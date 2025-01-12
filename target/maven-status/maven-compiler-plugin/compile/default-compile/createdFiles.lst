@@ -1,0 +1,8 @@
+com\java\school\online_video_training\entity\Category.class
+com\java\school\online_video_training\OnlineVideoTrainingApplication.class
+com\java\school\online_video_training\entity\Course.class
+com\java\school\online_video_training\repository\CategoryRepository.class
+com\java\school\online_video_training\entity\User.class
+com\java\school\online_video_training\service\impl\CategoryServiceImpl.class
+com\java\school\online_video_training\service\CategoryService.class
+com\java\school\online_video_training\entity\Video.class

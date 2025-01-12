@@ -1,0 +1,92 @@
+databaseChangeLog:
+- changeSet:
+    id: 001_init_db_structure
+    author: soksoytry200@gmail.com
+    changes:
+    - createTable:
+        tableName: categories
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+            name: category_id
+            type: BIGINT
+        - column:
+            name: category_name
+            type: VARCHAR(50)
+    - createTable:
+        tableName: courses
+        columns:
+        - column:
+            autoIncrement: true
+            constraints:
+              primaryKey: true
+            name: course_id
+            type: BIGINT
+        - column:
+            name: course_name
+            type: VARCHAR(50)
+        - column:
+            name: category_id
+            type: BIGINT
+          constraints:
+           - foreignKeyName: fk_courses_categories
+             references: categories(category_id)
+        - createTable:
+             tableName: users
+             columns:
+             - column:
+                 autoIncrement: true
+                 constraints:
+                    primaryKey: true
+                 name: user_id
+                 type: BIGINT
+             - column:
+                 name: user_name
+                 type: VARCHAR(50)
+             - column:
+                 name: user_password
+                 type: VARCHAR(50)
+             - column:
+                 name: user_email
+                 type: VARCHAR(50)
+             - column:
+                 name: phone_number
+                 type: INT
+             - column:
+                 name: gender
+                 type: VARCHAR(50)
+             - column:
+                 name: photo
+                 type: VARCHAR(50)
+             - column:
+                 name: join_date
+                 type: LOCALDATETIME
+        - createTable:
+              tableName: users
+              columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                     primaryKey: true
+                  name: video_id
+                  type: BIGINT
+              - column:
+                  name: video_title
+                  type: VARCHAR(50)
+              - column:
+                  name: user_password
+                  type: VARCHAR(50)
+              - column:
+                  name: video_link
+                  type: VARCHAR(50)
+              - column:
+                  name: image_cover
+                  type: VARCHAR(50)
+              - column:
+                  name: date_create
+                  type: String
+              - column:
+                  name: date_modified
+                  type: String

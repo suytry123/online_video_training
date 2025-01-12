@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.java.school.online_video_training.OnlineVideoTrainingApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.791 s - in com.java.school.online_video_training.OnlineVideoTrainingApplicationTests
