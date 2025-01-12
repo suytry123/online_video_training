@@ -25,5 +25,4 @@ public class CategoryController {
 		category = categoryService.create(category);
 		return ResponseEntity.ok(category);
 	}
-	
 }
