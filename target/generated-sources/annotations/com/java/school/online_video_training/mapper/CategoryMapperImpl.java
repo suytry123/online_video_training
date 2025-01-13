@@ -6,8 +6,8 @@ import javax.annotation.processing.Generated;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-01-12T20:59:10+0700",
-    comments = "version: 1.5.3.Final, compiler: Eclipse JDT (IDE) 3.39.0.v20240820-0604, environment: Java 21.0.4 (Eclipse Adoptium)"
+    date = "2025-01-13T18:17:58+0700",
+    comments = "version: 1.5.3.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
 )
 public class CategoryMapperImpl implements CategoryMapper {
 
@@ -22,5 +22,18 @@ public class CategoryMapperImpl implements CategoryMapper {
         category.setName( dto.getName() );
 
         return category;
+    }
+
+    @Override
+    public CategoryDTO toCategoryDTO(Category category) {
+        if ( category == null ) {
+            return null;
+        }
+
+        CategoryDTO categoryDTO = new CategoryDTO();
+
+        categoryDTO.setName( category.getName() );
+
+        return categoryDTO;
     }
 }
