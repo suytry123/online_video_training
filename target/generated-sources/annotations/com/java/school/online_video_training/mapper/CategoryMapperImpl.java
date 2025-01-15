@@ -3,12 +3,14 @@ package com.java.school.online_video_training.mapper;
 import com.java.school.online_video_training.dto.CategoryDTO;
 import com.java.school.online_video_training.entity.Category;
 import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-01-13T18:17:58+0700",
+    date = "2025-01-14T23:31:39+0700",
     comments = "version: 1.5.3.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
 )
+@Component
 public class CategoryMapperImpl implements CategoryMapper {
 
     @Override
