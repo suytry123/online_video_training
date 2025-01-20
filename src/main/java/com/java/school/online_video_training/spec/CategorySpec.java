@@ -34,8 +34,6 @@ public class CategorySpec implements Specification<Category>{
 			predicates.add(id);
 		}
 		
-		
-		
 		return cb.and(predicates.toArray(Predicate[]::new));
 	}
 

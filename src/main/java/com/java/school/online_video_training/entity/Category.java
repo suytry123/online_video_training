@@ -6,6 +6,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import lombok.Data;
 
@@ -18,6 +21,8 @@ public class Category {
 	@Column(name = "category_id")
 	private Long id;
 	
-	@Column(name = "category_name")
+	@NotEmpty
+	@NotNull
+	@Column(name = "category_name", nullable = false)
 	private String name;
 }

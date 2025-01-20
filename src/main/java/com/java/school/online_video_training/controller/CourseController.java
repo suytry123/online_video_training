@@ -1,0 +1,66 @@
+package com.java.school.online_video_training.controller;
+
+import java.util.Map;
+
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.java.school.online_video_training.dto.CourseDTO;
+import com.java.school.online_video_training.dto.PageDTO;
+import com.java.school.online_video_training.entity.Course;
+import com.java.school.online_video_training.mapper.CourseMapper;
+import com.java.school.online_video_training.service.CourseService;
+
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/courses")
+public class CourseController {
+	private final CourseService courseService;
+	private final CourseMapper courseMapper;
+	
+	@PostMapping
+	public ResponseEntity<?> create(@RequestBody CourseDTO courseDTO){
+		Course course = courseMapper.toCourse(courseDTO);
+		course = courseService.create(course);
+		return ResponseEntity.ok(courseMapper.toCourseDTO(course));
+	}
+	
+	@GetMapping("{id}")
+	public ResponseEntity<?> getById(@PathVariable("id") Long Id){
+		Course course = courseService.getById(Id);
+		return ResponseEntity.ok(courseMapper.toCourseDTO(course));
+	}
+	
+	@GetMapping
+	public ResponseEntity<?> getCourses(@RequestParam("id") Map<String, String> course){
+		Page<Course> courses = courseService.getCourses(course);
+		
+		PageDTO dto = new PageDTO(courses) ;
+		
+		return ResponseEntity.ok(dto);
+	}
+	
+	@PutMapping("{id}")
+	public ResponseEntity<?> update(@PathVariable("id") Long courseId, @RequestBody CourseDTO courseUpdate){
+		Course course = courseMapper.toCourse(courseUpdate);
+		Course update = courseService.update(courseId, course);
+		return ResponseEntity.ok(courseMapper.toCourseDTO(course));
+	}
+	
+	@DeleteMapping("{id}")
+	public ResponseEntity<?> deleteById(@PathVariable("id") Long courseId){
+		courseService.delete(courseId);
+		return ResponseEntity.ok("Item with ID :" + courseId + " deleted successfully.");
+	}
+}

@@ -36,24 +36,24 @@ public class CategoryController {
 	public ResponseEntity<?> create(@RequestBody CategoryDTO dto){
 		Category category = categoryMapper.toCategory(dto);
 		Category category1 = categoryService.create(category);
-	    return ResponseEntity.ok(category1);
+	    return ResponseEntity.ok(categoryMapper.toCategoryDTO(category1));
 	}
 	
 	@GetMapping("{id}")
 	public ResponseEntity<?> getOneCategory(@PathVariable("id") Long categoryId){
 		Category category = categoryService.getById(categoryId);
-		return ResponseEntity.ok(category);
+		return ResponseEntity.ok(categoryMapper.toCategoryDTO(category));
 	}
 	
 	@PutMapping("{id}")
 	public ResponseEntity<?> update(@PathVariable("id") Long categoryId, @RequestBody CategoryDTO categoryDTO){
 		Category category = categoryMapper.toCategory(categoryDTO);
 		Category updatedCategory = categoryService.update(categoryId, category);
-		return ResponseEntity.ok(updatedCategory);
+		return ResponseEntity.ok(categoryMapper.toCategoryDTO(updatedCategory));
 	}
 	
 	 @GetMapping
-	 public ResponseEntity<?> getCategory(@RequestParam Map<String, String> params){
+	 public ResponseEntity<?> getCategories(@RequestParam Map<String, String> params){
 		Page<Category> page = categoryService.getCategories(params);
 	    	
 	    PageDTO pageDTO = new PageDTO(page);
@@ -62,8 +62,8 @@ public class CategoryController {
 		return ResponseEntity.ok(pageDTO);
 	}
 	
-	@DeleteMapping("{id}")
-	 public ResponseEntity<?> delete(@PathVariable("id") Long categoryId){
+	@DeleteMapping
+	 public ResponseEntity<?> delete(@RequestParam("id") Long categoryId){
 	 	categoryService.deleteById(categoryId);
 	 	
 	 	return ResponseEntity.ok().build();

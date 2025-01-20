@@ -38,7 +38,11 @@ public class Video {
 	private LocalDateTime dateModified;
 	
 	@ManyToOne
-	@JoinColumn(name = "user_create")
+	@JoinColumn(name = "course_id")
+	private Course course;
+	
+	@ManyToOne
+	@JoinColumn(name = "user_created")
 	private User userCreated;
 	
 	@ManyToOne

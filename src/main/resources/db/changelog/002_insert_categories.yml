@@ -1,0 +1,17 @@
+databaseChangeLog:
+- changeSet:
+    id: 002_insert_categories
+    author: soksoytry200@gmail.com
+    changes:
+    - loadData:
+        tableName: categories
+        columns:
+        - column:
+            name: category_id
+            type: NUMERIC
+        - column:
+            name: category_name
+            type: STRING
+            constraints:
+              nullable: false
+        file: db/data/002_insert_categories.csv
