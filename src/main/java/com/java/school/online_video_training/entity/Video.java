@@ -31,7 +31,7 @@ public class Video {
 	@Column(name = "image_cover")
 	private String imageCover;
 	
-	@Column(name = "date_create")
+	@Column(name = "date_created")
 	private LocalDateTime dateCreate;
 	
 	@Column(name = "date_modified")

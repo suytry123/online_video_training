@@ -43,7 +43,7 @@ public class CourseController {
 	}
 	
 	@GetMapping
-	public ResponseEntity<?> getCourses(@RequestParam("id") Map<String, String> course){
+	public ResponseEntity<?> getCourses(@RequestParam Map<String, String> course){
 		Page<Course> courses = courseService.getCourses(course);
 		
 		PageDTO dto = new PageDTO(courses) ;
@@ -61,6 +61,6 @@ public class CourseController {
 	@DeleteMapping("{id}")
 	public ResponseEntity<?> deleteById(@PathVariable("id") Long courseId){
 		courseService.delete(courseId);
-		return ResponseEntity.ok("Item with ID :" + courseId + " deleted successfully.");
+		return ResponseEntity.ok().build();
 	}
 }

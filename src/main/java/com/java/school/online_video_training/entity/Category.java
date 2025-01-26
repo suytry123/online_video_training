@@ -21,8 +21,6 @@ public class Category {
 	@Column(name = "category_id")
 	private Long id;
 	
-	@NotEmpty
-	@NotNull
 	@Column(name = "category_name", nullable = false)
 	private String name;
 }

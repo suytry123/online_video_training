@@ -1,7 +1,5 @@
 package com.java.school.online_video_training.service.impl;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +15,14 @@ import com.java.school.online_video_training.service.util.PageUtil;
 import com.java.school.online_video_training.spec.CategoryFilter;
 import com.java.school.online_video_training.spec.CategorySpec;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService{
 	
 	@Autowired
-	private  CategoryRepository categoryRepository;
+	private  final CategoryRepository categoryRepository;
 	
 	@Override
 	public Category create(Category category) {

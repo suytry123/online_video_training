@@ -98,7 +98,7 @@ databaseChangeLog:
                   name: image_cover
                   type: VARCHAR(50)
               - column:
-                  name: date_create
+                  name: date_created
                   type: String
               - column:
                   name: date_modified

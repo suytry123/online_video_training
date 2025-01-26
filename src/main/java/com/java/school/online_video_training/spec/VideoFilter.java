@@ -3,7 +3,7 @@ package com.java.school.online_video_training.spec;
 import lombok.Data;
 
 @Data
-public class CourseFilter {
-	private Long categoryId;
-	private String name;
+public class VideoFilter {
+	private Integer courseId;
+	private String title;
 }

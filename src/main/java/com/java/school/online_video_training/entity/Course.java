@@ -22,8 +22,6 @@ public class Course {
 	@Column(name = "course_id")
 	private Long id;
 	
-	@NotEmpty
-	@NotNull
 	@Column(name = "course_name")
 	private String name;
 	 

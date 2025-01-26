@@ -22,33 +22,21 @@ public class User {
 	@Column(name = "user_id")
 	private Long id;
 	
-	@NotEmpty
-	@NotNull
 	@Column(name = "user_name")
 	private String username;
 	
-	@NotNull
-	@NotEmpty
 	@Column(name = "user_password")
 	private String password;
 	
-	@NotNull
-	@NotEmpty
 	@Column(name = "user_email")
 	private String email;
 	
-	@NotEmpty
-	@NotNull
 	@Column(name = "phone_number")
 	private Integer phoneNumber;
 	
-	@NotEmpty
-	@NotNull
 	@Column(name = "gender")
 	private String gender;
 	
-	@NotNull
-	@NotNull
 	@Column(name = "photo")
 	private String photo;
 	
