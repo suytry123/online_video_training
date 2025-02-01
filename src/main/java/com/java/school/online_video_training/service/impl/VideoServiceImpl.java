@@ -1,5 +1,7 @@
 package com.java.school.online_video_training.service.impl;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -27,13 +29,14 @@ public class VideoServiceImpl implements VideoService{
 
 	@Override
 	public void saveImage(MultipartFile file) throws Exception{
-		String folder = "/Pictures/";
+		String folder = System.getProperty("user.home") + File.separator + "Pictures" + File.separator;
+//		String folder = "/Pictures/";
+		Files.createDirectories(Paths.get(folder));
 		byte[] bytes = file.getBytes();
 		Path path = Paths.get(folder + file.getOriginalFilename());
-		Path write = Files.write(path, bytes);
-		
+	    Files.write(path, bytes);
 	}
-
+	
 	@Override
 	public Video createVideo(Video video) {
 		return videoRepository.save(video);
@@ -88,6 +91,36 @@ public class VideoServiceImpl implements VideoService{
 	@Override
 	public void deleteVideo(Long id) {
 		videoRepository.deleteById(id);
+	}
+
+//	@Override
+//	public Byte[] getByPath(String path) throws Exception{
+////		 Path filePath = Paths.get(path);
+////		 byte[] allBytes = Files.readAllBytes(filePath);
+////		 return videoRepository.findByImageCover(allBytes.toString());
+//		String folder = System.getProperty("user.home") + File.separator + "Pictures" + File.separator;
+//		Path filePath = Paths.get(folder, path);
+//		byte[] allBytes = Files.readAllBytes(filePath);
+//		return videoRepository.findByImageCover(allBytes);
+//	}
+	
+	public byte[] getByPath(String path) throws Exception {
+//	    Path filePath = Paths.get(System.getProperty("user.home"), "Pictures", path);
+//	    if (!Files.exists(filePath)) {
+//	        throw new FileNotFoundException("File not found: " + filePath);
+//	    }
+//	    byte[] allBytes = Files.readAllBytes(filePath);
+//	    return videoRepository.findByImageCover(new String(allBytes));
+		 // Construct full file path
+	    Path filePath = Paths.get(System.getProperty("user.home"), "Pictures", path);
+
+	    // Check if file exists
+	    if (!Files.exists(filePath)) {
+	        throw new FileNotFoundException("File not found: " + filePath);
+	    }
+
+	    // Read and return the image file as byte[]
+	    return Files.readAllBytes(filePath);
 	}
 
 }
