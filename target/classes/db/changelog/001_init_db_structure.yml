@@ -89,6 +89,9 @@ databaseChangeLog:
                   name: video_title
                   type: VARCHAR(50)
               - column:
+                  name: video_description
+                  type: VARCHAR(50)
+              - column:
                   name: user_password
                   type: VARCHAR(50)
               - column:

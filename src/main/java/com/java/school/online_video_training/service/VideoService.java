@@ -18,4 +18,8 @@ public interface VideoService {
 	void saveImage(MultipartFile file) throws Exception;
 	//String saveImage(MultipartFile file) throws Exception;
 	byte[] getByPath(String path) throws Exception;
+	void updateImage(String path, MultipartFile file) throws Exception;
+	Page<byte[]> getImages(Map<String, String> image) throws Exception;
+//	Page<String> getImages(Map<String, String> image) throws Exception;
+	void deleteImageByPath(String url) throws Exception;
 }

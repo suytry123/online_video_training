@@ -25,6 +25,9 @@ public class Video {
 	@Column(name = "video_title")
 	private String title;
 	
+	@Column(name = "video_description")
+	private String description;
+	
 	@Column(name = "video_link")
 	private String videoLink;
 	

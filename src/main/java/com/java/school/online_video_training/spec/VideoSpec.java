@@ -24,7 +24,7 @@ public class VideoSpec implements Specification<Video>{
 	@Override
 	public Predicate toPredicate(Root<Video> video, CriteriaQuery<?> query, CriteriaBuilder cb) {
 		if(videoFilter.getTitle() != null) {
-			Predicate name = cb.like(cb.upper(video.get("videoTitle")),"%" + videoFilter.getTitle().toUpperCase() + "%");
+			Predicate name = cb.like(cb.upper(video.get("title")),"%" + videoFilter.getTitle().toUpperCase() + "%");
 			predicates.add(name);
 		}
 		

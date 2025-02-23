@@ -7,5 +7,6 @@ public class VideoDTO {
 	
 	private Long courseId;
 	private String title;
+	private String description;
 	
 }
