@@ -11,4 +11,8 @@ public class ResourceNotFoundException extends ApiException{
 		
 	}
 	
+	 public ResourceNotFoundException(String resourceName, String path) {
+	        super(HttpStatus.NOT_FOUND, String.format("%s With path = %s Not Found", resourceName, path));
+	        //this.status = HttpStatus.NOT_FOUND;
+	    }
 }

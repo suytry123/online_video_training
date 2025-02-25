@@ -3,12 +3,8 @@ package com.java.school.online_video_training.controller;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Base64;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -77,14 +73,14 @@ public class VideoController {
 		return ResponseEntity.ok().build();
 	}
 	
-	@PostMapping("/upload")
-	public ResponseEntity<?> uploadPicture(@RequestParam("file") MultipartFile file) throws Exception{
+	@PostMapping("/upload/{id}")
+	public ResponseEntity<?> uploadPicture(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws Exception{
 		if (file.isEmpty()) {
 			throw new RuntimeException("Please load a file");
         }
 	
 		try {
-			videoService.saveImage(file);
+			videoService.saveImage(id, file);
 			log.info("your image save successful.");
 		}
 		catch(Exception e){
@@ -96,9 +92,6 @@ public class VideoController {
 	
 	@GetMapping("path/{path}")
 	public ResponseEntity<?> getByPath(@PathVariable String path) throws Exception{
-//	    Path filePath = Paths.get(System.getProperty("user.home"), "Pictures", path);
-//		 Path filePath = Paths.get(System.getProperty("src"), "main", "resources", "file-repository", path);
-		//Path filePath = Paths.get(absolutePath, path);
 		 if (path == null || path.isEmpty()) {
 		        throw new IllegalArgumentException("File name cannot be null or empty.");
 		    }
@@ -130,59 +123,18 @@ public class VideoController {
 	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update video image.");
 	        }
 	    }
-	/*
-	 @GetMapping("/images")
-		public ResponseEntity<?> getImages(@RequestParam Map<String, String> image) throws Exception{
-		 Path path = Paths.get(System.getProperty("user.home") + File.separator + "Pictures" + File.separator);
-		 //Path path = Paths.get(System.getProperty("user.home") + File.separator);
-		log.info("Directory Path: " + path);
-		 if (Files.exists(path)) {
-		     log.info("Directory exists!");
-		 } else {
-		     log.error("Directory does not exist or cannot be accessed.");
-		 }
-		 try {
-			Page<byte[]> images = videoService.getImages(image);
-		     byte[] imageBytes = Files.readAllBytes(path);
-		     String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-		     PageDTO dto = new PageDTO(images) ;
-		     Files.readAllBytes(path);
-			log.info("your images get successful.");
-			 return ResponseEntity.ok(dto);
-		 }catch(Exception e) {
-			 e.printStackTrace();
-				log.error("get images Error", e.getMessage());
-		 }
-		     
-		     // Return the images as a response
-		     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update video image.");
-		}
-		*/
 	 
 	 @GetMapping("/images")
 	 public ResponseEntity<?> getImages(@RequestParam Map<String, String> image) {
-		 //Path directoryPath = Paths.get(System.getProperty("user.home"), "Pictures");
-	    // Path directoryPath = Paths.get(System.getProperty("user.home") + File.separator + "Pictures" + File.separator);
-		// Path directoryPath = Paths.get(System.getProperty("src"), "main", "resources", "file-repository");
-		 Path directoryPath = Paths.get("src", "main", "resources", "file-repository");	
+		 Path directoryPath = Paths.get("src", "main", "resources", "file-repository");
 		 log.info("Directory Path: {}", directoryPath);
 	     
-	     if (!Files.exists(directoryPath)) {
-	         log.error("Directory does not exist: {}", directoryPath);
-	         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-	             .body("Images directory not found");
-	     }
-	     
-	     if (!Files.isReadable(directoryPath)) {
-	         log.error("Directory is not readable: {}", directoryPath);
-	         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-	             .body("Cannot access images directory");
-	     }
-	     
 	     try {
-	         Page<byte[]> images = videoService.getImages(image);
-	         byte[] imageBytes = Files.readAllBytes(directoryPath);
-		     String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+	         Page<String> images = videoService.getImages(image);
+	         Path imagePath = Paths.get(directoryPath.toString(), images.getContent().get(0)); 
+	         byte[] imageBytes = Files.readAllBytes(imagePath);
+//	         byte[] imageBytes = Files.readAllBytes(directoryPath);
+//		     String base64Image = Base64.getEncoder().encodeToString(imageBytes);
 	         PageDTO dto = new PageDTO(images);
 	         log.info("Images retrieved successfully");
 	         return ResponseEntity.ok(dto);
@@ -193,33 +145,6 @@ public class VideoController {
 	     }
 	 }
 
-	 
-	 /*
-	 
-	 @GetMapping("/images")
-	 public ResponseEntity<?> getImages(@RequestParam Map<String, String> image) throws Exception {
-//	     Path path = Paths.get(System.getProperty("user.home"), "Pictures");
-		 Path path = Paths.get(System.getProperty("user.home") + File.separator + "Pictures" + File.separator);
-		 Page<byte[]> images = videoService.getImages(image);
-	     byte[] imageBytes = Files.readAllBytes(path);
-	     String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-	     return ResponseEntity.ok(images);
-	 }
-	 */
-	 
-//	 @DeleteMapping("/delete/{path}")
-//		public ResponseEntity<?> deleteByPath(@PathVariable String url) throws Exception{
-//		 try {
-//	            // Call the service method to delete the file
-//	            videoService.deleteImageByPath(url);
-//	            log.info("Delete successfully: " + url);
-//	            return ResponseEntity.ok("Image deleted successfully.");
-//	        } catch (Exception e) {
-//	            // Log the error and send the failure response
-//	            log.error("Delete failed: " + e.getMessage());
-//	            return ResponseEntity.status(500).body("Error deleting image: " + e.getMessage());
-//	        }
-//	 }
 	
 	 @DeleteMapping("/delete/{url}") 
 	 public ResponseEntity<?> deleteByPath(@PathVariable String url) throws Exception {
@@ -234,5 +159,21 @@ public class VideoController {
 	         return ResponseEntity.status(500).body("Error deleting image: " + e.getMessage());
 	     }
 	 }
-
+	 
+//	 @PostMapping("/{id}/linkVideo")
+//		//@ResponseStatus(HttpStatus.CREATED)
+//		public ResponseEntity<?> createLink(@PathVariable Long id, @RequestParam String link){
+//		  try {
+//	            videoService.linkVideo(id, link);  // Call the service method to update the video link
+//	            return ResponseEntity.ok("Video link updated successfully");
+//	        } catch (Exception e) {
+//	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//	                .body("Failed to update video link: " + e.getMessage());
+//	        }
+//	 }
+//	 @GetMapping("/{id}/linkVideo")
+//	 public ResponseEntity<?> getLink(@PathVariable Long id, @RequestParam(required = false) String link){
+//		 String link2 = videoService.getLink(id, link);
+//		 return ResponseEntity.ok(link2);
+//	 }
 }

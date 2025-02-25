@@ -1,8 +1,10 @@
 package com.java.school.online_video_training.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -15,7 +17,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table
+@Table(name = "videos")
 public class Video {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,8 +30,9 @@ public class Video {
 	@Column(name = "video_description")
 	private String description;
 	
+	@ElementCollection
 	@Column(name = "video_link")
-	private String videoLink;
+	private List<String> videoLink;
 	
 	@Column(name = "image_cover")
 	private String imageCover;

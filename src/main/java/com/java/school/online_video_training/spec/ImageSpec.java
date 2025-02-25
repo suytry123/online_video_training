@@ -15,12 +15,12 @@ import com.java.school.online_video_training.entity.Video;
 import lombok.Data;
 
 @Data
-public class ImageSpec implements Specification<byte[]>{
+public class ImageSpec implements Specification<Video>{
 	private final ImageFilter imageFilter;
 	
 	List<Predicate> predicates = new ArrayList<>();
 	@Override
-	public Predicate toPredicate(Root<byte[]> image, CriteriaQuery<?> query, CriteriaBuilder cb) {
+	public Predicate toPredicate(Root<Video> image, CriteriaQuery<?> query, CriteriaBuilder cb) {
 		if(imageFilter.getPath() != null) {
 			Predicate name = cb.like(cb.upper(image.get("imageCover")),"%" + imageFilter.getPath().toUpperCase() + "%");
 			predicates.add(name);
