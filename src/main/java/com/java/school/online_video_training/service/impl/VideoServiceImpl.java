@@ -91,7 +91,7 @@ public class VideoServiceImpl implements VideoService{
 	public void deleteVideo(Long id) {
 		Video videoById = getVideoById(id);
 		videoRepository.delete(videoById);
-		log.info("video with id = %d is deleted".formatted(id));
+		log.info("video with id = %ld is deleted".formatted(id));
 	}
 	
 	@Override

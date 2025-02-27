@@ -10,8 +10,11 @@ C:\online-video-training\src\main\java\com\java\school\online_video_training\ser
 C:\online-video-training\src\main\java\com\java\school\online_video_training\dto\PageDTO.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\mapper\VideoMapper.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\mapper\CategoryMapper.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\config\security\SecurityConfig.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\config\security\PermissionEnum.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\dto\PaginationDTO.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\service\CourseService.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\config\security\RoleEnum.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\exception\ResourceNotFoundException.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\repository\CourseRepository.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\Base64ImageHandler.java
@@ -22,6 +25,7 @@ C:\online-video-training\src\main\java\com\java\school\online_video_training\exc
 C:\online-video-training\src\main\java\com\java\school\online_video_training\OnlineVideoTrainingApplication.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\SpringFoxConfig.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\spec\CourseSpec.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\config\security\PasswordConfig.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\JacksonConfiguration.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\dto\VideoDTO.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\spec\ImageFilter.java

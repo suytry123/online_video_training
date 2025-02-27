@@ -18,6 +18,10 @@ databaseChangeLog:
             constraints:
               nullable: false
               unique: true
+        - alterSequence:
+              sequenceName: category_id_seq
+              incrementBy: 1
+              restart: true
     - createTable:
         tableName: courses
         columns:
@@ -74,8 +78,7 @@ databaseChangeLog:
                  type: LOCALDATETIME
                constraints:
                  nullable: false
-             - addUniqueConstraint:
-                 tableName: courses
+                 unique: true
         - createTable:
               tableName: videos
               columns:
@@ -120,5 +123,4 @@ databaseChangeLog:
                     references: courses(course_id)	
                     constraints:
                       nullable: false	
-              - addUniqueConstraint:
-                    tableName: courses		  
+                      unique: true  

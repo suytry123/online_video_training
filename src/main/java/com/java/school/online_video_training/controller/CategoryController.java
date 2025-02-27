@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +33,7 @@ public class CategoryController {
 	private final CategoryMapper categoryMapper;
 	
 	
+	@PreAuthorize("hasAuthority('category:write')")
 	@PostMapping
 	public ResponseEntity<?> create(@RequestBody CategoryDTO dto){
 		Category category = categoryMapper.toCategory(dto);
@@ -39,6 +41,7 @@ public class CategoryController {
 	    return ResponseEntity.ok(categoryMapper.toCategoryDTO(category));
 	}
 	
+	@PreAuthorize("hasAuthority('category:read')")
 	@GetMapping("{id}")
 	public ResponseEntity<?> getOneCategory(@PathVariable("id") Long categoryId){
 		Category category = categoryService.getById(categoryId);

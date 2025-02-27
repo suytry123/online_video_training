@@ -133,8 +133,6 @@ public class VideoController {
 	         Page<String> images = videoService.getImages(image);
 	         Path imagePath = Paths.get(directoryPath.toString(), images.getContent().get(0)); 
 	         byte[] imageBytes = Files.readAllBytes(imagePath);
-//	         byte[] imageBytes = Files.readAllBytes(directoryPath);
-//		     String base64Image = Base64.getEncoder().encodeToString(imageBytes);
 	         PageDTO dto = new PageDTO(images);
 	         log.info("Images retrieved successfully");
 	         return ResponseEntity.ok(dto);
