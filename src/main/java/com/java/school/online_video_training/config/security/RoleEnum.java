@@ -26,7 +26,6 @@ public enum RoleEnum {
 			
 		SimpleGrantedAuthority roles = new SimpleGrantedAuthority("ROLE_" + this.name());
 		grantedAuthorities.add(roles);
-		System.out.print(grantedAuthorities);
 		return grantedAuthorities;
 	}
 }

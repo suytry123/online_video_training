@@ -10,11 +10,15 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+
+import com.java.school.online_video_training.config.jwt.JwtLoginFilter;
+import com.java.school.online_video_training.config.jwt.TokenVerifyFIlter;
 
 import static com.java.school.online_video_training.config.security.PermissionEnum.*;
 
@@ -31,6 +35,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable()
+			.addFilter(new JwtLoginFilter(authenticationManager()))
+			.addFilterAfter(new TokenVerifyFIlter(), JwtLoginFilter.class)
+			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+			.and()
 			.authorizeHttpRequests()
 			.antMatchers("/","index.html","css/**","js/**").permitAll()
 			.antMatchers("/courses").hasRole("AUTHOR")
@@ -38,9 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 			//.antMatchers(HttpMethod.POST, "/categories").hasAuthority(CATEGORY_WRITE.getDescription())
 			//.antMatchers(HttpMethod.GET, "/categories").hasAuthority(CATEGORY_READ.getDescription())
 			.anyRequest()
-			.authenticated()
-			.and()
-			.httpBasic();
+			.authenticated();
 	}
 	
 	@Bean
