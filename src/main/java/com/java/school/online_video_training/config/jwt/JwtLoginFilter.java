@@ -23,11 +23,13 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter{
+	
 	private final AuthenticationManager authenticationManager;
 	
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException {
+
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			LoginRequestDTO loginRequest = mapper.readValue(request.getInputStream(), LoginRequestDTO.class);
@@ -35,24 +37,24 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter{
 			Authentication authenticate = authenticationManager.authenticate(authentication);
 			return authenticate;
 		} catch (Exception e) {
-			e.printStackTrace();
 			throw new RuntimeException(e);
-		} 
+		}
 	}
+	
 	@Override
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 			Authentication authResult) throws IOException, ServletException {
 		String secretKey = "sddfasfsdfsfsfdddddddddddddddddsddfasfsdfsfsfddddddddddddddddd";
-		
+
 		String token = Jwts.builder()
 				.setSubject(authResult.getName())
 				.setIssuedAt(new Date())
 				.claim("authorities", authResult.getAuthorities())
 				.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(7)))
-				.setIssuer("online_video_training.com")
+				.setIssuer("phoneshop.com")
 				.signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
 				.compact();
-		
-		response.setHeader("Authorization", "Bearer " + token);
+
+		response.setHeader("Authorization", "Bearer "+ token);
 	}
 }

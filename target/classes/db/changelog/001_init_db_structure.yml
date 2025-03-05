@@ -95,28 +95,13 @@ databaseChangeLog:
                   name: video_description
                   type: VARCHAR(50)
               - column:
-                  name: user_password
-                  type: VARCHAR(50)
-              - column:
                   name: video_link
                   type: VARCHAR(50)
               - column:
                   name: image_cover
                   type: VARCHAR(50)
               - column:
-                  name: date_created
-                  type: String
-              - column:
-                  name: date_modified
-                  type: String
-              - column:
                   name: course_id
-                  type: BIGINT
-              - column:
-                  name: user_create
-                  type: BIGINT
-              - column:
-                  name: user_modified
                   type: BIGINT
                 constraints:
                   - foreignKeyName: fk_videos_courses

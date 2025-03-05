@@ -1,6 +1,5 @@
 package com.java.school.online_video_training.entity;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -18,7 +17,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "videos")
-public class Video {
+public class Video extends AuditEntity{
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "video_id")
@@ -37,22 +36,9 @@ public class Video {
 	@Column(name = "image_cover")
 	private String imageCover;
 	
-	@Column(name = "date_created")
-	private LocalDateTime dateCreate;
-	
-	@Column(name = "date_modified")
-	private LocalDateTime dateModified;
-	
 	@ManyToOne
 	@JoinColumn(name = "course_id")
 	private Course course;
 	
-	@ManyToOne
-	@JoinColumn(name = "user_created")
-	private User userCreated;
-	
-	@ManyToOne
-	@JoinColumn(name = "user_modified")
-	private User userModified;
 }
 

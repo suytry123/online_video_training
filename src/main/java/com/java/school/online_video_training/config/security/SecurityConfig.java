@@ -1,36 +1,32 @@
 package com.java.school.online_video_training.config.security;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 import com.java.school.online_video_training.config.jwt.JwtLoginFilter;
 import com.java.school.online_video_training.config.jwt.TokenVerifyFIlter;
 
-import static com.java.school.online_video_training.config.security.PermissionEnum.*;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
+@RequiredArgsConstructor
 @EnableGlobalMethodSecurity(
 		  prePostEnabled = true, 
 		  securedEnabled = true, 
 		  jsr250Enabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter{
 	
-	@Autowired
-	private PasswordEncoder passwordEncoder;
+	private final PasswordEncoder passwordEncoder;
+	private final UserDetailsService userDetailsService;
 	
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -41,33 +37,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter{
 			.and()
 			.authorizeHttpRequests()
 			.antMatchers("/","index.html","css/**","js/**").permitAll()
-			.antMatchers("/courses").hasRole("AUTHOR")
-			//.antMatchers("/categories").hasRole("AUTHOR")
-			//.antMatchers(HttpMethod.POST, "/categories").hasAuthority(CATEGORY_WRITE.getDescription())
-			//.antMatchers(HttpMethod.GET, "/categories").hasAuthority(CATEGORY_READ.getDescription())
+			//.antMatchers("/courses").hasRole("AUTHOR")
 			.anyRequest()
 			.authenticated();
 	}
 	
-	@Bean
 	@Override
-	protected UserDetailsService userDetailsService() {
-		//User user1 = new User("dara", passwordEncoder.encode("Dara123"), Collections.emptyList());
-		UserDetails user1 = User.builder()
-				.username("dara")
-				.password(passwordEncoder.encode("dara123"))
-				//.roles()
-				.authorities(RoleEnum.AUTHOR.getAuthorities())
-				.build();
-		
-		UserDetails user2 = User.builder()
-				.username("thida")
-				.password(passwordEncoder.encode("thida123"))
-				.authorities(RoleEnum.ADMIN.getAuthorities())
-				.build();
-		
-		//UserDetails
-		UserDetailsService userDetailsService = new InMemoryUserDetailsManager(user1 , user2);
-		return userDetailsService;
+	public void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth.authenticationProvider(getAuthenticationProvider());
+	}
+	
+	@Bean
+	public AuthenticationProvider getAuthenticationProvider() {
+		DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+		authenticationProvider.setUserDetailsService(userDetailsService);
+		authenticationProvider.setPasswordEncoder(passwordEncoder);
+		return authenticationProvider;
 	}
 }
