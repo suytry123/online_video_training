@@ -23,5 +23,7 @@ public interface VideoService {
 	Page<String> getImages(Map<String, String> image) throws Exception;
 //	Page<String> getImages(Map<String, String> image) throws Exception;
 	void deleteImageByPath(String url) throws Exception;
-	
+	void videoLink(Long id, List<String> link);
+	String getLink(Long id);
+	String updateLink(Long id, List<String> link);
 }

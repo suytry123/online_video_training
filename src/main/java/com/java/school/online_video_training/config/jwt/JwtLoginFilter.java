@@ -32,7 +32,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter{
 
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			LoginRequestDTO loginRequest = mapper.readValue(request.getInputStream(), LoginRequestDTO.class);
+			LoginRequest loginRequest = mapper.readValue(request.getInputStream(), LoginRequest.class);
 			Authentication authentication = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
 			Authentication authenticate = authenticationManager.authenticate(authentication);
 			return authenticate;
@@ -50,8 +50,8 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter{
 				.setSubject(authResult.getName())
 				.setIssuedAt(new Date())
 				.claim("authorities", authResult.getAuthorities())
-				.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusDays(7)))
-				.setIssuer("phoneshop.com")
+				.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusWeeks(2)))
+				.setIssuer("online_video_training.com")
 				.signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
 				.compact();
 

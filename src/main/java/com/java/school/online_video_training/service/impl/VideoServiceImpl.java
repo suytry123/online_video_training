@@ -5,11 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.transaction.Transactional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -213,134 +211,6 @@ public class VideoServiceImpl implements VideoService{
 		 return imagePaths;
 	}
 
-
-	
-	/*@Override
-	public Page<byte[]> getImages(Map<String, String> image) throws Exception{
-		ImageFilter  imageFilter = new ImageFilter();
-		List<byte[]> list = new ArrayList<>();
-//		String folder = System.getProperty("user.home") + File.separator + "Pictures" + File.separator;
-		//Path filePath = Paths.get(System.getProperty("user.home") + File.separator + "Pictures" + File.separator);
-		 //Path filePath = Paths.get(System.getProperty("user.home"), "Pictures");
-		//Path filePath = Paths.get(System.getProperty("user.home") + File.separator);
-		 Path filePath = Paths.get(System.getProperty("src"), "main", "resources", "file-repository");
-		
-		if(image.containsKey("imageCover")) {
-			String pic = image.get("imageCover");
-			imageFilter.setPath(pic);
-		}
-		
-		int pageLimit = PageUtil.DEFAULT_PAGE_LIMIT;
-		if(image.containsKey(PageUtil.PAGE_LIMIT)) {
-			pageLimit = Integer.parseInt(image.get(PageUtil.PAGE_LIMIT));
-		}
-		
-		int pageNumber = PageUtil.DEFAULT_PAGE_NUMBER;
-		if(image.containsKey(PageUtil.PAGE_NUMBER)){
-			pageNumber = Integer.parseInt(image.get(PageUtil.PAGE_NUMBER));
-		}
-		
-		
-			    List<byte[]> collect = list.stream()
-	    	.filter(p -> p.toString().toLowerCase().matches(".*\\.(jpg|jpeg|png|gif)$"))
-	    	.map(p -> {
-	    		try {
-	    			return Files.readAllBytes(directoryPath);
-	    		}catch(IOException e) {
-	    			 log.error("Error reading file: {}", p, e);
-	    			 return null;
-	    		}
-	    	})
-	    	.filter(Objects::nonNull)
-	    	.collect(Collectors.toList());
-		}
-			
-		 
-		ImageSpec spec = new ImageSpec(imageFilter);
-		
-		//byte[] allBytes = Files.readAllBytes(filePath);
-		
-		 Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
-		 
-		    int start = (int) pageable.getOffset();
-		    int end = Math.min(start + pageable.getPageSize(), list.size());
-		    
-		    List<byte[]> pagedImages = list.subList(start, end);
-		
-		 return new PageImpl<>(pagedImages , pageable, list.size());
-	}*/
-	
-	
-	
-	/*
-	@Override
-	public Page<byte[]> getImages(Map<String, String> image) throws Exception {
-	    ImageFilter imageFilter = new ImageFilter();
-	    List<byte[]> list = new ArrayList<>();
-
-	    // Define the image directory path
-	    String folder = System.getProperty("user.home") + File.separator + "Pictures" + File.separator;
-	    Path filePath = Paths.get(folder);
-
-	    // Debugging: Print the resolved directory path
-	    System.out.println("Reading images from directory: " + filePath.toString());
-
-	    // Ensure directory exists
-	    if (!Files.exists(filePath) || !Files.isDirectory(filePath)) {
-	        throw new FileNotFoundException("Directory not found: " + filePath.toString());
-	    }
-
-	    // Set filter if provided
-	    if (image.containsKey("imageCover")) {
-	        imageFilter.setPath(image.get("imageCover"));
-	    }
-
-	    // Get pagination values
-	    int pageLimit = PageUtil.DEFAULT_PAGE_LIMIT;
-	    if (image.containsKey(PageUtil.PAGE_LIMIT)) {
-	        pageLimit = Integer.parseInt(image.get(PageUtil.PAGE_LIMIT));
-	    }
-
-	    int pageNumber = PageUtil.DEFAULT_PAGE_NUMBER;
-	    if (image.containsKey(PageUtil.PAGE_NUMBER)) {
-	        pageNumber = Integer.parseInt(image.get(PageUtil.PAGE_NUMBER));
-	    }
-
-	    // Read images from the directory
-	    try (Stream<Path> fileStream = Files.list(filePath)) {
-	        list = fileStream
-	            .filter(Files::isRegularFile)  // Ensure it's a file, not a directory
-	            .filter(p -> {
-	                try {
-	                    String contentType = Files.probeContentType(p);
-	                    return contentType != null && contentType.startsWith("image");
-	                } catch (IOException e) {
-	                    System.err.println("Failed to determine content type: " + p.toString());
-	                    return false;
-	                }
-	            })
-	            .map(p -> {
-	                try {
-	                    return Files.readAllBytes(p);
-	                } catch (IOException e) {
-	                    System.err.println("Failed to read file: " + p.toString());
-	                    return null;
-	                }
-	            })
-	            .filter(Objects::nonNull) // Remove failed reads
-	            .collect(Collectors.toList());
-	    }
-
-	    // Pagination
-	    Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
-	    int start = (int) pageable.getOffset();
-	    int end = Math.min(start + pageable.getPageSize(), list.size());
-	    List<byte[]> pagedImages = list.subList(start, end);
-
-	    return new PageImpl<>(pagedImages, pageable, list.size());
-	}
-	*/
-
 	@Override
 	public void deleteImageByPath(String url) throws Exception{
 		
@@ -369,5 +239,39 @@ public class VideoServiceImpl implements VideoService{
 		    }
 	}
 
-	
+	@Override
+	public void videoLink(Long id, List<String> link) {
+	    Video video = videoRepository.findById(id)
+	        .orElseThrow(() -> new ResourceNotFoundException("Video", id));
+	    List<String> videoLink = video.getVideoLink();  
+	    if (videoLink == null) {
+	        videoLink = new ArrayList<>(); // This ensures that you can add the link safely
+	    }
+	    videoLink.addAll(link);
+	    video.setVideoLink(videoLink);
+	    videoRepository.save(video);
+	}
+
+	@Override
+	public String getLink(Long id) {
+	    Video video = videoRepository.findById(id)
+	        .orElseThrow(() -> new ResourceNotFoundException("Video", id));
+	    return video.getVideoLink().toString();
+	}
+
+	@Override
+	public String updateLink(Long id, List<String> link) {
+	    Video video = videoRepository.findById(id)
+	        .orElseThrow(() -> new ResourceNotFoundException("Video", id));
+	    List<String> videoLink = video.getVideoLink();
+	    if (videoLink == null) {
+	        videoLink = new ArrayList<>();
+	    }
+	    //videoLink.addAll(link); // Replace old links with the new one
+
+	    video.setVideoLink(videoLink);
+	    videoRepository.save(video);
+
+	    return link.toString(); // Return the updated link
+	}
 }

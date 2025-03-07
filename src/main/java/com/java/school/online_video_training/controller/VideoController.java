@@ -3,6 +3,7 @@ package com.java.school.online_video_training.controller;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -158,20 +159,29 @@ public class VideoController {
 	     }
 	 }
 	 
-//	 @PostMapping("/{id}/linkVideo")
-//		//@ResponseStatus(HttpStatus.CREATED)
-//		public ResponseEntity<?> createLink(@PathVariable Long id, @RequestParam String link){
-//		  try {
-//	            videoService.linkVideo(id, link);  // Call the service method to update the video link
-//	            return ResponseEntity.ok("Video link updated successfully");
-//	        } catch (Exception e) {
-//	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//	                .body("Failed to update video link: " + e.getMessage());
-//	        }
-//	 }
-//	 @GetMapping("/{id}/linkVideo")
-//	 public ResponseEntity<?> getLink(@PathVariable Long id, @RequestParam(required = false) String link){
-//		 String link2 = videoService.getLink(id, link);
-//		 return ResponseEntity.ok(link2);
-//	 }
+	 @PostMapping("/{id}/linkVideo")
+		//@ResponseStatus(HttpStatus.CREATED)
+		public ResponseEntity<?> createLink(@PathVariable Long id, @RequestBody List<String> link){
+		  try {
+	            videoService.videoLink(id, link);  // Call the service method to update the video link
+	            return ResponseEntity.ok("Video link updated successfully");
+	        } catch (Exception e) {
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Failed to update video link: " + e.getMessage());
+	        }
+	 }
+	 
+	 @GetMapping("/{id}/getLink")
+	 public ResponseEntity<?> getLink(@PathVariable Long id){
+		 String link = videoService.getLink(id);
+		 return ResponseEntity.ok(link);
+	 }
+	 
+	 @PutMapping("{id}/updateLink")
+	 public ResponseEntity<?> updateVideoLink(@PathVariable Long id, @RequestBody List<String> link) {
+	     
+	     String updatedLink = videoService.updateLink(id, link);
+	     return ResponseEntity.ok(updatedLink);
+	 }
+
 }
