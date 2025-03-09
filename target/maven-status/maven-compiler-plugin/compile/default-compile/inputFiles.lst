@@ -31,6 +31,7 @@ C:\online-video-training\src\main\java\com\java\school\online_video_training\exc
 C:\online-video-training\src\main\java\com\java\school\online_video_training\service\impl\VideoServiceImpl.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\repository\VideoRepository.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\spec\CourseFilter.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\spec\LinkSpec.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\AuditorAwareImpl.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\service\VideoService.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\spec\ImageSpec.java
@@ -47,6 +48,7 @@ C:\online-video-training\src\main\java\com\java\school\online_video_training\map
 C:\online-video-training\src\main\java\com\java\school\online_video_training\service\impl\UserServiceImpl.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\jwt\TokenVerifyFIlter.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\entity\AuditEntity.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\spec\LinkFilter.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\jwt\FilterChainExceptionHandler.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\spec\CategoryFilter.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\exception\ApiException.java

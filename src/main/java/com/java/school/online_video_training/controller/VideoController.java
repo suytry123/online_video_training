@@ -176,12 +176,26 @@ public class VideoController {
 		 String link = videoService.getLink(id);
 		 return ResponseEntity.ok(link);
 	 }
+
+	@GetMapping("/links")
+	public ResponseEntity<?> getLinks(@RequestParam Map<String, String> link) {
+		Page<String> video1 = videoService.getLinks(link);
+
+		PageDTO dto = new PageDTO(video1);
+
+		return ResponseEntity.ok(dto);
+		}
 	 
 	 @PutMapping("{id}/updateLink")
 	 public ResponseEntity<?> updateVideoLink(@PathVariable Long id, @RequestBody List<String> link) {
-	     
-	     String updatedLink = videoService.updateLink(id, link);
-	     return ResponseEntity.ok(updatedLink);
+	      videoService.updateLink(id, link);
+	      return ResponseEntity.ok(link);
 	 }
+	 
+	 @DeleteMapping("/{id}/deleteLink")
+	 public ResponseEntity<String> deleteLink(@PathVariable Long id) {
+	       videoService.deleteLink(id);
+	       return ResponseEntity.ok("Link deleted successfully");
+	  }
 
 }

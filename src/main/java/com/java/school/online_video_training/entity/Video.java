@@ -2,9 +2,11 @@ package com.java.school.online_video_training.entity;
 
 import java.util.List;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -30,6 +32,10 @@ public class Video extends AuditEntity{
 	private String description;
 	
 	@ElementCollection
+//	@CollectionTable(
+//			name = "video_video_link",//child table name
+//			joinColumns = @JoinColumn(name = "video_id")//FK col name
+//			)
 	@Column(name = "video_link")
 	private List<String> videoLink;
 	

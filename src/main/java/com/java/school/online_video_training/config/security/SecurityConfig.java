@@ -44,6 +44,7 @@ public class SecurityConfig {
 			.and()
 			.authorizeHttpRequests()
 			.antMatchers("/","index.html","css/**","js/**").permitAll()
+			.antMatchers("/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/webjars/**", "/swagger-ui/**").permitAll()
 			//.antMatchers(HttpMethod.PUT, "/categories/**").hasAuthority(PermissionEnum.CATEGORY_WRITE.getDescription())
 			.anyRequest()
 			.authenticated();

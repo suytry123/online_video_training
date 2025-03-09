@@ -25,5 +25,7 @@ public interface VideoService {
 	void deleteImageByPath(String url) throws Exception;
 	void videoLink(Long id, List<String> link);
 	String getLink(Long id);
-	String updateLink(Long id, List<String> link);
+	Page<String> getLinks(Map<String, String> link);
+	void updateLink(Long id, List<String> link);
+	void deleteLink(Long id);
 }

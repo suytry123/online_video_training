@@ -13,4 +13,5 @@ public interface VideoRepository extends JpaRepository<Video, Long>, JpaSpecific
 	//String findByImageCover(String path);
 	//Video findByCoverImage(String coverImage);
 	Optional<Video> findByImageCover(String path);
+	
 }

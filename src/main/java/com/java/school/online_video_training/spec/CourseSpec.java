@@ -23,7 +23,7 @@ public class CourseSpec implements Specification<Course>{
 	@Override
 	public Predicate toPredicate(Root<Course> course, CriteriaQuery<?> query, CriteriaBuilder cb) {
 		if(courseFilter.getName() != null) {
-			Predicate name = cb.like(cb.upper(course.get("courseName")),"%" + courseFilter.getName().toUpperCase() + "%");
+			Predicate name = cb.like(cb.upper(course.get("name")),"%" + courseFilter.getName().toUpperCase() + "%");
 			predicates.add(name);
 		}
 		
