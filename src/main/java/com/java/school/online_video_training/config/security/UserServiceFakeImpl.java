@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.java.school.online_video_training.dto.UserDTO;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -24,6 +26,11 @@ public class UserServiceFakeImpl implements UserService{
 		return users.stream()
 			.filter(user -> user.getUsername().equals(username))
 			.findFirst();
+	}
+
+	@Override
+	public void rigisterUser(UserDTO userDTO) {
+		
 	}
 
 }

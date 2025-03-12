@@ -1,12 +1,16 @@
 C:\online-video-training\src\main\java\com\java\school\online_video_training\controller\VideoController.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\dto\UserDTO.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\repository\CategoryRepository.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\spec\VideoFilter.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\entity\Role.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\controller\CategoryController.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\service\util\PageUtil.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\service\CategoryService.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\service\impl\AuthServiceImpl.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\service\impl\CategoryServiceImpl.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\config\security\AuthTokenFilter.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\security\UserServiceFakeImpl.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\repository\RoleRepository.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\security\SecurityConfig.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\security\PermissionEnum.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\repository\UserRepository.java
@@ -17,6 +21,7 @@ C:\online-video-training\src\main\java\com\java\school\online_video_training\con
 C:\online-video-training\src\main\java\com\java\school\online_video_training\exception\ResourceNotFoundException.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\repository\CourseRepository.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\dto\CategoryDTO.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\service\AuthService.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\exception\GlobleExceptionHandler.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\OnlineVideoTrainingApplication.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\security\PasswordConfig.java
@@ -26,6 +31,7 @@ C:\online-video-training\src\main\java\com\java\school\online_video_training\spe
 C:\online-video-training\src\main\java\com\java\school\online_video_training\dto\CourseDTO.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\entity\Category.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\spec\CategorySpec.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\controller\AuthController.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\entity\User.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\exception\ErrorResponse.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\service\impl\VideoServiceImpl.java
@@ -50,8 +56,10 @@ C:\online-video-training\src\main\java\com\java\school\online_video_training\con
 C:\online-video-training\src\main\java\com\java\school\online_video_training\entity\AuditEntity.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\spec\LinkFilter.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\jwt\FilterChainExceptionHandler.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\mapper\UserMapper.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\spec\CategoryFilter.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\exception\ApiException.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\config\security\JwtUtils.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\SpringFoxConfig.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\spec\CourseSpec.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\controller\CourseController.java
@@ -61,4 +69,5 @@ C:\online-video-training\src\main\java\com\java\school\online_video_training\ent
 C:\online-video-training\src\main\java\com\java\school\online_video_training\service\impl\CourseServiceImpl.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\WebConfig.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\entity\Video.java
+C:\online-video-training\src\main\java\com\java\school\online_video_training\dto\SignupRequest.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\spec\VideoSpec.java

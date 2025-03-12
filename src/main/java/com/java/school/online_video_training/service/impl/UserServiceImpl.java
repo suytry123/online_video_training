@@ -11,9 +11,11 @@ import org.springframework.stereotype.Service;
 
 import com.java.school.online_video_training.config.security.AuthUser;
 import com.java.school.online_video_training.config.security.UserService;
+import com.java.school.online_video_training.dto.UserDTO;
 import com.java.school.online_video_training.entity.Role;
 import com.java.school.online_video_training.entity.User;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
+import com.java.school.online_video_training.mapper.UserMapper;
 import com.java.school.online_video_training.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -54,6 +56,10 @@ public class UserServiceImpl implements UserService{
 	private Stream<SimpleGrantedAuthority> toStream(Role role){
 		return role.getPermissions().stream()
 			.map(permiision -> new SimpleGrantedAuthority(permiision.getName()));
+	}
+	@Override
+	public void rigisterUser(UserDTO userDTO) {
+		
 	}
 
 }

@@ -15,7 +15,8 @@ import static com.java.school.online_video_training.config.security.PermissionEn
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum RoleEnum {
 	ADMIN(Set.of(CATEGORY_WRITE, CATEGORY_READ, COURSE_WRITE, COURSE_READ)),
-	AUTHOR(Set.of(CATEGORY_READ, COURSE_READ));
+	AUTHOR(Set.of(CATEGORY_READ, COURSE_READ)),
+	USER(Set.of());
 	
 	private Set<PermissionEnum> permissions;
 	
