@@ -27,48 +27,48 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("categories")
 public class CategoryController {
-	
+
 //	@Autowired
 	private final CategoryService categoryService;
 	private final CategoryMapper categoryMapper;
-	
-	
+
 	@PreAuthorize("hasAuthority('category:write')")
 	@PostMapping
-	public ResponseEntity<?> create(@RequestBody CategoryDTO dto){
+	public ResponseEntity<?> create(@RequestBody CategoryDTO dto) {
 		Category category = categoryMapper.toCategory(dto);
 		categoryService.create(category);
-	    return ResponseEntity.ok(categoryMapper.toCategoryDTO(category));
+		return ResponseEntity.ok(categoryMapper.toCategoryDTO(category));
 	}
-	
+
 	@PreAuthorize("hasAuthority('category:read')")
 	@GetMapping("{id}")
-	public ResponseEntity<?> getOneCategory(@PathVariable("id") Long categoryId){
+	public ResponseEntity<?> getOneCategory(@PathVariable("id") Long categoryId) {
 		Category category = categoryService.getById(categoryId);
 		return ResponseEntity.ok(categoryMapper.toCategoryDTO(category));
 	}
-	
+
+	@PreAuthorize("hasAuthority('category:write')")
 	@PutMapping("{id}")
-	public ResponseEntity<?> update(@PathVariable("id") Long categoryId, @RequestBody CategoryDTO categoryDTO){
+	public ResponseEntity<?> update(@PathVariable("id") Long categoryId, @RequestBody CategoryDTO categoryDTO) {
 		Category category = categoryMapper.toCategory(categoryDTO);
 		Category updatedCategory = categoryService.update(categoryId, category);
 		return ResponseEntity.ok(categoryMapper.toCategoryDTO(updatedCategory));
 	}
-	
-	 @GetMapping
-	 public ResponseEntity<?> getCategories(@RequestParam Map<String, String> params){
+
+	@PreAuthorize("hasAuthority('category:read')")
+	@GetMapping
+	public ResponseEntity<?> getCategories(@RequestParam Map<String, String> params) {
 		Page<Category> page = categoryService.getCategories(params);
-	    	
-	    PageDTO pageDTO = new PageDTO(page);
-	    	
-		
+
+		PageDTO pageDTO = new PageDTO(page);
+
 		return ResponseEntity.ok(pageDTO);
 	}
-	
+
 	@DeleteMapping
-	 public ResponseEntity<?> delete(@RequestParam("id") Long categoryId){
-	 	categoryService.deleteById(categoryId);
-	 	
-	 	return ResponseEntity.ok().build();
-		}
+	public ResponseEntity<?> delete(@RequestParam("id") Long categoryId) {
+		categoryService.deleteById(categoryId);
+
+		return ResponseEntity.ok().build();
+	}
 }

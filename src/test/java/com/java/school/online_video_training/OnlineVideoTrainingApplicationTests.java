@@ -11,11 +11,11 @@ class OnlineVideoTrainingApplicationTests {
 	void contextLoads() {
 	}
 	
-	@Test
-	public void showPassword() {
-		BCryptPasswordEncoder cryptPasswordEncoder = new BCryptPasswordEncoder();
-		String encode = cryptPasswordEncoder.encode("thida123");
-		System.out.println(encode);
-	}
+//	@Test
+//	public void showPassword() {
+//		BCryptPasswordEncoder cryptPasswordEncoder = new BCryptPasswordEncoder();
+//		String encode = cryptPasswordEncoder.encode("thida123");
+//		System.out.println(encode);
+//	}
 
 }

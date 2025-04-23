@@ -13,6 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.java.school.online_video_training.config.jwt.FilterChainExceptionHandler;
 import com.java.school.online_video_training.config.jwt.JwtLoginFilter;
@@ -37,13 +38,19 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http.csrf().disable()
-			.addFilter(new JwtLoginFilter(authenticationManager(authenticationConfiguration)))
-			.addFilterBefore(filterChainExceptionHandler, JwtLoginFilter.class)
+			.addFilter(new JwtLoginFilter(authenticationManager(authenticationConfiguration))) // Add JWT login filter
+			.addFilterBefore(filterChainExceptionHandler, JwtLoginFilter.class) // Add exception handler filter before JwtLoginFilter
+			.addFilterBefore(new RequestLoggingFilter(), UsernamePasswordAuthenticationFilter.class) // Add logging filter before UsernamePasswordAuthenticationFilter
 			.addFilterAfter(new TokenVerifyFIlter(), JwtLoginFilter.class)
+//			.addFilter(new JwtLoginFilter(authenticationManager(authenticationConfiguration)))
+//			.addFilterBefore(filterChainExceptionHandler, JwtLoginFilter.class)
+//			.addFilterAfter(new TokenVerifyFIlter(), JwtLoginFilter.class)
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			.and()
 			.authorizeHttpRequests()
-			.antMatchers("/","index.html","css/**","js/**").permitAll()
+			.antMatchers("/","index.html","css/**","js/**", "/api/auth/**", 
+					"/register", "/login", "/registerForm", "verify-email").permitAll()
+			.antMatchers("/").permitAll()
 			.antMatchers("/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/webjars/**", "/swagger-ui/**").permitAll()
 			//.antMatchers(HttpMethod.PUT, "/categories/**").hasAuthority(PermissionEnum.CATEGORY_WRITE.getDescription())
 			.anyRequest()

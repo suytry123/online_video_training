@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class CategoryServiceImpl implements CategoryService{
 	
 	@Autowired
-	private  final CategoryRepository categoryRepository;
+	private final CategoryRepository categoryRepository;
 	
 	@Override
 	public Category create(Category category) {

@@ -4,7 +4,6 @@ import java.security.Key;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -35,8 +34,13 @@ public class JwtUtils {
         .compact();
   }
   
+//public String generateJwtToken(User user) {
+//return generateJwtToken(user.getUsername());
+//}
+  
   private Key key() {
-    return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+	  return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+	  //return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
   }
 
   public String getUserNameFromJwtToken(String token) {
@@ -65,3 +69,5 @@ public class JwtUtils {
     return false;
   }
 }
+
+

@@ -1,5 +1,14 @@
 package com.java.school.online_video_training.config.security;
 
+import static com.java.school.online_video_training.config.security.PermissionEnum.CATEGORY_READ;
+import static com.java.school.online_video_training.config.security.PermissionEnum.CATEGORY_WRITE;
+import static com.java.school.online_video_training.config.security.PermissionEnum.COURSE_READ;
+import static com.java.school.online_video_training.config.security.PermissionEnum.COURSE_WRITE;
+import static com.java.school.online_video_training.config.security.PermissionEnum.VIDEO_WRITE;
+import static com.java.school.online_video_training.config.security.PermissionEnum.VIDEO_READ;
+
+
+
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -9,13 +18,11 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import static com.java.school.online_video_training.config.security.PermissionEnum.*;
-
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum RoleEnum {
-	ADMIN(Set.of(CATEGORY_WRITE, CATEGORY_READ, COURSE_WRITE, COURSE_READ)),
-	AUTHOR(Set.of(CATEGORY_READ, COURSE_READ)),
+	ADMIN(Set.of(CATEGORY_WRITE, CATEGORY_READ, COURSE_WRITE, COURSE_READ, VIDEO_WRITE, VIDEO_READ)),
+	AUTHOR(Set.of(CATEGORY_READ, COURSE_READ, VIDEO_READ)),
 	USER(Set.of());
 	
 	private Set<PermissionEnum> permissions;

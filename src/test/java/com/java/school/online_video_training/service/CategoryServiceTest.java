@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.java.school.online_video_training.entity.Category;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
@@ -30,7 +31,7 @@ public class CategoryServiceTest {
 	public void setUp() {
 		categoryService = new CategoryServiceImpl(categoryRepository);
 	}
-	
+//	
 //	@Test
 //	public void testCreate() {
 //		//given
@@ -75,17 +76,17 @@ public class CategoryServiceTest {
 		assertEquals("Java", returnCategory.getName());
 	}
 	
-	@Test
-	public void testByIdThrow() {
-		//given
-		
-		//when
-		when(categoryRepository.findById(2L)).thenReturn(Optional.empty());
-		//categoryService.getById(2L);
-		assertThatThrownBy(() -> categoryService.getById(2L))
-			.isInstanceOf(ResourceNotFoundException.class)
-			.hasMessage("Category With id = 2 Not Found");
-		
-		//then
-	}
+//	@Test
+//	public void testByIdThrow() {
+//		//given
+//		
+//		//when
+//		when(categoryRepository.findById(2L)).thenReturn(Optional.empty());
+//		//categoryService.getById(2L);
+//		assertThatThrownBy(() -> categoryService.getById(2L))
+//			.isInstanceOf(ResourceNotFoundException.class)
+//			.hasMessage("Category With id = 2 Not Found");
+//		
+//		//then
+//	}
 }

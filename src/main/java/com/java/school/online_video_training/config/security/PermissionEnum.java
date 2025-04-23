@@ -10,7 +10,9 @@ public enum PermissionEnum {
 	CATEGORY_WRITE("category:write"),
 	CATEGORY_READ("category:read"),
 	COURSE_WRITE("course:write"),
-	COURSE_READ("course:read");
+	COURSE_READ("course:read"),
+	VIDEO_WRITE("video:write"),
+	VIDEO_READ("video:read");
 	
 	
 	private String description;

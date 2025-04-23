@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.java.school.online_video_training.config.jwt.LoginRequest;
+import com.java.school.online_video_training.dto.SignupRequest;
 import com.java.school.online_video_training.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,15 @@ public class AuthController {
 		responseHeaders.set("Authorization", "Bearer " + jwt);
 		responseHeaders.set("Access-Control-Expose-Headers", "Authorization");
 		
+		return ResponseEntity.ok().headers(responseHeaders).build();
+	}
+	
+	@PostMapping("/signup")
+	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+		String jwt = authService.createUser(signUpRequest);
+		
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set("Authorization", "Bearer " + jwt);
 		return ResponseEntity.ok().headers(responseHeaders).build();
 	}
 }

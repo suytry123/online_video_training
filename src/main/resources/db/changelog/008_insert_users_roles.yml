@@ -1,0 +1,15 @@
+databaseChangeLog:
+- changeSet:
+    id: 008_insert_users_roles
+    author: soksoytry200@gmail.com
+    changes:
+    - loadData:
+        tableName: users_roles
+        columns:
+        - column:
+            name: user_id
+            type: NUMERIC
+        - column:
+            name: roles_id
+            type: NUMERIC
+        file: db/data/008_users_roles.csv

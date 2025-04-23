@@ -40,48 +40,48 @@ public class AuthServiceImpl implements AuthService{
 	private final JwtUtils jwtUtils;
 	
 	@Override
-	public String createUser(SignupRequest signupRequest) {
-		if(userRepository.existsByUsername(signupRequest.getUsername())){
-			throw new ApiException(HttpStatus.BAD_REQUEST, "Username is already token!");
+	public String createUser(SignupRequest signUpRequest) {
+		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Username is already taken!");
 		}
-		
-		if(userRepository.existsByEmail(signupRequest.getEmail())) {
-			throw new ApiException(HttpStatus.BAD_REQUEST, "Email is already token!");
+
+		if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Email is already taken!");
 		}
-		
+
 		// Create new user's account
-		User user = new User(signupRequest.getUsername(),signupRequest.getEmail(),
-				passwordEncoder.encode(signupRequest.getPassword()));
-		
-		Set<String> strRoles = signupRequest.getRoles();
+		User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(),
+				passwordEncoder.encode(signUpRequest.getPassword()));
+
+		Set<String> strRoles = signUpRequest.getRoles();
 		Set<Role> roles = new HashSet<>();
-		
-		if(strRoles == null) {
+
+		if (strRoles == null) {
 			Role userRole = roleRepository.findByName(RoleEnum.USER.name())
-				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Roles is not found!"));
+					.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Role is not found!"));
 			roles.add(userRole);
-		}else {
+		} else {
 			strRoles.forEach(role -> {
-				Role adimRole = roleRepository.findByName(role)
-					.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Roles id noy found"));
-				roles.add(adimRole);
+				Role adminRole = roleRepository.findByName(role)
+						.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, role + " Role is not found!"));
+				roles.add(adminRole);
 			});
 		}
-		
+
 		user.setRoles(roles);
 		userRepository.save(user);
-		return jwtUtils.generateJwtToken(signupRequest.getUsername());
+		return jwtUtils.generateJwtToken(signUpRequest.getUsername());
 	}
 
 	@Override
 	public String authenticateUser(LoginRequest loginRequest) {
-		Authentication authenticate = authenticationManager.authenticate(
-				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-		
-		SecurityContextHolder.getContext().setAuthentication(authenticate);
-		AuthUser principal = (AuthUser) authenticate.getPrincipal();
-		
-		return jwtUtils.generateJwtToken(principal.getUsername());
+		Authentication authentication = authenticationManager.authenticate(
+		        new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+
+		    SecurityContextHolder.getContext().setAuthentication(authentication);
+		    AuthUser userPrincipal = (AuthUser) authentication.getPrincipal();
+
+		    return jwtUtils.generateJwtToken(userPrincipal.getUsername());
 	}
 	
 	

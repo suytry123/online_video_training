@@ -35,7 +35,7 @@ public class User {
 	private String email;
 	
 	@Column(name = "phone_number")
-	private Integer phoneNumber;
+	private String phoneNumber;
 	
 	@Column(name = "gender")
 	private String gender;
@@ -46,12 +46,18 @@ public class User {
 	@Column(name = "join_date")
 	private LocalDateTime joinDate;
 	
+	
+	
 	@ManyToMany(fetch = FetchType.EAGER)
 	private Set<Role> roles;
 	private boolean accountNonExpired;
 	private boolean accountNonLocked;
 	private boolean credentialsNonExpired;
 	private boolean enabled;
+	
+	// for author field
+    private String education;
+    private String address;
 	
 	public User(String username, String email, String password) {
 		this.username = username;

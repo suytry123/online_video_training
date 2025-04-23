@@ -18,3 +18,15 @@ spring:
 app:
   jwtSecret: ======================Suy===========================
   jwtExpirationMs: 86400000
+mail:
+  host: smtp.gmail.com
+  port: 587
+  username: Boysoy331@gmail.com
+  password:  ${MAIL_PASSWORD}
+  properties:
+  mail:
+    smtp:
+      auth: true
+      starttls:
+        enable: true
+

@@ -44,13 +44,13 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter{
 	@Override
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain,
 			Authentication authResult) throws IOException, ServletException {
-		String secretKey = "sddfasfsdfsfsfdddddddddddddddddsddfasfsdfsfsfddddddddddddddddd";
+	    String secretKey = "sddfasfsdfsfsfdddddddddddddddddsddfasfsdfsfsfddddddddddddddddd";
 
 		String token = Jwts.builder()
 				.setSubject(authResult.getName())
 				.setIssuedAt(new Date())
 				.claim("authorities", authResult.getAuthorities())
-				.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusWeeks(2)))
+				.setExpiration(java.sql.Date.valueOf(LocalDate.now().plusMonths(8)))
 				.setIssuer("online_video_training.com")
 				.signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
 				.compact();

@@ -1,0 +1,20 @@
+databaseChangeLog:
+- changeSet:
+    id: 008_add_columns_to_brands_table
+    author: soksoytry200@gmail.com
+    changes:
+    - addColumn:
+        tableName: videos
+        columns:
+        - column:
+            name: date_created
+            type: DATETIME
+        - column:
+            name: date_modified
+            type: DATETIME
+        - column:
+            name: user_created
+            type: VARCHAR(30)
+        - column:
+            name: user_modified
+            type: VARCHAR(30)

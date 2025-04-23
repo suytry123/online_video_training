@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,146 +38,153 @@ import lombok.extern.slf4j.Slf4j;
 public class VideoController {
 	private final VideoService videoService;
 	private final VideoMapper videoMapper;
-	
+
+	@PreAuthorize("hasAuthority('video:write')")
 	@PostMapping
-	//@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<?> createVideo(@RequestBody VideoDTO videoDTO){
+	// @ResponseStatus(HttpStatus.CREATED)
+	public ResponseEntity<?> createVideo(@RequestBody VideoDTO videoDTO) {
 		Video video = videoMapper.toVideo(videoDTO);
 		video = videoService.createVideo(video);
 		return ResponseEntity.ok(videoMapper.toVideoDTO(video));
 	}
 
+	@PreAuthorize("hasAuthority('video:read')")
 	@GetMapping("/{id}")
-	public ResponseEntity<?> getVideoById(@PathVariable Long id){
+	public ResponseEntity<?> getVideoById(@PathVariable Long id) {
 		Video byId = videoService.getVideoById(id);
 		return ResponseEntity.ok(videoMapper.toVideoDTO(byId));
 	}
-	
+
+	@PreAuthorize("hasAuthority('video:read')")
 	@GetMapping
-	public ResponseEntity<?> getCourses(@RequestParam Map<String, String> video){
+	public ResponseEntity<?> getCourses(@RequestParam Map<String, String> video) {
 		Page<Video> video1 = videoService.getVideos(video);
-		
-		PageDTO dto = new PageDTO(video1) ;
-		
+
+		PageDTO dto = new PageDTO(video1);
+
 		return ResponseEntity.ok(dto);
 	}
-	
+
+	@PreAuthorize("hasAuthority('video:write')")
 	@PutMapping("{id}")
-	public ResponseEntity<?> updateVideo(@PathVariable Long id, @RequestBody VideoDTO videoDTO){
+	public ResponseEntity<?> updateVideo(@PathVariable Long id, @RequestBody VideoDTO videoDTO) {
 		Video video = videoMapper.toVideo(videoDTO);
 		video = videoService.updateVideo(id, video);
 		return ResponseEntity.ok(video);
 	}
-	
+
 	@DeleteMapping("{id}")
-	public ResponseEntity<?> deleteVideo(@PathVariable Long id){
+	public ResponseEntity<?> deleteVideo(@PathVariable Long id) {
 		videoService.deleteVideo(id);
 		return ResponseEntity.ok().build();
 	}
-	
+
+	@PreAuthorize("hasAuthority('video:write')")
 	@PostMapping("/upload/{id}")
-	public ResponseEntity<?> uploadPicture(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws Exception{
+	public ResponseEntity<?> uploadPicture(@PathVariable Long id, @RequestParam("file") MultipartFile file)
+			throws Exception {
 		if (file.isEmpty()) {
 			throw new RuntimeException("Please load a file");
-        }
-	
+		}
+
 		try {
 			videoService.saveImage(id, file);
 			log.info("your image save successful.");
-		}
-		catch(Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("Save image Error", e.getMessage());
 		}
 		return ResponseEntity.ok().build();
 	}
-	
+
+	@PreAuthorize("hasAuthority('video:read')")
 	@GetMapping("path/{path}")
-	public ResponseEntity<?> getByPath(@PathVariable String path) throws Exception{
-		 if (path == null || path.isEmpty()) {
-		        throw new IllegalArgumentException("File name cannot be null or empty.");
-		    }
-		 
-		 Path filePath = Paths.get("src", "main", "resources", "file-repository", path);
-		
-	    if (!Files.exists(filePath)) {
-	        return ResponseEntity.notFound().build();
-	    }
+	public ResponseEntity<?> getByPath(@PathVariable String path) throws Exception {
+		if (path == null || path.isEmpty()) {
+			throw new IllegalArgumentException("File name cannot be null or empty.");
+		}
 
-	   byte[] fileBytes = Files.readAllBytes(filePath);
-	    //byte[] byPath = videoService.getByPath(path);
+		Path filePath = Paths.get("src", "main", "resources", "file-repository", path);
 
-	    String contentType = Files.probeContentType(filePath);
-	    
-	    return ResponseEntity.ok()
-	            .contentType(MediaType.parseMediaType(contentType))
-	            .body(fileBytes);
+		if (!Files.exists(filePath)) {
+			return ResponseEntity.notFound().build();
+		}
+
+		byte[] fileBytes = Files.readAllBytes(filePath);
+		// byte[] byPath = videoService.getByPath(path);
+
+		String contentType = Files.probeContentType(filePath);
+
+		return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType)).body(fileBytes);
 	}
-	
-	
-	 @PutMapping("update/{path}")
-	    public ResponseEntity<?> updateVideoImage(@PathVariable String path, @RequestParam("file") MultipartFile file) {
-	        try {
-	            // Call the service method to update the video image (path)
-	            videoService.updateImage(path, file);
-	            return ResponseEntity.ok().build();
-	        } catch (Exception e) {
-	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update video image.");
-	        }
-	    }
-	 
-	 @GetMapping("/images")
-	 public ResponseEntity<?> getImages(@RequestParam Map<String, String> image) {
-		 Path directoryPath = Paths.get("src", "main", "resources", "file-repository");
-		 log.info("Directory Path: {}", directoryPath);
-	     
-	     try {
-	         Page<String> images = videoService.getImages(image);
-	         Path imagePath = Paths.get(directoryPath.toString(), images.getContent().get(0)); 
-	         byte[] imageBytes = Files.readAllBytes(imagePath);
-	         PageDTO dto = new PageDTO(images);
-	         log.info("Images retrieved successfully");
-	         return ResponseEntity.ok(dto);
-	     } catch (Exception e) {
-	         log.error("Failed to get images", e);
-	         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	             .body("Failed to retrieve images: " + e.getMessage());
-	     }
-	 }
 
-	
-	 @DeleteMapping("/delete/{url}") 
-	 public ResponseEntity<?> deleteByPath(@PathVariable String url) throws Exception {
-	     try {
-	         // Call the service method to delete the file
-	         videoService.deleteImageByPath(url);
-	         log.info("Delete successfully: " + url);
-	         return ResponseEntity.ok("Image deleted successfully.");
-	     } catch (Exception e) {
-	         // Log the error and send the failure response
-	         log.error("Delete failed: " + e.getMessage());
-	         return ResponseEntity.status(500).body("Error deleting image: " + e.getMessage());
-	     }
-	 }
-	 
-	 @PostMapping("/{id}/linkVideo")
-		//@ResponseStatus(HttpStatus.CREATED)
-		public ResponseEntity<?> createLink(@PathVariable Long id, @RequestBody List<String> link){
-		  try {
-	            videoService.videoLink(id, link);  // Call the service method to update the video link
-	            return ResponseEntity.ok("Video link updated successfully");
-	        } catch (Exception e) {
-	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body("Failed to update video link: " + e.getMessage());
-	        }
-	 }
-	 
-	 @GetMapping("/{id}/getLink")
-	 public ResponseEntity<?> getLink(@PathVariable Long id){
-		 String link = videoService.getLink(id);
-		 return ResponseEntity.ok(link);
-	 }
+	@PreAuthorize("hasAuthority('video:write')")
+	@PutMapping("update/{path}")
+	public ResponseEntity<?> updateVideoImage(@PathVariable String path, @RequestParam("file") MultipartFile file) {
+		try {
+			// Call the service method to update the video image (path)
+			videoService.updateImage(path, file);
+			return ResponseEntity.ok().build();
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update video image.");
+		}
+	}
 
+	@PreAuthorize("hasAuthority('video:read')")
+	@GetMapping("/images")
+	public ResponseEntity<?> getImages(@RequestParam Map<String, String> image) {
+		Path directoryPath = Paths.get("src", "main", "resources", "file-repository");
+		log.info("Directory Path: {}", directoryPath);
+
+		try {
+			Page<String> images = videoService.getImages(image);
+			Path imagePath = Paths.get(directoryPath.toString(), images.getContent().get(0));
+			byte[] imageBytes = Files.readAllBytes(imagePath);
+			PageDTO dto = new PageDTO(images);
+			log.info("Images retrieved successfully");
+			return ResponseEntity.ok(dto);
+		} catch (Exception e) {
+			log.error("Failed to get images", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Failed to retrieve images: " + e.getMessage());
+		}
+	}
+
+	@DeleteMapping("/delete/{url}")
+	public ResponseEntity<?> deleteByPath(@PathVariable String url) throws Exception {
+		try {
+			// Call the service method to delete the file
+			videoService.deleteImageByPath(url);
+			log.info("Delete successfully: " + url);
+			return ResponseEntity.ok("Image deleted successfully.");
+		} catch (Exception e) {
+			// Log the error and send the failure response
+			log.error("Delete failed: " + e.getMessage());
+			return ResponseEntity.status(500).body("Error deleting image: " + e.getMessage());
+		}
+	}
+
+	@PreAuthorize("hasAuthority('video:write')")
+	@PostMapping("/{id}/linkVideo")
+	// @ResponseStatus(HttpStatus.CREATED)
+	public ResponseEntity<?> createLink(@PathVariable Long id, @RequestBody List<String> link) {
+		try {
+			videoService.videoLink(id, link); // Call the service method to update the video link
+			return ResponseEntity.ok("Video link updated successfully");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Failed to update video link: " + e.getMessage());
+		}
+	}
+
+	@PreAuthorize("hasAuthority('video:read')")
+	@GetMapping("/{id}/getLink")
+	public ResponseEntity<?> getLink(@PathVariable Long id) {
+		String link = videoService.getLink(id);
+		return ResponseEntity.ok(link);
+	}
+
+	@PreAuthorize("hasAuthority('video:read')")
 	@GetMapping("/links")
 	public ResponseEntity<?> getLinks(@RequestParam Map<String, String> link) {
 		Page<String> video1 = videoService.getLinks(link);
@@ -184,18 +192,19 @@ public class VideoController {
 		PageDTO dto = new PageDTO(video1);
 
 		return ResponseEntity.ok(dto);
-		}
-	 
-	 @PutMapping("{id}/updateLink")
-	 public ResponseEntity<?> updateVideoLink(@PathVariable Long id, @RequestBody List<String> link) {
-	      videoService.updateLink(id, link);
-	      return ResponseEntity.ok(link);
-	 }
-	 
-	 @DeleteMapping("/{id}/deleteLink")
-	 public ResponseEntity<String> deleteLink(@PathVariable Long id) {
-	       videoService.deleteLink(id);
-	       return ResponseEntity.ok("Link deleted successfully");
-	  }
+	}
+
+	@PreAuthorize("hasAuthority('video:write')")
+	@PutMapping("{id}/updateLink")
+	public ResponseEntity<?> updateVideoLink(@PathVariable Long id, @RequestBody List<String> link) {
+		videoService.updateLink(id, link);
+		return ResponseEntity.ok(link);
+	}
+
+	@DeleteMapping("/{id}/deleteLink")
+	public ResponseEntity<String> deleteLink(@PathVariable Long id) {
+		videoService.deleteLink(id);
+		return ResponseEntity.ok("Link deleted successfully");
+	}
 
 }

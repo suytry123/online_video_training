@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ public class CourseController {
 	private final CourseService courseService;
 	private final CourseMapper courseMapper;
 	
+	@PreAuthorize("hasAuthority('course:write')")
 	@PostMapping
 	public ResponseEntity<?> create(@RequestBody CourseDTO courseDTO){
 		Course course = courseMapper.toCourse(courseDTO);
@@ -36,6 +38,7 @@ public class CourseController {
 		return ResponseEntity.ok(courseMapper.toCourseDTO(course));
 	}
 	
+	@PreAuthorize("hasAuthority('course:read')")
 	@GetMapping("{id}")
 	public ResponseEntity<?> getById(@PathVariable("id") Long Id){
 		Course course = courseService.getById(Id);
@@ -51,6 +54,7 @@ public class CourseController {
 		return ResponseEntity.ok(dto);
 	}
 	
+	@PreAuthorize("hasAuthority('course:write')")
 	@PutMapping("{id}")
 	public ResponseEntity<?> update(@PathVariable("id") Long courseId, @RequestBody CourseDTO courseUpdate){
 		Course course = courseMapper.toCourse(courseUpdate);

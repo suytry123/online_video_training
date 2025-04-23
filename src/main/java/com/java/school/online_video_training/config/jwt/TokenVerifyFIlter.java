@@ -24,13 +24,15 @@ import com.java.school.online_video_training.exception.ApiException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TokenVerifyFIlter extends OncePerRequestFilter{
-
+	
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
@@ -43,8 +45,9 @@ public class TokenVerifyFIlter extends OncePerRequestFilter{
 		String token = authorizationHeader.replace("Bearer ", "");
 		String secretKey = "sddfasfsdfsfsfdddddddddddddddddsddfasfsdfsfsfddddddddddddddddd";
 		try {
-			 Jws<Claims> claimsJws = Jwts.parser()
+			 Jws<Claims> claimsJws = Jwts.parserBuilder()
 					 .setSigningKey(Keys.hmacShaKeyFor(secretKey.getBytes()))
+					 .build()
 					 .parseClaimsJws(token);
 			 Claims body = claimsJws.getBody();
 			 String username = body.getSubject();
@@ -62,5 +65,12 @@ public class TokenVerifyFIlter extends OncePerRequestFilter{
 			e.printStackTrace();
 			throw new ApiException(HttpStatus.BAD_REQUEST, e.getMessage());
 		}
+		catch (SignatureException e) {
+	        log.error("JWT Signature Verification Failed: " + e.getMessage());
+	        throw new ApiException(HttpStatus.UNAUTHORIZED, "Invalid token signature");
+	    } catch (JwtException e) {
+	        log.error("JWT Processing Error: " + e.getMessage());
+	        throw new ApiException(HttpStatus.UNAUTHORIZED, "Invalid token");
+	    }
 	}
 }
