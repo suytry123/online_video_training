@@ -1,6 +1,6 @@
 databaseChangeLog:
 - changeSet:
-    id: 008_add_columns_to_brands_table
+    id: 009_add_columns_to_videos_table
     author: soksoytry200@gmail.com
     changes:
     - addColumn:

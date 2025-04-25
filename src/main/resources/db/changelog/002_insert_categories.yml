@@ -14,4 +14,4 @@ databaseChangeLog:
             type: STRING
             constraints:
               nullable: false
-        file: db/data/002_insert_categories.csv
+        file: db/data/002_categories.csv

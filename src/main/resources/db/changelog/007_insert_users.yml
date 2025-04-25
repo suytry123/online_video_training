@@ -7,23 +7,29 @@ databaseChangeLog:
         tableName: users
         columns:
         - column:
-            name: id
+            name: user_id
             type: NUMERIC
         - column:
-            name: first_name
+            name: user_name
             type: STRING
         - column:
-            name: last_name
+            name: user_password
             type: STRING
         - column:
-            name: username
+            name: user_email
             type: STRING
         - column:
-            name: password
+            name: phone_number
             type: STRING
         - column:
-            name: email
+            name: gender
             type: STRING
+        - column:
+            name: photo
+            type: STRING
+        - column:
+            name: join_date
+            type: DATE
         - column:
             name: account_non_expired
             type: BOOLEAN

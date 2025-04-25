@@ -1,91 +1,57 @@
 databaseChangeLog:
-- changeSet:
-    id: 001_init_db_structure
-    author: soksoytry200@gmail.com
-    changes:
-    - createTable:
-        tableName: categories
-        columns:
-        - column:
-            autoIncrement: true
-            constraints:
-              primaryKey: true
-            name: category_id
-            type: BIGINT
-        - column:
-            name: category_name
-            type: VARCHAR(50)  
-            constraints:
-              nullable: false
-              unique: true
-        - alterSequence:
-              sequenceName: category_id_seq
-              incrementBy: 1
-              restart: true
-    - createTable:
-        tableName: courses
-        columns:
-        - column:
-            autoIncrement: true
-            constraints:
-              primaryKey: true
-            name: course_id
-            type: BIGINT
-        - column:
-            name: course_name
-            type: VARCHAR(50)
-            constraints:
-              nullable: false
-              unique: true
-        - column:
-            name: category_id
-            type: BIGINT
-            constraints:
-              nullable: false
-              unique: true
-          constraints:
-           - foreignKeyName: fk_courses_categories
-             references: categories(category_id)
+  - changeSet:
+      id: 001_init_db_structure
+      author: soksoytry200@gmail.com
+      changes:
         - createTable:
-             tableName: users
-             columns:
-             - column:
-                 autoIncrement: true
-                 constraints:
-                    primaryKey: true
-                 name: user_id
-                 type: BIGINT
-             - column:
-                 name: user_name
-                 type: VARCHAR(50)
-             - column:
-                 name: user_password
-                 type: VARCHAR(50)
-             - column:
-                 name: user_email
-                 type: VARCHAR(50)
-             - column:
-                 name: phone_number
-                 type: VARCHAR(25)
-             - column:
-                 name: gender
-                 type: VARCHAR(50)
-             - column:
-                 name: photo
-                 type: VARCHAR(50)
-             - column:
-                 name: join_date
-                 type: LOCALDATETIME
-               constraints:
-                 nullable: false
-                 unique: true
-        - createTable:
-              tableName: videos
-              columns:
+            tableName: categories
+            columns:
               - column:
                   autoIncrement: true
                   constraints:
-                     primaryKey: true
+                    primaryKey: true
+                  name: category_id
+                  type: BIGINT
+              - column:
+                  name: category_name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - createSequence:
+                   sequenceName: category_id_seq
+                   incrementBy: 1
+                   startValue: 1
+        - createTable:
+            tableName: courses
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                  name: course_id
+                  type: BIGINT
+              - column:
+                  name: course_name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: category_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - foreignKeyConstraint:
+                  name: fk_courses_categories
+                  references: categories(category_id)
+        - createTable:
+            tableName: videos
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
                   name: video_id
                   type: BIGINT
               - column:
@@ -103,9 +69,104 @@ databaseChangeLog:
               - column:
                   name: course_id
                   type: BIGINT
-                constraints:
-                  - foreignKeyName: fk_videos_courses
-                    references: courses(course_id)	
-                    constraints:
-                      nullable: false	
-                      unique: true  
+                  constraints:
+                    nullable: false
+              - foreignKeyConstraint:
+                  name: fk_videos_courses
+                  references: courses(course_id)
+        - createTable:
+            tableName: permissions
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+        - createTable:
+            tableName: roles
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: name
+                  type: VARCHAR(50)
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                  name: user_id
+                  type: BIGINT
+              - column:
+                  name: user_name
+                  type: VARCHAR(100)
+              - column:
+                  name: user_password
+                  type: VARCHAR(100)
+              - column:
+                  name: user_email
+                  type: VARCHAR(100)
+              - column:
+                  name: phone_number
+                  type: VARCHAR(50)
+              - column:
+                  name: gender
+                  type: VARCHAR(25)
+              - column:
+                  name: photo
+                  type: VARCHAR(50)
+              - column:
+                  name: join_date
+                  type: DATE
+              - column:
+                  name: account_non_expired
+                  type: BOOLEAN
+              - column:
+                  name: account_non_locked
+                  type: BOOLEAN
+              - column:
+                  name: credentials_non_expired
+                  type: BOOLEAN
+              - column:
+                  name: enabled
+                  type: BOOLEAN
+        - createTable:
+            tableName: roles_permissions
+            columns:
+              - column:
+                  name: role_id
+                  type: BIGINT
+              - foreignKeyConstraint:
+                  name: fk_roles_permissions_role
+                  references: roles(id)
+              - column:
+                  name: permissions_id
+                  type: BIGINT
+              - foreignKeyConstraint:
+                  name: fk_roles_permissions_permission
+                  references: permissions(id)
+        - createTable:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  type: BIGINT
+              - foreignKeyConstraint:
+                  name: fk_users_roles_users
+                  references: users(user_id)
+              - column:
+                  name: roles_id
+                  type: BIGINT
+              - foreignKeyConstraint:
+                  name: fk_users_roles_role
+                  references: roles(id)

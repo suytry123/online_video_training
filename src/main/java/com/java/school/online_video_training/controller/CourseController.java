@@ -45,6 +45,7 @@ public class CourseController {
 		return ResponseEntity.ok(courseMapper.toCourseDTO(course));
 	}
 	
+	@PreAuthorize("hasAuthority('course:read')")
 	@GetMapping
 	public ResponseEntity<?> getCourses(@RequestParam Map<String, String> course){
 		Page<Course> courses = courseService.getCourses(course);

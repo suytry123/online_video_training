@@ -9,7 +9,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import lombok.Data;
@@ -49,6 +52,8 @@ public class User {
 	
 	
 	@ManyToMany(fetch = FetchType.EAGER)
+//	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"),
+//	inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles;
 	private boolean accountNonExpired;
 	private boolean accountNonLocked;
@@ -68,6 +73,12 @@ public class User {
 		this.credentialsNonExpired = true;
 		this.enabled = true;
 	}
+	
+	@PrePersist
+	public void prePersist() {
+		if (joinDate == null) {
+			joinDate = LocalDateTime.now();
+		}
+	}
 
 }
-

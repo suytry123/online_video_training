@@ -4,7 +4,7 @@ databaseChangeLog:
     author: soksoytry200@gmail.com
     changes:
     - loadData:
-        tableName: permission
+        tableName: permissions
         columns:
         - column:
             name: id

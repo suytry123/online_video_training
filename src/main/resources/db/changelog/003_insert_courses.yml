@@ -16,5 +16,5 @@ databaseChangeLog:
              nullable: false
         - column:
             name: category_id
-            type: BIGINT
-        file: db/data/003_insert_courses.csv
+            type: NUMERIC
+        file: db/data/003_courses.csv
