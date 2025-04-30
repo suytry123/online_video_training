@@ -63,6 +63,34 @@ public class User {
 	// for author field
     private String education;
     private String address;
+    private String verificationToken;
+    
+    @Column(name = "is_author")
+    private boolean isAuthor = false;
+    
+    @Column(name = "bio")
+    private String bio;
+    
+    @Column(name = "expertise")
+    private String expertise;
+    
+    @Column(name = "author_approval_requested")
+    private boolean authorApprovalRequested = false;
+    
+    @Column(name = "author_approval_status")
+    private String authorApprovalStatus; // PENDING, APPROVED, REJECTED
+    
+    @Column(name = "author_approved")
+    private boolean authorApproved = false;
+    
+    @Column(name = "approve_token")
+    private String approveToken;
+    
+    @Column(name = "reject_token")
+    private String rejectToken;
+    
+    @Column(name = "email_verified")
+    private boolean emailVerified = false;
 	
 	public User(String username, String email, String password) {
 		this.username = username;

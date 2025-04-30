@@ -1,79 +1,76 @@
 package com.java.school.online_video_training.controller;
 
-import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.validation.ConstraintViolation;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.java.school.online_video_training.config.security.UserService;
 import com.java.school.online_video_training.dto.UserRegistrationDTO;
 import com.java.school.online_video_training.entity.User;
-import com.java.school.online_video_training.mapper.UserMapper;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/user")
 public class UserContorller {
-	
-	@Autowired
-	private UserService userService;
-	
-	  @PostMapping("registerForm")
-	    public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationDTO registrationDTO, BindingResult result) {
-	        // Check if there are validation errors
-	        if (result.hasErrors()) {
-	            result.getAllErrors().forEach(error -> {
-	                log.info("Validation error: " + error.getDefaultMessage());
-	            });
-	            return new ResponseEntity<>(result.getAllErrors().toString(), HttpStatus.BAD_REQUEST);
-	        }
+    
+    private final UserService userService;
+    private final LocalValidatorFactoryBean validator;
+    private final ObjectMapper objectMapper;
+    
+    public UserContorller(UserService userService, LocalValidatorFactoryBean validator, ObjectMapper objectMapper) {
+        this.userService = userService;
+        this.validator = validator;
+        this.objectMapper = objectMapper;
+    }
+    
+    @PostMapping("/registerForm")
+    public ResponseEntity<?> register(@RequestBody String rawBody) {
+        try {
+            log.info("Raw request body: {}", rawBody);
+            
+            // Parse JSON to DTO
+            UserRegistrationDTO registrationDTO = objectMapper.readValue(rawBody, UserRegistrationDTO.class);
+            log.info("Parsed DTO: {}", registrationDTO);
+            
+            // Validate the DTO
+            Set<ConstraintViolation<UserRegistrationDTO>> violations = validator.validate(registrationDTO);
+            if (!violations.isEmpty()) {
+                log.error("Validation errors: {}", violations);
+                Map<String, String> errors = new HashMap<>();
+                violations.forEach(violation -> 
+                    errors.put(violation.getPropertyPath().toString(), violation.getMessage())
+                );
+                return ResponseEntity.badRequest().body(errors);
+            }
+            
+            // Process registration
+            User user = userService.registerUserForm(registrationDTO);
+            return ResponseEntity.ok(user);
+        } catch (Exception e) {
+            log.error("Registration error: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error processing request: " + e.getMessage());
+        }
+    }
 
-	        // Log received password and user info (for debugging)
-	        log.info("Received password: " + registrationDTO.getPassword());
-	        log.info("Received User: " + registrationDTO);
-
-	        // No need to check password manually, as @NotBlank already ensures it's not null or empty
-	        User user = userService.registerUserForm(registrationDTO);
-	        return ResponseEntity.ok(user);
-	    }
-
-		@GetMapping("verify-email")
-		public ResponseEntity<?> verifyEmail(@RequestParam String token) {
-			String message = userService.verifyEmail(token);
-			return ResponseEntity.ok(message);
-		}
-
-	
-	/*
-	@PostMapping("registerForm")
-	public ResponseEntity<?> register(@Valid @RequestBody UserRegistrationDTO registrationDTO) {
-		 System.out.println("Received password: " + registrationDTO.getPassword());
-		
-	    System.out.println("Received User: " + registrationDTO);
-
-	    if (registrationDTO.getPassword() == null || registrationDTO.getPassword().isEmpty()) {
-	        throw new IllegalArgumentException("Password cannot be null or empty");
-	    }
-
-	    User user = userService.registerUserForm(registrationDTO);
-	    return ResponseEntity.ok(user);
-	}
-
-	
-	@GetMapping("verify-email")
-	public ResponseEntity<?> verifyEmail(@RequestParam String token){
-		String message = userService.verifyEmail(token);
-		return ResponseEntity.ok(message);
-	}*/
+    @GetMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+        String message = userService.verifyEmail(token);
+        return ResponseEntity.ok(message);
+    }
 }

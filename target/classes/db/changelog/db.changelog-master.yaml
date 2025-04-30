@@ -17,3 +17,5 @@ databaseChangeLog:
       file: db/changelog/008_insert_users_roles.yml
   - include:
       file: db/changelog/009_add_columns_to_videos_table.yml
+  - include:
+      file: db/changelog/010_rename_user_id_column.yml
