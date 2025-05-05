@@ -22,11 +22,11 @@ public class UserRegistrationDTO {
     @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
     private String username;
 
-    @NotBlank(message = "Email is required")
+    // Make email optional for author applications
     @Email(message = "Invalid email format")
     private String email;
 
-    @NotBlank(message = "Password is required")
+    // Make password optional for author applications
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
 
@@ -41,16 +41,16 @@ public class UserRegistrationDTO {
 
     private String education;
     
-	@Size(max = 200, message = "Address cannot exceed 200 characters")
-	private String address;
-	
-	@Size(max = 500, message = "Author bio must not exceed 500 characters")
-	private String authorBio;
-	
-	@Size(max = 200, message = "Author expertise must not exceed 200 characters")
-	private String authorExpertise;
-	
-	private boolean wantToBeAuthor = false;
+    @Size(max = 200, message = "Address cannot exceed 200 characters")
+    private String address;
+    
+    @Size(max = 500, message = "Author bio must not exceed 500 characters")
+    private String authorBio;
+    
+    @Size(max = 200, message = "Author expertise must not exceed 200 characters")
+    private String authorExpertise;
+    
+    private boolean wantToBeAuthor = false;
 
     @JsonCreator
     public UserRegistrationDTO(

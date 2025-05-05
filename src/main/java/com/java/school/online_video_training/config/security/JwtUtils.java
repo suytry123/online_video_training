@@ -6,6 +6,9 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.java.school.online_video_training.entity.User;
+
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
@@ -33,6 +36,25 @@ public class JwtUtils {
         .signWith(key(), SignatureAlgorithm.HS256)
         .compact();
   }
+  
+  public String generateToken(User user, String action) {
+	    // Set the subject as the user's email and include the action (approve or reject)
+	    return Jwts.builder()
+	            .setSubject(user.getEmail())  // Subject is the user's email
+	            .claim("action", action)      // The action (approve or reject)
+	            .setIssuedAt(new Date())      // Set the issue date
+	            .setExpiration(new Date(System.currentTimeMillis() + 86400000))  // Token expires in 24 hours
+	            .signWith(key(), SignatureAlgorithm.HS256)
+	            .compact();  // Create the token
+	}
+  
+  public Claims getClaimsFromToken(String token) {
+	    return Jwts.parser()
+	               .setSigningKey(key())
+	               .parseClaimsJws(token)
+	               .getBody();
+	}
+ 
   
 //public String generateJwtToken(User user) {
 //return generateJwtToken(user.getUsername());

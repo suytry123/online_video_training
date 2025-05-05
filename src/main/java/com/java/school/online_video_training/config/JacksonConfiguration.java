@@ -26,10 +26,12 @@ public class JacksonConfiguration {
 			// deserializers
 			builder.deserializers(new LocalDateDeserializer(dateFormatter));
 			builder.deserializers(new LocalDateTimeDeserializer(dateTimeFormatter));
-
+			builder.deserializers(new LocalDateTimeDeserializer(DateTimeFormatter.ISO_DATE_TIME));
+			
 			// serializers
 			builder.serializers(new LocalDateSerializer(dateFormatter));
 			builder.serializers(new LocalDateTimeSerializer(dateTimeFormatter));
+			builder.serializers(new LocalDateTimeSerializer(DateTimeFormatter.ISO_DATE_TIME));
 		};
 	}
 }

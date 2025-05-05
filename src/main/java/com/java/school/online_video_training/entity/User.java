@@ -9,11 +9,11 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -46,15 +46,13 @@ public class User {
 	@Column(name = "photo")
 	private String photo;
 	
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	@Column(name = "join_date")
 	private LocalDateTime joinDate;
 	
-	
-	
 	@ManyToMany(fetch = FetchType.EAGER)
-//	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"),
-//	inverseJoinColumns = @JoinColumn(name = "role_id"))
 	private Set<Role> roles;
+	
 	private boolean accountNonExpired;
 	private boolean accountNonLocked;
 	private boolean credentialsNonExpired;
@@ -66,7 +64,7 @@ public class User {
     private String verificationToken;
     
     @Column(name = "is_author")
-    private boolean isAuthor = false;
+    private Boolean  isAuthor = false;
     
     @Column(name = "bio")
     private String bio;
@@ -74,14 +72,32 @@ public class User {
     @Column(name = "expertise")
     private String expertise;
     
+    @Column(name = "temp_author_bio")
+    private String tempAuthorBio;
+    
+    @Column(name = "temp_expertise")
+    private String tempExpertise;
+    
+    @Column(name = "temp_gender")
+    private String tempGender;
+    
+    @Column(name = "temp_phone_number")
+    private String tempPhoneNumber;
+    
+    @Column(name = "temp_education")
+    private String tempEducation;
+    
+    @Column(name = "temp_address")
+    private String tempAddress;
+    
     @Column(name = "author_approval_requested")
-    private boolean authorApprovalRequested = false;
+    private Boolean  authorApprovalRequested;
     
     @Column(name = "author_approval_status")
     private String authorApprovalStatus; // PENDING, APPROVED, REJECTED
     
     @Column(name = "author_approved")
-    private boolean authorApproved = false;
+    private Boolean  authorApproved = false;
     
     @Column(name = "approve_token")
     private String approveToken;
@@ -90,8 +106,9 @@ public class User {
     private String rejectToken;
     
     @Column(name = "email_verified")
-    private boolean emailVerified = false;
+    private Boolean  emailVerified = false;
 	
+	// Constructor for creating new users
 	public User(String username, String email, String password) {
 		this.username = username;
 		this.email = email;
@@ -108,5 +125,4 @@ public class User {
 			joinDate = LocalDateTime.now();
 		}
 	}
-
 }

@@ -1,6 +1,6 @@
 package com.java.school.online_video_training.service.impl;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,18 +17,19 @@ import org.springframework.stereotype.Service;
 import com.java.school.online_video_training.config.security.AuthUser;
 import com.java.school.online_video_training.config.security.JwtUtils;
 import com.java.school.online_video_training.config.security.UserService;
+import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserRegistrationDTO;
 import com.java.school.online_video_training.entity.Role;
 import com.java.school.online_video_training.entity.User;
 import com.java.school.online_video_training.exception.ApiException;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
-import com.java.school.online_video_training.exception.UserAlreadyExistsException;
 import com.java.school.online_video_training.mapper.UserMapper;
 import com.java.school.online_video_training.repository.RoleRepository;
 import com.java.school.online_video_training.repository.UserRepository;
 import com.java.school.online_video_training.service.EmailService;
 import com.java.school.online_video_training.service.UserValidationService;
 
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -72,326 +73,318 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional
-	public User registerUserForm(UserRegistrationDTO registrationDTO) {
-		log.info("Registering new user with email: {}", registrationDTO.getEmail());
+	public User applyForAuthor(UserRegistrationDTO registrationDTO) {
+		log.info("Processing author application for user: {}", registrationDTO.getUsername());
 
-		// Validate user registration data
-		userValidationService.validateUserRegistration(registrationDTO);
+		// Find existing user
+		User user = userRepository.findByUsername(registrationDTO.getUsername())
+				.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-		// Check if user already exists
-		if (userRepository.existsByEmail(registrationDTO.getEmail())) {
-			log.warn("Registration failed - Email already exists: {}", registrationDTO.getEmail());
-			throw new UserAlreadyExistsException("Email already registered");
+		// Check if user is already an author
+//		if (user.isAuthor()) {
+//			throw new ApiException(HttpStatus.BAD_REQUEST, "User is already an author");
+//		}
+		if (user.getIsAuthor()) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "User is already an author");
 		}
 
-		if (userRepository.existsByUsername(registrationDTO.getUsername())) {
-			log.warn("Registration failed - Username already exists: {}", registrationDTO.getUsername());
-			throw new UserAlreadyExistsException("Username already taken");
-		}
+		// Store temporary data for admin approval
+		user.setTempGender(registrationDTO.getGender());
+		user.setTempPhoneNumber(registrationDTO.getPhoneNumber());
+		user.setTempEducation(registrationDTO.getEducation());
+		user.setTempAddress(registrationDTO.getAddress());
+		user.setTempAuthorBio(registrationDTO.getAuthorBio());
+		user.setTempExpertise(registrationDTO.getAuthorExpertise());
 
-		// Create new user
-		User user = new User();
-		user.setUsername(registrationDTO.getUsername());
-		user.setEmail(registrationDTO.getEmail());
-		user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
-		user.setGender(registrationDTO.getGender());
-		user.setPhoneNumber(registrationDTO.getPhoneNumber());
-		user.setEducation(registrationDTO.getEducation());
-		user.setAddress(registrationDTO.getAddress());
-		user.setEnabled(false); // User is disabled until email verification
+		// Set application status
+		user.setAuthorApprovalRequested(true);
+		user.setAuthorApprovalStatus("PENDING");
+		//user.setAuthor(false);
+		user.setIsAuthor(false);
+		user.setAuthorApproved(false);
 
-		// Generate JWT token for email verification
-		String verificationToken = jwtUtils.generateJwtToken(user.getEmail());
-		user.setVerificationToken(verificationToken);
+		// Generate tokens for admin approval
+		String approveToken = jwtUtils.generateJwtToken(user.getEmail() + "_APPROVE");
+		String rejectToken = jwtUtils.generateJwtToken(user.getEmail() + "_REJECT");
 
-		// Set roles
-		Set<Role> roles = new HashSet<>();
+		// Store tokens
+		user.setApproveToken(approveToken);
+		user.setRejectToken(rejectToken);
 
-		// Get roles from registrationDTO
-		if (registrationDTO.getRoleNames() != null && !registrationDTO.getRoleNames().isEmpty()) {
-			for (String roleName : registrationDTO.getRoleNames()) {
-				Role role = roleRepository.findByName(roleName)
-						.orElseThrow(() -> new ResourceNotFoundException("Role not found: " + roleName));
-				roles.add(role);
-			}
-		} else {
-			// If no roles specified, add default ROLE_USER
-			Role userRole = roleRepository.findByName("ROLE_USER")
-					.orElseThrow(() -> new ResourceNotFoundException("Default role ROLE_USER not found"));
-			roles.add(userRole);
-		}
-
-		user.setRoles(roles);
-
-		// Save user
-		User savedUser = userRepository.save(user);
-		log.info("User registered successfully with ID: {}", savedUser.getId());
-
-		// Send verification email
+		// Send admin notification email
 		try {
-			emailService.sendVerificationEmail(savedUser);
-			log.info("Verification email sent to: {}", savedUser.getEmail());
+			String adminEmail = "Boysoy331@gmail.com";
+			String subject = "ALERT: New Author Application Requires Your Attention";
+
+			String text = String.format("""
+					<html>
+					<body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+						<h2 style="color: #333; text-align: center;">New Author Application</h2>
+
+						<p>Dear Admin,</p>
+
+						<p>A user has applied to become an author. Please review the details below:</p>
+
+						<div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+							<p style="margin: 5px 0;"><strong>Username:</strong> %s</p>
+							<p style="margin: 5px 0;"><strong>Email:</strong> %s</p>
+							<p style="margin: 5px 0;"><strong>Gender:</strong> %s</p>
+							<p style="margin: 5px 0;"><strong>Phone:</strong> %s</p>
+							<p style="margin: 5px 0;"><strong>Education:</strong> %s</p>
+							<p style="margin: 5px 0;"><strong>Address:</strong> %s</p>
+							<p style="margin: 5px 0;"><strong>Current Role:</strong> %s</p>
+							<p style="margin: 5px 0;"><strong>Bio:</strong> %s</p>
+							<p style="margin: 5px 0;"><strong>Expertise:</strong> %s</p>
+						</div>
+
+						<div style="text-align: center; margin: 30px 0;">
+							<a href="%s" style="
+								background-color: #4CAF50;
+								color: white;
+								padding: 12px 25px;
+								text-decoration: none;
+								border-radius: 5px;
+								margin-right: 10px;
+								font-weight: bold;
+								display: inline-block;
+							">APPROVE</a>
+
+							<a href="%s" style="
+								background-color: #f44336;
+								color: white;
+								padding: 12px 25px;
+								text-decoration: none;
+								border-radius: 5px;
+								font-weight: bold;
+								display: inline-block;
+							">REJECT</a>
+						</div>
+
+						<p style="color: #666; font-size: 12px; text-align: center;">
+							Note: This is an automated message. Please do not reply.
+						</p>
+
+						<p style="text-align: center;">
+							Best regards,<br>
+							Your Application Team
+						</p>
+					</body>
+					</html>
+					""", user.getUsername(), user.getEmail(), registrationDTO.getGender(),
+					registrationDTO.getPhoneNumber(), registrationDTO.getEducation(), registrationDTO.getAddress(),
+					user.getRoles().stream().map(Role::getName).collect(Collectors.joining(", ")),
+					registrationDTO.getAuthorBio(), registrationDTO.getAuthorExpertise(),
+					"http://localhost:8080/api/user/author/approve?token=" + approveToken,
+					"http://localhost:8080/api/user/author/reject?token=" + rejectToken);
+			// Update email service to send HTML content
+			emailService.sendVerificationEmail(adminEmail, subject, text, true);
+			log.info("Admin notification email sent for author application: {}", user.getEmail());
 		} catch (Exception e) {
-			log.error("Failed to send verification email to: {}", savedUser.getEmail(), e);
+			log.error("Failed to send admin notification email: {}", e.getMessage());
+			throw new RuntimeException("Failed to send admin notification email", e);
 		}
 
-		return savedUser;
+		// Save only the application status and tokens
+		return userRepository.save(user);
+	}
+
+	@Override
+	@Transactional
+	public String handleAuthorApproval(String token) {
+		if (!jwtUtils.validateJwtToken(token)) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid or expired token");
+		}
+
+		String email = jwtUtils.getUserNameFromJwtToken(token);
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "User not found"));
+
+		if (token.endsWith("_APPROVE")) {
+			// Admin approved - update user with temporary data
+			user.setGender(user.getTempGender());
+			user.setPhoneNumber(user.getTempPhoneNumber());
+			user.setEducation(user.getTempEducation());
+			user.setAddress(user.getTempAddress());
+			user.setBio(user.getTempAuthorBio());
+			user.setExpertise(user.getTempExpertise());
+
+			// Clear temporary fields
+			user.setTempGender(null);
+			user.setTempPhoneNumber(null);
+			user.setTempEducation(null);
+			user.setTempAddress(null);
+			user.setTempAuthorBio(null);
+			user.setTempExpertise(null);
+
+			// Update status
+			user.setAuthorApprovalStatus("APPROVED");
+			//user.setAuthor(true);
+			user.setAuthorApprovalRequested(true);
+			user.setAuthorApproved(true);
+
+			// Add AUTHOR role
+			Role authorRole = roleRepository.findByName("AUTHOR")
+					.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Role Author not found"));
+			user.getRoles().add(authorRole);
+
+			userRepository.save(user);
+			return "Author application approved successfully";
+		} else if (token.endsWith("_REJECT")) {
+			// Admin rejected - clear all temporary data
+			user.setTempGender(null);
+			user.setTempPhoneNumber(null);
+			user.setTempEducation(null);
+			user.setTempAddress(null);
+			user.setTempAuthorBio(null);
+			user.setTempExpertise(null);
+
+			// Update status
+			user.setAuthorApprovalRequested(false);
+			user.setAuthorApprovalStatus("REJECTED");
+//			user.setAuthor(false);
+			user.setIsAuthor(false);
+			user.setAuthorApproved(false);
+
+			userRepository.save(user);
+			return "Author application rejected successfully";
+		}
+
+		throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid approval token");
 	}
 
 	/*
-	 * @Override
-	 * 
-	 * @Transactional public User registerUserForm(UserRegistrationDTO
-	 * registrationDTO) { log.info("Registering new user with email: {}",
-	 * registrationDTO.getEmail());
-	 * 
-	 * // Validate user registration data
-	 * userValidationService.validateUserRegistration(registrationDTO);
-	 * 
-	 * // Check if user already exists if
-	 * (userRepository.existsByEmail(registrationDTO.getEmail())) {
-	 * log.warn("Registration failed - Email already exists: {}",
-	 * registrationDTO.getEmail()); throw new
-	 * UserAlreadyExistsException("Email already registered"); }
-	 * 
-	 * if (userRepository.existsByUsername(registrationDTO.getUsername())) {
-	 * log.warn("Registration failed - Username already exists: {}",
-	 * registrationDTO.getUsername()); throw new
-	 * UserAlreadyExistsException("Username already taken"); }
-	 * 
-	 * // Create new user User user = new User();
-	 * user.setUsername(registrationDTO.getUsername());
-	 * user.setEmail(registrationDTO.getEmail());
-	 * user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
-	 * user.setGender(registrationDTO.getGender());
-	 * user.setPhoneNumber(registrationDTO.getPhoneNumber());
-	 * user.setEducation(registrationDTO.getEducation());
-	 * user.setAddress(registrationDTO.getAddress()); user.setEnabled(false); //
-	 * User is disabled until email verification
-	 * 
-	 * // Handle author application if requested if
-	 * (registrationDTO.isWantToBeAuthor()) {
-	 * user.setBio(registrationDTO.getAuthorBio());
-	 * user.setExpertise(registrationDTO.getAuthorExpertise());;
-	 * user.setAuthorApprovalRequested(true);
-	 * user.setAuthorApprovalStatus("PENDING"); }
-	 * 
-	 * // Set default role Role userRole = roleRepository.findByName("ROLE_USER")
-	 * .orElseThrow(() -> new ResourceNotFoundException("Default role not found"));
-	 * user.setRoles(Collections.singleton(userRole));
-	 * 
-	 * // Save user User savedUser = userRepository.save(user);
-	 * log.info("User registered successfully with ID: {}", savedUser.getId());
-	 * 
-	 * // Send verification email try {
-	 * emailService.sendVerificationEmail(savedUser);
-	 * log.info("Verification email sent to: {}", savedUser.getEmail()); } catch
-	 * (Exception e) { log.error("Failed to send verification email to: {}",
-	 * savedUser.getEmail(), e); }
-	 * 
-	 * return savedUser; }
-	 * 
-	 * 
-	 * @Override public User registerUserForm(UserRegistrationDTO userDTO) { //
-	 * Validate input if (userDTO == null) { throw new
-	 * IllegalArgumentException("User registration data cannot be null"); }
-	 * 
-	 * // Check uniqueness if (userRepository.existsByEmail(userDTO.getEmail())) {
-	 * throw new UserAlreadyExistsException("Email already exists"); }
-	 * 
-	 * if (userRepository.existsByUsername(userDTO.getUsername())) { throw new
-	 * UserAlreadyExistsException("Username already exists"); }
-	 * 
-	 * // Create and save user User user = new User();
-	 * user.setUsername(userDTO.getUsername()); user.setEmail(userDTO.getEmail());
-	 * user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-	 * user.setGender(userDTO.getGender());
-	 * user.setPhoneNumber(userDTO.getPhoneNumber());
-	 * user.setEducation(userDTO.getEducation());
-	 * user.setAddress(userDTO.getAddress()); user.setEnabled(false);
-	 * user.setAccountNonExpired(true); user.setAccountNonLocked(true);
-	 * user.setCredentialsNonExpired(true);
-	 * 
-	 * // Assign roles Set<Role> userRoles = userDTO.getRoleNames().stream()
-	 * .map(roleName -> { try { return roleRepository.findByName(roleName)
-	 * .orElseThrow(() -> new RoleNotFoundException("Role not found: " + roleName));
-	 * } catch (RoleNotFoundException e) { // TODO Auto-generated catch block
-	 * e.printStackTrace(); } return null; }) .collect(Collectors.toSet());
-	 * 
-	 * user.setRoles(userRoles); user = userRepository.save(user);
-	 * 
-	 * // Send verification email String token =
-	 * jwtUtils.generateJwtToken(user.getUsername()); // Use username instead of
-	 * email
-	 * 
-	 * // Create Verification Link String verificationLink =
-	 * "http://localhost:8080/api/user/verify-email?token=" + token;
-	 * 
-	 * emailService.sendVerificationEmail(user.getEmail(),
-	 * "Verify your email address", // subject
-	 * "Click the link to verify your email: " + verificationLink // body text );
-	 * 
-	 * return user; }
-	 */
+	@Override
+	public String verifyEmail(String token) {
+	    if (!jwtUtils.validateJwtToken(token)) {
+	        throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid or expired token");
+	    }
 
+	    String email = jwtUtils.getUserNameFromJwtToken(token);
+	    User user = userRepository.findByEmail(email)
+	        .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "User not found"));
+
+	    // Extract the action (approve or reject) from the token's claims
+	    Claims claims = jwtUtils.getClaimsFromToken(token);  // Get the claims from the token
+	    String action = claims.get("action", String.class);  // Retrieve the 'action' claim from the token
+
+	    // Check if this is an approval token
+	    if ("approve".equals(action)) {
+	        // Admin approved - now save the user data
+	        user.setEnabled(true);
+	        user.setAuthorApprovalStatus("APPROVED");
+	        user.setBio(user.getTempAuthorBio());
+	        user.setExpertise(user.getTempExpertise());
+	        user.setTempAuthorBio(null);
+	        user.setTempExpertise(null);
+	        //user.setAuthor(true);
+	        user.setIsAuthor(true);
+	        user.setAuthorApproved(true);
+
+	        // Add AUTHOR role
+	        Role authorRole = roleRepository.findByName("AUTHOR")
+	            .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Role Author not found"));
+	        user.getRoles().add(authorRole);
+
+	        userRepository.save(user);
+	        return "User approved successfully and data stored in database";
+	    } else if ("reject".equals(action)) {
+	        // Admin rejected - don't save anything
+	        return "User application rejected - no data stored in database";
+	    }
+
+	    return "Invalid token";  // If the action is neither 'approve' nor 'reject'
+	}*/
+	
+	
 	@Override
 	public String verifyEmail(String token) {
 		if (!jwtUtils.validateJwtToken(token)) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid or expired token");
 		}
 
-		String username = jwtUtils.getUserNameFromJwtToken(token);
-		User user = userRepository.findByUsername(username)
-				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Username not found"));
-		user.setEnabled(true);
+		String email = jwtUtils.getUserNameFromJwtToken(token);
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "User not found"));
 
-		// Assign roles during email verification (you can modify this logic as per your
-		// needs)
-		Set<Role> defaultRoles = user.getRoles();
-		if (defaultRoles.isEmpty()) {
-			Role authRole = roleRepository.findByName("AUTHOR")
+		// Check if this is an approval token
+		if (token.endsWith("_APPROVE")) {
+			// Admin approved - now save the user data
+			user.setEnabled(true);
+			user.setAuthorApprovalStatus("APPROVED");
+			user.setBio(user.getTempAuthorBio());
+			user.setExpertise(user.getTempExpertise());
+			user.setTempAuthorBio(null);
+			user.setTempExpertise(null);
+			//user.setAuthor(true);
+			user.setIsAuthor(true);
+			user.setAuthorApproved(true);
+
+			// Add AUTHOR role
+			Role authorRole = roleRepository.findByName("AUTHOR")
 					.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Role Author not found"));
-			defaultRoles.add(authRole);
+			user.getRoles().add(authorRole);
+
+			userRepository.save(user);
+			return "User approved successfully and data stored in database";
+		} else if (token.endsWith("_REJECT")) {
+			// Admin rejected - don't save anything
+			return "User application rejected - no data stored in database";
 		}
 
-		user.setRoles(defaultRoles);
-
-		userRepository.save(user);
-
-		// Send confirmation email after assigning roles
-		sendAuthorConfirmationEmail(user);
-
-		return "Email verified successfully, you are now an author";
-	}
-
-	@Override
-	public void sendVerificationEmail(User user, String token) {
-		String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
-		String confirmationUrl = baseUrl + "/api/auth/verify?token=" + token;
-
-		String subject = "Email Verification";
-		String body = "Click the link to verify your email: " + confirmationUrl;
-
-		emailService.sendVerificationEmail(user.getEmail(), subject, body);
+		return "Invalid token";
 	}
 
 	@Override
 	public void sendAuthorConfirmationEmail(User user) {
-		String subject = "Congratulations! You are now an Author!";
-		String body = "Hello " + user.getUsername() + ",\n\n"
-				+ "Your email has been successfully verified, and you are now an author on our platform. "
-				+ "You can now access author-related features.\n\n" + "Best regards,\nThe Team";
+		String subject = "ALERT: Author Application Approved";
+		String body = String.format("ALERT: Author Application Approved\n\n" + "Dear %s,\n\n"
+				+ "Congratulations! Your author application has been approved.\n"
+				+ "You are now an author on our platform and can access author-related features.\n\n"
+				+ "Your author details:\n" + "-------------------\n" + "Bio: %s\n" + "Expertise: %s\n\n"
+				+ "Note: This is an automated message. Please do not reply.\n" + "Best regards,\n"
+				+ "Your Application Team", user.getUsername(), user.getBio(), user.getExpertise());
 
 		emailService.sendVerificationEmail(user.getEmail(), subject, body);
 	}
 
-	/*
-	 * @Override public User registerUserForm(UserRegistrationDTO userDTO) { //
-	 * Check if email already exists if
-	 * (userRepository.existsByEmail(userDTO.getEmail())) { throw new
-	 * RuntimeException("Email already exists"); }
-	 * 
-	 * // Check if the password is valid if (userDTO.getPassword() == null ||
-	 * userDTO.getPassword().isEmpty()) { throw new
-	 * IllegalArgumentException("Password cannot be null or empty"); }
-	 * 
-	 * // Map DTO to Entity User user = new User();
-	 * user.setUsername(userDTO.getUsername()); user.setEmail(userDTO.getEmail());
-	 * user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // ✅ Encrypt
-	 * password user.setGender(userDTO.getGender());
-	 * user.setPhoneNumber(userDTO.getPhoneNumber());
-	 * user.setEducation(userDTO.getEducation());
-	 * user.setAddress(userDTO.getAddress()); user.setEnabled(false); // ✅ User is
-	 * disabled until email verification
-	 * 
-	 * // ✅ Assign Role Set<Role> userRoles = userDTO.getRoleNames().stream()
-	 * .map(roleName -> roleRepository.findByName(roleName) .orElseThrow(() -> new
-	 * RuntimeException("Role not found: " + roleName)))
-	 * .collect(Collectors.toSet());
-	 * 
-	 * // ✅ Save User user = userRepository.save(user);
-	 * 
-	 * // ✅ Generate Email Verification Token String token =
-	 * jwtUtils.generateJwtToken(user.getEmail()); // Use email instead of
-	 * toString()
-	 * 
-	 * // ✅ Create Verification Link String verificationLink =
-	 * "http://localhost:8080/api/auth/verify?token=" + token;
-	 * 
-	 * // ✅ Send Verification Email sendVerificationEmail(user, verificationLink);
-	 * 
-	 * return user; }
-	 * 
-	 * 
-	 * /*
-	 * 
-	 * @Override public User rigisterUserForm(UserRegistrationDTO userDTO) { //
-	 * Check if email already exists
-	 * if(userRepository.existsByEmail(userDTO.getEmail())) { throw new
-	 * RuntimeException("Email already exists"); }
-	 * 
-	 * // Check if the password is not null or empty if (userDTO.getPassword() ==
-	 * null || userDTO.getPassword().isEmpty()) { throw new
-	 * IllegalArgumentException("Password cannot be null or empty"); }
-	 * 
-	 * // Map UserRegistrationDTO to User entity User user = mapper.toUser(userDTO);
-	 * 
-	 * // Encode the password before saving to the database
-	 * user.setUsername(userDTO.getUsername()); user.setEmail(userDTO.getEmail());
-	 * user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-	 * user.setGender(userDTO.getGender());
-	 * user.setPhoneNumber(userDTO.getPhoneNumber());
-	 * user.setEducation(userDTO.getEducation());
-	 * user.setAddress(userDTO.getAddress()); user.setEnabled(false); // Make sure
-	 * to set the default enabled status as false
-	 * 
-	 * // Generate JWT token for email verification String token =
-	 * jwtUtils.generateJwtToken(user.toString());
-	 * 
-	 * // Send the verification email sendVerificationEmail(user, token);
-	 * 
-	 * return userRepository.save(user); }
-	 * 
-	 * @Override public String verifyEmail(String token) { if
-	 * (!jwtUtils.validateJwtToken(token)) { // Check for invalid token first throw
-	 * new ApiException(HttpStatus.BAD_REQUEST, "Invalid or expired token"); }
-	 * 
-	 * String username = jwtUtils.getUserNameFromJwtToken(token); User user =
-	 * userRepository.findByUsername(username) .orElseThrow(() -> new
-	 * ApiException(HttpStatus.BAD_REQUEST, "Username not found"));
-	 * user.setEnabled(true);
-	 * 
-	 * // Assign default roles user Role authRole =
-	 * roleRepository.findByName("AUTHOR") .orElseThrow(() -> new
-	 * ApiException(HttpStatus.BAD_REQUEST, "Role Author not found"));
-	 * 
-	 * user.getRoles().add(authRole);
-	 * 
-	 * userRepository.save(user);
-	 * 
-	 * // Sent confirmation email to user sendAuthorConfirmationEmail(user);
-	 * 
-	 * String message = "Email verified successfully, you are now an author";
-	 * 
-	 * return message; }
-	 * 
-	 * @Override public void sendVerificationEmail(User user, String token) { String
-	 * confirmationUrl = "http://localhost:8080/verify-email?token=" + token;
-	 * 
-	 * String subject = "Email Verification"; String body =
-	 * "Click the link to verify your email: ";
-	 * 
-	 * emailService.sendVerificationEmail(user.getEmail(), subject, body +
-	 * confirmationUrl); }
-	 * 
-	 * @Override public void sendAuthorConfirmationEmail(User user) { String subject
-	 * = "Congratulations! You are now an Author!"; String body = "Hello " +
-	 * user.getUsername() + ",\n\n" +
-	 * "Your email has been successfully verified, and you are now an author on our platform. "
-	 * + "You can now access author-related features.\n\n" +
-	 * "Best regards,\nThe Team";
-	 * 
-	 * emailService.sendVerificationEmail(user.getEmail(), subject, body); }
-	 */
+	@Override
+	public void sendVerificationEmail(User user, String token) {
+		//String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
+		String baseUrl = "http://192.168.100.119:8080";
+		String confirmationUrl = baseUrl + "/api/auth/verify?token=" + token;
 
+		String subject = "ALERT: Email Verification Required";
+		String body = String.format("ALERT: Email Verification Required\n\n" + "Dear %s,\n\n"
+				+ "Please verify your email address by clicking the link below:\n\n" + "%s\n\n"
+				+ "This link will expire in 24 hours.\n\n"
+				+ "Note: This is an automated message. Please do not reply.\n" + "Best regards,\n"
+				+ "Your Application Team", user.getUsername(), confirmationUrl);
+
+		emailService.sendVerificationEmail(user.getEmail(), subject, body);
+	}
+
+	@Override
+	public String signupUser(SignupUser signupUser) {
+		if (userRepository.existsByUsername(signupUser.getUsername())) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Username is already taken!");
+		}
+
+		if (userRepository.existsByEmail(signupUser.getEmail())) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Email is already taken!");
+		}
+
+		// Create new user's account
+		User user = new User(signupUser.getUsername(), signupUser.getEmail(),
+		        passwordEncoder.encode(signupUser.getPassword()));
+
+//		user.setRoles(Role.USER);
+		// Fetch existing role "USER" from DB
+	    Role userRole = roleRepository.findByName("USER")
+	        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "USER role not found"));
+
+	    // Assign role to user
+	    user.setRoles(Collections.singleton(userRole));
+		userRepository.save(user);
+		return jwtUtils.generateJwtToken(signupUser.getUsername());
+	}
 }
