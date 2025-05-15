@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.java.school.online_video_training.projection.UserReportProjection;
+import com.java.school.online_video_training.projection.VideoReportProjection;
 import com.java.school.online_video_training.service.ReportService;
 
 import lombok.RequiredArgsConstructor;
@@ -43,23 +44,18 @@ public class ReportController {
         return ResponseEntity.ok(reportService.getYearlyReport());
     }
 
-    @GetMapping("/detailed/{startDate}/{endDate}")
-    public ResponseEntity<List<UserReportProjection>> dropDownReport(
-            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @PathVariable("startDate") LocalDateTime start, 
-            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @PathVariable("endDate") LocalDateTime end) {
-        if (start.isAfter(end)) {
-            return ResponseEntity.badRequest().body(Collections.emptyList());
-        }
-        return ResponseEntity.ok(reportService.getDropDownReport(start, end));
+    @GetMapping("/dropdown")
+    public ResponseEntity<List<VideoReportProjection>> getVideoDetailedVideoReport() {
+    	return ResponseEntity.ok(reportService.getDetailedVideoReport());
     }
 
     @GetMapping("/specific/{startDate}/{endDate}")
-    public ResponseEntity<List<UserReportProjection>> specificReport(
+    public ResponseEntity<List<UserReportProjection>> getSpecificReport(
             @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @PathVariable("startDate") LocalDateTime start, 
             @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @PathVariable("endDate") LocalDateTime end) {
         if (start.isAfter(end)) {
             return ResponseEntity.badRequest().body(Collections.emptyList());
         }
-        return ResponseEntity.ok(reportService.getSpecificReport(start, end));
+        return ResponseEntity.ok(reportService.getUserReportBetweenDate(start, end));
     }
 }

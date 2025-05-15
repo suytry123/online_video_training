@@ -49,7 +49,7 @@ public class SecurityConfig {
 			.and()
 			.authorizeHttpRequests()
 			.antMatchers("/","index.html","css/**","js/**", "/api/auth/**", 
-					"/register", "/login", "/registerForm", "verify-email").permitAll()
+					"/register", "/login", "/registerForm", "/verify-email","/approve", "/reject").permitAll()
 			.antMatchers("/").permitAll()
 			.antMatchers("/swagger-ui.html", "/swagger-resources/**", "/v2/api-docs", "/webjars/**", "/swagger-ui/**").permitAll()
 			//.antMatchers(HttpMethod.PUT, "/categories/**").hasAuthority(PermissionEnum.CATEGORY_WRITE.getDescription())

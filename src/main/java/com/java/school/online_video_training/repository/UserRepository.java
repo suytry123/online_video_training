@@ -16,6 +16,8 @@ public interface UserRepository extends JpaRepository<User, Long>{
 	Optional<User> findByEmail(String email);
 	boolean existsByUsername(String username);
 	boolean existsByEmail(String email);
+	Optional<User> findByApproveToken(String token);
+	Optional<User> findByRejectToken(String token);
 	@Query("SELECT u.username AS username, u.email AS email, u.joinDate AS joinDate " +
 	           "FROM User u WHERE DATE(u.joinDate) = CURRENT_DATE")
 	List<UserReportProjection> getTodayUsers();

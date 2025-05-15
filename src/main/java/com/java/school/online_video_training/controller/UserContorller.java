@@ -9,6 +9,7 @@ import javax.validation.Valid;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -75,7 +76,64 @@ public class UserContorller {
 		String message = userService.verifyEmail(token);
 		return ResponseEntity.ok(message);
 	}
+	
+/*
+	@GetMapping("/author/approve")
+	public ResponseEntity<String> approveAuthor(@RequestParam String token) {
+		try {
+			String result = userService.handleAuthorApproval(token);
+			String htmlResponse = String.format("""
+			    <html>
+			      <head><title>Author Approval</title></head>
+			      <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
+			        <h2 style='color:green;'>✅ %s</h2>
+			        <p>You may now close this window.</p>
+			      </body>
+			    </html>
+			    """, result);
+			return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(htmlResponse);
+		} catch (Exception e) {
+			String errorHtml = String.format("""
+			    <html>
+			      <head><title>Approval Error</title></head>
+			      <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
+			        <h2 style='color:red;'>❌ Error: %s</h2>
+			        <p>Please try again later.</p>
+			      </body>
+			    </html>
+			    """, e.getMessage());
+			return ResponseEntity.badRequest().contentType(MediaType.TEXT_HTML).body(errorHtml);
+		}
+	}
 
+	@GetMapping("/author/reject")
+	public ResponseEntity<String> rejectAuthor(@RequestParam String token) {
+		try {
+			String result = userService.handleAuthorRejection(token); // Use correct method if different
+			String htmlResponse = String.format("""
+			    <html>
+			      <head><title>Author Rejection</title></head>
+			      <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
+			        <h2 style='color:orange;'>⚠️ %s</h2>
+			        <p>You may now close this window.</p>
+			      </body>
+			    </html>
+			    """, result);
+			return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(htmlResponse);
+		} catch (Exception e) {
+			String errorHtml = String.format("""
+			    <html>
+			      <head><title>Rejection Error</title></head>
+			      <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
+			        <h2 style='color:red;'>❌ Error: %s</h2>
+			        <p>Please try again later.</p>
+			      </body>
+			    </html>
+			    """, e.getMessage());
+			return ResponseEntity.badRequest().contentType(MediaType.TEXT_HTML).body(errorHtml);
+		}
+	}*/
+	
 	@GetMapping("/author/approve")
 	public ResponseEntity<String> approveAuthor(@RequestParam String token) {
 		try {

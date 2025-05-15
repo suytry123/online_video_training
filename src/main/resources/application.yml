@@ -31,13 +31,14 @@ spring:
                     ssl:
                         trust: smtp.gmail.com
                 debug: true
+    server:
+      address: 0.0.0.0   
+      port: 8080
     liquibase:
       change-log: classpath:db/changelog/db.changelog-master.yaml 
-      enabled: true
-    server:
-       address: 0.0.0.0
+      enabled: true  
 app:
 #  base-url: http://localhost:8080/api
-  base-url: http://192.168.100.119:8080/api
+  base-url:   https://2569-175-100-46-12.ngrok-free.app
   jwtSecret: ======================Suy===========================
   jwtExpirationMs: 86400000

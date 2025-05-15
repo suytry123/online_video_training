@@ -71,6 +71,7 @@ public class UserServiceImpl implements UserService {
 		return role.getPermissions().stream().map(permiision -> new SimpleGrantedAuthority(permiision.getName()));
 	}
 
+	/*
 	@Override
 	@Transactional
 	public User applyForAuthor(UserRegistrationDTO registrationDTO) {
@@ -174,8 +175,136 @@ public class UserServiceImpl implements UserService {
 					registrationDTO.getPhoneNumber(), registrationDTO.getEducation(), registrationDTO.getAddress(),
 					user.getRoles().stream().map(Role::getName).collect(Collectors.joining(", ")),
 					registrationDTO.getAuthorBio(), registrationDTO.getAuthorExpertise(),
-					"http://localhost:8080/api/user/author/approve?token=" + approveToken,
-					"http://localhost:8080/api/user/author/reject?token=" + rejectToken);
+//					"http://localhost:8080/api/user/author/approve?token=" + approveToken,
+//					"http://localhost:8080/api/user/author/reject?token=" + rejectToken);
+//					"http://192.168.100.119/api/user/author/approve?token=" + approveToken,
+//					"http://192.168.100.119/api/user/author/reject?token=" + rejectToken);
+//					"http://192.168.100.119:8080/author/approve?token=" + approveToken,
+//			        "http://192.168.100.119:8080/author/reject?token=" + rejectToken);
+					"https://84de-154-214-2-4.ngrok-free.app /approve?token=" + approveToken,
+			        "https://84de-154-214-2-4.ngrok-free.app /author/reject?token=" + rejectToken);
+			// Update email service to send HTML content
+			emailService.sendVerificationEmail(adminEmail, subject, text, true);
+			log.info("Admin notification email sent for author application: {}", user.getEmail());
+		} catch (Exception e) {
+			log.error("Failed to send admin notification email: {}", e.getMessage());
+			throw new RuntimeException("Failed to send admin notification email", e);
+		}
+
+		// Save only the application status and tokens
+		return userRepository.save(user);
+	}*/
+	
+	@Override
+	@Transactional
+	public User applyForAuthor(UserRegistrationDTO registrationDTO) {
+		log.info("Processing author application for user: {}", registrationDTO.getUsername());
+
+		// Find existing user
+		User user = userRepository.findByUsername(registrationDTO.getUsername())
+				.orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+		// Check if user is already an author
+//		if (user.isAuthor()) {
+//			throw new ApiException(HttpStatus.BAD_REQUEST, "User is already an author");
+//		}
+		if (user.getIsAuthor()) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "User is already an author");
+		}
+
+		// Store temporary data for admin approval
+		user.setTempGender(registrationDTO.getGender());
+		user.setTempPhoneNumber(registrationDTO.getPhoneNumber());
+		user.setTempEducation(registrationDTO.getEducation());
+		user.setTempAddress(registrationDTO.getAddress());
+		user.setTempAuthorBio(registrationDTO.getAuthorBio());
+		user.setTempExpertise(registrationDTO.getAuthorExpertise());
+
+		// Set application status
+		user.setAuthorApprovalRequested(true);
+		user.setAuthorApprovalStatus("PENDING");
+		//user.setAuthor(false);
+		user.setIsAuthor(false);
+		user.setAuthorApproved(false);
+
+		// Generate tokens for admin approval
+		String approveToken = jwtUtils.generateJwtToken(user.getEmail() + "_APPROVE");
+		String rejectToken = jwtUtils.generateJwtToken(user.getEmail() + "_REJECT");
+
+		// Store tokens
+		user.setApproveToken(approveToken);
+		user.setRejectToken(rejectToken);
+
+		// Send admin notification email
+		try {
+			String adminEmail = "Boysoy331@gmail.com";
+			String subject = "ALERT: New Author Application Requires Your Attention";
+
+			String baseUrl = "https://2569-175-100-46-12.ngrok-free.app"; // No space
+
+			String approveLink = baseUrl + "/api/user/author/approve?token=" + approveToken;
+			String rejectLink = baseUrl + "/api/user/author/reject?token=" + rejectToken;
+
+			String text = String.format("""
+			    <html>
+			    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+			      <h2 style="color: #333; text-align: center;">New Author Application</h2>
+
+			      <p>Dear Admin,</p>
+
+			      <p>A user has applied to become an author. Please review the details below:</p>
+
+			      <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+			        <p style="margin: 5px 0;"><strong>Username:</strong> %s</p>
+			        <p style="margin: 5px 0;"><strong>Email:</strong> %s</p>
+			        <p style="margin: 5px 0;"><strong>Gender:</strong> %s</p>
+			        <p style="margin: 5px 0;"><strong>Phone:</strong> %s</p>
+			        <p style="margin: 5px 0;"><strong>Education:</strong> %s</p>
+			        <p style="margin: 5px 0;"><strong>Address:</strong> %s</p>
+			        <p style="margin: 5px 0;"><strong>Current Role:</strong> %s</p>
+			        <p style="margin: 5px 0;"><strong>Bio:</strong> %s</p>
+			        <p style="margin: 5px 0;"><strong>Expertise:</strong> %s</p>
+			      </div>
+
+			      <div style="text-align: center; margin: 30px 0;">
+			        <a href="%s" style="
+			          background-color: #4CAF50;
+			          color: white;
+			          padding: 12px 25px;
+			          text-decoration: none;
+			          border-radius: 5px;
+			          margin-right: 10px;
+			          font-weight: bold;
+			          display: inline-block;
+			        ">APPROVE</a>
+
+			        <a href="%s" style="
+			          background-color: #f44336;
+			          color: white;
+			          padding: 12px 25px;
+			          text-decoration: none;
+			          border-radius: 5px;
+			          font-weight: bold;
+			          display: inline-block;
+			        ">REJECT</a>
+			      </div>
+
+			      <p style="color: #666; font-size: 12px; text-align: center;">
+			        Note: This is an automated message. Please do not reply.
+			      </p>
+
+			      <p style="text-align: center;">
+			        Best regards,<br>
+			        Your Application Team
+			      </p>
+			    </body>
+			    </html>
+			    """,
+			    user.getUsername(), user.getEmail(), registrationDTO.getGender(),
+			    registrationDTO.getPhoneNumber(), registrationDTO.getEducation(), registrationDTO.getAddress(),
+			    user.getRoles().stream().map(Role::getName).collect(Collectors.joining(", ")),
+			    registrationDTO.getAuthorBio(), registrationDTO.getAuthorExpertise(),
+			    approveLink, rejectLink);
 			// Update email service to send HTML content
 			emailService.sendVerificationEmail(adminEmail, subject, text, true);
 			log.info("Admin notification email sent for author application: {}", user.getEmail());
@@ -188,6 +317,104 @@ public class UserServiceImpl implements UserService {
 		return userRepository.save(user);
 	}
 
+	@Override
+	@Transactional
+	public String handleAuthorApproval(String token) {
+	    // 1. Find user by matching approveToken or rejectToken
+	    User user = userRepository.findByApproveToken(token)
+	        .or(() -> userRepository.findByRejectToken(token))
+	        .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Invalid or expired token"));
+
+	    boolean approved = token.equals(user.getApproveToken());
+
+	    if (approved) {
+	        // Admin APPROVED - move temp data to permanent fields
+	        user.setGender(user.getTempGender());
+	        user.setPhoneNumber(user.getTempPhoneNumber());
+	        user.setEducation(user.getTempEducation());
+	        user.setAddress(user.getTempAddress());
+	        user.setBio(user.getTempAuthorBio());
+	        user.setExpertise(user.getTempExpertise());
+
+	        // Clear temp fields
+	        user.setTempGender(null);
+	        user.setTempPhoneNumber(null);
+	        user.setTempEducation(null);
+	        user.setTempAddress(null);
+	        user.setTempAuthorBio(null);
+	        user.setTempExpertise(null);
+
+	        // Update approval status
+	        user.setAuthorApprovalStatus("APPROVED");
+	        user.setAuthorApprovalRequested(true);
+	        user.setAuthorApproved(true);
+	        user.setIsAuthor(true);
+
+	        // Assign AUTHOR role
+	        Role authorRole = roleRepository.findByName("AUTHOR")
+	            .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Author role not found"));
+	        user.getRoles().add(authorRole);
+	    } else {
+	        // Admin REJECTED - clear temp data and update status
+	        user.setTempGender(null);
+	        user.setTempPhoneNumber(null);
+	        user.setTempEducation(null);
+	        user.setTempAddress(null);
+	        user.setTempAuthorBio(null);
+	        user.setTempExpertise(null);
+
+	        user.setAuthorApprovalStatus("REJECTED");
+	        user.setAuthorApprovalRequested(false);
+	        user.setAuthorApproved(false);
+	        user.setIsAuthor(false);
+	    }
+
+	    // 2. Clear tokens after action
+	    user.setApproveToken(null);
+	    user.setRejectToken(null);
+
+	    // 3. Save user
+	    userRepository.save(user);
+
+	    // 4. Send email to notify user
+	    emailService.sendAuthorApprovalStatusEmail(user, approved);
+
+	    return approved ? "Author application approved successfully"
+	                    : "Author application rejected successfully";
+	}
+	
+	@Override
+	@Transactional
+	public String handleAuthorRejection(String token) {
+		if (!jwtUtils.validateJwtToken(token)) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid or expired token");
+		}
+
+		String email = jwtUtils.getUserNameFromJwtToken(token);
+		User user = userRepository.findByEmail(email)
+				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "User not found"));
+
+		// Clear temporary author-related fields
+		user.setTempGender(null);
+		user.setTempPhoneNumber(null);
+		user.setTempEducation(null);
+		user.setTempAddress(null);
+		user.setTempAuthorBio(null);
+		user.setTempExpertise(null);
+
+		// Set author rejection flags
+		user.setAuthorApprovalRequested(false);
+		user.setAuthorApprovalStatus("REJECTED");
+		user.setIsAuthor(false);
+		user.setAuthorApproved(false);
+
+		userRepository.save(user);
+
+		return "Author application rejected successfully";
+	}
+
+	
+	/*
 	@Override
 	@Transactional
 	public String handleAuthorApproval(String token) {
@@ -250,51 +477,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid approval token");
-	}
-
-	/*
-	@Override
-	public String verifyEmail(String token) {
-	    if (!jwtUtils.validateJwtToken(token)) {
-	        throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid or expired token");
-	    }
-
-	    String email = jwtUtils.getUserNameFromJwtToken(token);
-	    User user = userRepository.findByEmail(email)
-	        .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "User not found"));
-
-	    // Extract the action (approve or reject) from the token's claims
-	    Claims claims = jwtUtils.getClaimsFromToken(token);  // Get the claims from the token
-	    String action = claims.get("action", String.class);  // Retrieve the 'action' claim from the token
-
-	    // Check if this is an approval token
-	    if ("approve".equals(action)) {
-	        // Admin approved - now save the user data
-	        user.setEnabled(true);
-	        user.setAuthorApprovalStatus("APPROVED");
-	        user.setBio(user.getTempAuthorBio());
-	        user.setExpertise(user.getTempExpertise());
-	        user.setTempAuthorBio(null);
-	        user.setTempExpertise(null);
-	        //user.setAuthor(true);
-	        user.setIsAuthor(true);
-	        user.setAuthorApproved(true);
-
-	        // Add AUTHOR role
-	        Role authorRole = roleRepository.findByName("AUTHOR")
-	            .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Role Author not found"));
-	        user.getRoles().add(authorRole);
-
-	        userRepository.save(user);
-	        return "User approved successfully and data stored in database";
-	    } else if ("reject".equals(action)) {
-	        // Admin rejected - don't save anything
-	        return "User application rejected - no data stored in database";
-	    }
-
-	    return "Invalid token";  // If the action is neither 'approve' nor 'reject'
 	}*/
-	
 	
 	@Override
 	public String verifyEmail(String token) {
@@ -350,7 +533,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void sendVerificationEmail(User user, String token) {
 		//String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
-		String baseUrl = "http://192.168.100.119:8080";
+		String baseUrl = "https://2569-175-100-46-12.ngrok-free.app";
 		String confirmationUrl = baseUrl + "/api/auth/verify?token=" + token;
 
 		String subject = "ALERT: Email Verification Required";

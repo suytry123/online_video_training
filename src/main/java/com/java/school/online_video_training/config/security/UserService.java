@@ -13,8 +13,9 @@ public interface UserService {
 	void sendVerificationEmail(User user, String token);
 	void sendAuthorConfirmationEmail(User user);
 	String handleAuthorApproval(String token);
-//	User approveAuthor(Long userId);
-//	User rejectAuthor(Long userId);
+	String handleAuthorRejection(String token);
+	//String approveAuthor(String token);
+	//String rejectAuthor(String token);
 	//for user signup
 	String signupUser(SignupUser signupUser);
 }
