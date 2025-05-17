@@ -44,9 +44,11 @@ public class UserRegistrationDTO {
     @Size(max = 200, message = "Address cannot exceed 200 characters")
     private String address;
     
+    @JsonProperty("authorBio")
     @Size(max = 500, message = "Author bio must not exceed 500 characters")
     private String authorBio;
     
+    @JsonProperty("authorExpertise")
     @Size(max = 200, message = "Author expertise must not exceed 200 characters")
     private String authorExpertise;
     

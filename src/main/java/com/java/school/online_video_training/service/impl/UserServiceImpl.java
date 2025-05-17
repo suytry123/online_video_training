@@ -1,6 +1,7 @@
 package com.java.school.online_video_training.service.impl;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,7 +30,6 @@ import com.java.school.online_video_training.repository.UserRepository;
 import com.java.school.online_video_training.service.EmailService;
 import com.java.school.online_video_training.service.UserValidationService;
 
-import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -240,7 +240,7 @@ public class UserServiceImpl implements UserService {
 			String adminEmail = "Boysoy331@gmail.com";
 			String subject = "ALERT: New Author Application Requires Your Attention";
 
-			String baseUrl = "https://2569-175-100-46-12.ngrok-free.app"; // No space
+			String baseUrl = "https://b074-154-214-2-4.ngrok-free.app"; // No space
 
 			String approveLink = baseUrl + "/api/user/author/approve?token=" + approveToken;
 			String rejectLink = baseUrl + "/api/user/author/reject?token=" + rejectToken;
@@ -317,100 +317,82 @@ public class UserServiceImpl implements UserService {
 		return userRepository.save(user);
 	}
 
+	private void clearTempAuthorFields(User user) {
+	    user.setTempGender(null);
+	    user.setTempPhoneNumber(null);
+	    user.setTempEducation(null);
+	    user.setTempAddress(null);
+	    user.setTempAuthorBio(null);
+	    user.setTempExpertise(null);
+	}
+
 	@Override
 	@Transactional
 	public String handleAuthorApproval(String token) {
-	    // 1. Find user by matching approveToken or rejectToken
 	    User user = userRepository.findByApproveToken(token)
 	        .or(() -> userRepository.findByRejectToken(token))
 	        .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Invalid or expired token"));
-
 	    boolean approved = token.equals(user.getApproveToken());
 
 	    if (approved) {
-	        // Admin APPROVED - move temp data to permanent fields
+	        // Move temp data to permanent fields
 	        user.setGender(user.getTempGender());
 	        user.setPhoneNumber(user.getTempPhoneNumber());
 	        user.setEducation(user.getTempEducation());
 	        user.setAddress(user.getTempAddress());
 	        user.setBio(user.getTempAuthorBio());
 	        user.setExpertise(user.getTempExpertise());
-
-	        // Clear temp fields
-	        user.setTempGender(null);
-	        user.setTempPhoneNumber(null);
-	        user.setTempEducation(null);
-	        user.setTempAddress(null);
-	        user.setTempAuthorBio(null);
-	        user.setTempExpertise(null);
-
-	        // Update approval status
+	        clearTempAuthorFields(user);
 	        user.setAuthorApprovalStatus("APPROVED");
 	        user.setAuthorApprovalRequested(true);
 	        user.setAuthorApproved(true);
 	        user.setIsAuthor(true);
-
-	        // Assign AUTHOR role
+	        // Ensure roles is mutable and add AUTHOR role
+	        Set<Role> roles = user.getRoles();
+	        if (roles == null || roles.getClass().getName().contains("Immutable")) {
+	            roles = new java.util.HashSet<>(roles != null ? roles : java.util.Collections.emptySet());
+	            user.setRoles(roles);
+	        }
 	        Role authorRole = roleRepository.findByName("AUTHOR")
 	            .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Author role not found"));
-	        user.getRoles().add(authorRole);
+	        roles.add(authorRole);
+	        user.setApproveToken(null);
+	        user.setRejectToken(null);
+	        userRepository.save(user);
+	        emailService.sendAuthorApprovalStatusEmail(user, true);
+	        return "Author application approved successfully";
 	    } else {
-	        // Admin REJECTED - clear temp data and update status
-	        user.setTempGender(null);
-	        user.setTempPhoneNumber(null);
-	        user.setTempEducation(null);
-	        user.setTempAddress(null);
-	        user.setTempAuthorBio(null);
-	        user.setTempExpertise(null);
-
+	        // Send rejection email before clearing fields
+	        emailService.sendAuthorApprovalStatusEmail(user, false);
+	        clearTempAuthorFields(user);
 	        user.setAuthorApprovalStatus("REJECTED");
 	        user.setAuthorApprovalRequested(false);
 	        user.setAuthorApproved(false);
 	        user.setIsAuthor(false);
+	        user.setApproveToken(null);
+	        user.setRejectToken(null);
+	        userRepository.save(user);
+	        return "Author application rejected successfully";
 	    }
-
-	    // 2. Clear tokens after action
-	    user.setApproveToken(null);
-	    user.setRejectToken(null);
-
-	    // 3. Save user
-	    userRepository.save(user);
-
-	    // 4. Send email to notify user
-	    emailService.sendAuthorApprovalStatusEmail(user, approved);
-
-	    return approved ? "Author application approved successfully"
-	                    : "Author application rejected successfully";
 	}
-	
+
 	@Override
 	@Transactional
 	public String handleAuthorRejection(String token) {
-		if (!jwtUtils.validateJwtToken(token)) {
-			throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid or expired token");
-		}
-
-		String email = jwtUtils.getUserNameFromJwtToken(token);
-		User user = userRepository.findByEmail(email)
-				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "User not found"));
-
-		// Clear temporary author-related fields
-		user.setTempGender(null);
-		user.setTempPhoneNumber(null);
-		user.setTempEducation(null);
-		user.setTempAddress(null);
-		user.setTempAuthorBio(null);
-		user.setTempExpertise(null);
-
-		// Set author rejection flags
-		user.setAuthorApprovalRequested(false);
-		user.setAuthorApprovalStatus("REJECTED");
-		user.setIsAuthor(false);
-		user.setAuthorApproved(false);
-
-		userRepository.save(user);
-
-		return "Author application rejected successfully";
+	    User user = userRepository.findByApproveToken(token)
+	        .or(() -> userRepository.findByRejectToken(token))
+	        .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Invalid or expired token"));
+	    // Send rejection email before clearing fields
+	    emailService.sendAuthorApprovalStatusEmail(user, false);
+	    clearTempAuthorFields(user);
+	    user.setAuthorApprovalRequested(false);
+	    user.setAuthorApprovalStatus("REJECTED");
+	    user.setIsAuthor(false);
+	    user.setAuthorApproved(false);
+	    user.setApproveToken(null);
+	    user.setRejectToken(null);
+	    userRepository.save(user);
+	    return "Author application rejected successfully";
 	}
 
 	
@@ -533,7 +515,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void sendVerificationEmail(User user, String token) {
 		//String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
-		String baseUrl = "https://2569-175-100-46-12.ngrok-free.app";
+		String baseUrl = "https://b074-154-214-2-4.ngrok-free.app";
 		String confirmationUrl = baseUrl + "/api/auth/verify?token=" + token;
 
 		String subject = "ALERT: Email Verification Required";

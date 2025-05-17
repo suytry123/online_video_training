@@ -77,6 +77,73 @@ public class UserContorller {
 		return ResponseEntity.ok(message);
 	}
 	
+
+	@GetMapping("/test")
+	public ResponseEntity<String> test() {
+		String html = """
+			<html><body><h2>Test endpoint works!</h2></body></html>
+		""";
+		return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(html);
+	}
+	
+	@GetMapping("/author/approve")
+	public ResponseEntity<String> approveAuthor(@RequestParam String token) {
+	    try {
+	        String result = userService.handleAuthorApproval(token);
+	        String htmlResponse = String.format("""
+	            <html>
+	              <head><title>Author Approval</title></head>
+	              <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
+	                <h2 style='color:green;'>✅ %s</h2>
+	                <p>You may now close this window.</p>
+	              </body>
+	            </html>
+	            """, result);
+	        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(htmlResponse);
+	    } catch (Exception e) {
+	        log.error("Error in approveAuthor for token {}: ", token, e); // Add this line
+	        String errorMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+	        String errorHtml = String.format("""
+	            <html>
+	              <head><title>Approval Error</title></head>
+	              <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
+	                <h2 style='color:red;'>❌ Error: %s</h2>
+	                <p>Please try again later.</p>
+	              </body>
+	            </html>
+	            """, errorMsg);
+	        return ResponseEntity.badRequest().contentType(MediaType.TEXT_HTML).body(errorHtml);
+	    }
+	}
+	
+	@GetMapping("/author/reject")
+	public ResponseEntity<?> rejectAuthor(@RequestParam String token) {
+		try {
+			String result = userService.handleAuthorRejection(token);
+			String htmlResponse = String.format("""
+				<html>
+				  <head><title>Author Rejection</title></head>
+				  <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
+					<h2 style='color:orange;'>⚠️ %s</h2>
+					<p>You may now close this window.</p>
+				  </body>
+				</html>
+				""", result);
+			return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(htmlResponse);
+		} catch (Exception e) {
+			String errorHtml = String.format("""
+				<html>
+				  <head><title>Rejection Error</title></head>
+				  <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
+					<h2 style='color:red;'>❌ Error: %s</h2>
+					<p>Please try again later.</p>
+				  </body>
+				</html>
+				""", e.getMessage());
+			return ResponseEntity.badRequest().contentType(MediaType.TEXT_HTML).body(errorHtml);
+		}
+	}
+	
 /*
 	@GetMapping("/author/approve")
 	public ResponseEntity<String> approveAuthor(@RequestParam String token) {
@@ -133,26 +200,34 @@ public class UserContorller {
 			return ResponseEntity.badRequest().contentType(MediaType.TEXT_HTML).body(errorHtml);
 		}
 	}*/
-	
+	/*
 	@GetMapping("/author/approve")
-	public ResponseEntity<String> approveAuthor(@RequestParam String token) {
-		try {
-			String result = userService.handleAuthorApproval(token);
-			return ResponseEntity.ok(result);
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
+	public ResponseEntity<String> approveAuthor(@RequestParam("token") String token) {
+	    String result = userService.handleAuthorApproval(token);
+	    if (result != null && result.contains("AUTHOR")) {
+	        return ResponseEntity.ok()
+	            .header("Content-Type", "text/html")
+	            .body("<h2>User has been promoted to AUTHOR.</h2>");
+	    } else {
+	        return ResponseEntity.badRequest()
+	            .header("Content-Type", "text/html")
+	            .body("<h2>Invalid or expired approval token.</h2>");
+	    }
 	}
 
 	@GetMapping("/author/reject")
-	public ResponseEntity<String> rejectAuthor(@RequestParam String token) {
-		try {
-			String result = userService.handleAuthorApproval(token);
-			return ResponseEntity.ok(result);
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().body(e.getMessage());
-		}
-	}
+	public ResponseEntity<String> rejectAuthor(@RequestParam("token") String token) {
+	    String result = userService.handleAuthorRejection(token);
+	    if (result != null && result.contains("rejected")) {
+	        return ResponseEntity.ok()
+	            .header("Content-Type", "text/html")
+	            .body("<h2>User's author request has been rejected.</h2>");
+	    } else {
+	        return ResponseEntity.badRequest()
+	            .header("Content-Type", "text/html")
+	            .body("<h2>Invalid or expired rejection token.</h2>");
+	    }
+	}*/
 	
 	@PostMapping("/signup_user")
 	public ResponseEntity<?> createUserAcc(@Valid @RequestBody SignupUser signupUser) {
