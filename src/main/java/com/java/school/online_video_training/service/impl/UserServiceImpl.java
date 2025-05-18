@@ -240,7 +240,7 @@ public class UserServiceImpl implements UserService {
 			String adminEmail = "Boysoy331@gmail.com";
 			String subject = "ALERT: New Author Application Requires Your Attention";
 
-			String baseUrl = "https://b074-154-214-2-4.ngrok-free.app"; // No space
+			String baseUrl = "https://e641-154-214-2-4.ngrok-free.app"; // No space
 
 			String approveLink = baseUrl + "/api/user/author/approve?token=" + approveToken;
 			String rejectLink = baseUrl + "/api/user/author/reject?token=" + rejectToken;
@@ -360,10 +360,12 @@ public class UserServiceImpl implements UserService {
 	        user.setRejectToken(null);
 	        userRepository.save(user);
 	        emailService.sendAuthorApprovalStatusEmail(user, true);
+	        emailService.sendAdminActionConfirmation(user, true);
 	        return "Author application approved successfully";
 	    } else {
 	        // Send rejection email before clearing fields
 	        emailService.sendAuthorApprovalStatusEmail(user, false);
+	        emailService.sendAdminActionConfirmation(user, false);
 	        clearTempAuthorFields(user);
 	        user.setAuthorApprovalStatus("REJECTED");
 	        user.setAuthorApprovalRequested(false);
@@ -384,6 +386,7 @@ public class UserServiceImpl implements UserService {
 	        .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Invalid or expired token"));
 	    // Send rejection email before clearing fields
 	    emailService.sendAuthorApprovalStatusEmail(user, false);
+	    emailService.sendAdminActionConfirmation(user, false);
 	    clearTempAuthorFields(user);
 	    user.setAuthorApprovalRequested(false);
 	    user.setAuthorApprovalStatus("REJECTED");
@@ -394,6 +397,7 @@ public class UserServiceImpl implements UserService {
 	    userRepository.save(user);
 	    return "Author application rejected successfully";
 	}
+
 
 	
 	/*
@@ -463,40 +467,22 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public String verifyEmail(String token) {
-		if (!jwtUtils.validateJwtToken(token)) {
-			throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid or expired token");
-		}
-
-		String email = jwtUtils.getUserNameFromJwtToken(token);
-		User user = userRepository.findByEmail(email)
-				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "User not found"));
-
-		// Check if this is an approval token
-		if (token.endsWith("_APPROVE")) {
-			// Admin approved - now save the user data
-			user.setEnabled(true);
-			user.setAuthorApprovalStatus("APPROVED");
-			user.setBio(user.getTempAuthorBio());
-			user.setExpertise(user.getTempExpertise());
-			user.setTempAuthorBio(null);
-			user.setTempExpertise(null);
-			//user.setAuthor(true);
-			user.setIsAuthor(true);
-			user.setAuthorApproved(true);
-
-			// Add AUTHOR role
-			Role authorRole = roleRepository.findByName("AUTHOR")
-					.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Role Author not found"));
-			user.getRoles().add(authorRole);
-
-			userRepository.save(user);
-			return "User approved successfully and data stored in database";
-		} else if (token.endsWith("_REJECT")) {
-			// Admin rejected - don't save anything
-			return "User application rejected - no data stored in database";
-		}
-
-		return "Invalid token";
+	    if (!jwtUtils.validateJwtToken(token)) {
+	        throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid or expired token");
+	    }
+	    String email = jwtUtils.getUserNameFromJwtToken(token);
+	    User user = userRepository.findByEmail(email)
+	            .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "User not found"));
+	    if (user.getEmailVerified() != null && user.getEmailVerified()) {
+	        return "Email already verified.";
+	    }
+	    if (!token.equals(user.getVerificationToken())) {
+	        throw new ApiException(HttpStatus.BAD_REQUEST, "Token does not match user's verification token");
+	    }
+	    user.setEmailVerified(true);
+	    user.setVerificationToken(null);
+	    userRepository.save(user);
+	    return "Email verified successfully! You can now log in and use your account.";
 	}
 
 	@Override
@@ -515,7 +501,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void sendVerificationEmail(User user, String token) {
 		//String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
-		String baseUrl = "https://b074-154-214-2-4.ngrok-free.app";
+		String baseUrl = "https://e641-154-214-2-4.ngrok-free.app";
 		String confirmationUrl = baseUrl + "/api/auth/verify?token=" + token;
 
 		String subject = "ALERT: Email Verification Required";

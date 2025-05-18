@@ -39,6 +39,7 @@ spring:
       enabled: true  
 app:
 #  base-url: http://localhost:8080/api
-  base-url: https://b074-154-214-2-4.ngrok-free.app
+  base-url: https://e641-154-214-2-4.ngrok-free.app
   jwtSecret: ======================Suy===========================
   jwtExpirationMs: 86400000
+  admin-email: Boysoy331@gmail.com

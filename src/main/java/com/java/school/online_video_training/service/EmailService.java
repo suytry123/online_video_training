@@ -8,4 +8,5 @@ public interface EmailService {
 	void sendAuthorApprovalRequestEmail(User user);
     void sendAuthorApprovalStatusEmail(User user, boolean approved);
 	void sendVerificationEmail(User user);
+	void sendAdminActionConfirmation(User user, boolean approved);
 }
