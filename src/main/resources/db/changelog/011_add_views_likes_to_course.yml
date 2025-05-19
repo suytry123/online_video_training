@@ -1,0 +1,20 @@
+databaseChangeLog:
+- changeSet:
+    id: 011_add_views_likes_to_courses
+    author: soksoytry200@gmail.com
+    changes:
+    - addColumn:
+        tableName: courses
+        columns:
+        - column:
+            name: views
+            type: INT
+            defaultValueNumeric: 0
+            constraints:
+                nullable: false
+        - column:
+            name: likes
+            type: INT
+            defaultValueNumeric: 0
+            constraints:
+                nullable: false

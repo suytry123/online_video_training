@@ -1,3 +1,3 @@
-course_id,course_name,category_id
-1,Spring Boot,1
-2,DotNet Framework,2
+course_name,category_id
+Spring Boot,1
+DotNet Framework,2

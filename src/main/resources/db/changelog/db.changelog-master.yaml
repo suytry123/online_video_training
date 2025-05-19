@@ -19,3 +19,7 @@ databaseChangeLog:
       file: db/changelog/009_add_columns_to_videos_table.yml
   - include:
       file: db/changelog/010_rename_user_id_column.yml
+  - include:
+      file: db/changelog/011_add_views_likes_to_course.yml
+  - include:
+      file: db/changelog/012_alter_join_date_to_datetime.yml

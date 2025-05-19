@@ -1,18 +1,42 @@
 package com.java.school.online_video_training.mapper;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import com.java.school.online_video_training.dto.CourseDTO;
+import com.java.school.online_video_training.dto.CourseDetailDTO;
+import com.java.school.online_video_training.dto.CourseSummaryDTO;
 import com.java.school.online_video_training.entity.Course;
 import com.java.school.online_video_training.service.CategoryService;
 
-@Mapper( componentModel = "spring", uses = {CategoryService.class} )
+@Mapper(componentModel = "spring", uses = { CategoryService.class, VideoMapper.class })
 public interface CourseMapper {
-	
-	@Mapping(target = "category", source = "categoryId")
+
+//	@Mapping(target = "category", source = "categoryId")
+//	Course toCourse(CourseDTO courseDTO);
+//	
+//	@Mapping(target = "categoryId", source = "category_id.id")
+//	CourseDTO toCourseDTO(Course course);
+
+	@Mapping(target = "category_id", source = "categoryId")
 	Course toCourse(CourseDTO courseDTO);
-	
-	@Mapping(target = "categoryId", source = "category.id")
+
+	@Mapping(target = "categoryId", source = "category_id.id")
 	CourseDTO toCourseDTO(Course course);
+
+	@Mapping(target = "category_id", source = "categoryId")
+	Course toCourse(CourseSummaryDTO dto);
+
+	@Mapping(target = "categoryId", source = "category_id.id")
+	@Mapping(target = "authorName", source = "author.username")
+	CourseSummaryDTO toCourseSummaryDTO(Course course);
+
+	@Mapping(target = "categoryId", source = "category_id.id")
+	@Mapping(target = "authorName", source = "author.username")
+	@Mapping(target = "videos", source = "videos")
+	CourseDetailDTO toCourseDetailDTO(Course course);
+
+	List<CourseSummaryDTO> toCourseSummaryDTOs(List<Course> courses);
 }

@@ -4,9 +4,8 @@ import lombok.Data;
 
 @Data
 public class VideoDTO {
-	
-	private Long courseId;
-	private String title;
-	private String description;
-	
+    private Long id;     
+    private Long courseId;
+    private String title;
+    private String description;
 }

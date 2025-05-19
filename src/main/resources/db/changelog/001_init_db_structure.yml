@@ -127,7 +127,7 @@ databaseChangeLog:
                   type: VARCHAR(50)
               - column:
                   name: join_date
-                  type: DATE
+                  type: DATETIME
               - column:
                   name: account_non_expired
                   type: BOOLEAN

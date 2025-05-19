@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.java.school.online_video_training.dto.CourseDTO;
+import com.java.school.online_video_training.dto.CourseDetailDTO;
 import com.java.school.online_video_training.dto.PageDTO;
 import com.java.school.online_video_training.entity.Course;
 import com.java.school.online_video_training.mapper.CourseMapper;
@@ -29,43 +30,58 @@ import lombok.RequiredArgsConstructor;
 public class CourseController {
 	private final CourseService courseService;
 	private final CourseMapper courseMapper;
-	
+
 	@PreAuthorize("hasAuthority('course:write')")
 	@PostMapping
-	public ResponseEntity<?> create(@RequestBody CourseDTO courseDTO){
+	public ResponseEntity<?> create(@RequestBody CourseDTO courseDTO) {
 		Course course = courseMapper.toCourse(courseDTO);
 		course = courseService.create(course);
 		return ResponseEntity.ok(courseMapper.toCourseDTO(course));
 	}
-	
-	@PreAuthorize("hasAuthority('course:read')")
-	@GetMapping("{id}")
-	public ResponseEntity<?> getById(@PathVariable("id") Long Id){
-		Course course = courseService.getById(Id);
-		return ResponseEntity.ok(courseMapper.toCourseDTO(course));
-	}
-	
-	@PreAuthorize("hasAuthority('course:read')")
-	@GetMapping
-	public ResponseEntity<?> getCourses(@RequestParam Map<String, String> course){
-		Page<Course> courses = courseService.getCourses(course);
-		
-		PageDTO dto = new PageDTO(courses) ;
-		
-		return ResponseEntity.ok(dto);
-	}
-	
+
+//	@PreAuthorize("hasAuthority('course:read')")
+//	@GetMapping("{id}")
+//	public ResponseEntity<?> getById(@PathVariable("id") Long id){
+//		Course course = courseService.getById(id);
+//		return ResponseEntity.ok(courseMapper.toCourseDTO(course));
+//	}
+//
+//	@PreAuthorize("hasAuthority('course:read')")
+//	@GetMapping
+//	public ResponseEntity<?> getCourses(@RequestParam Map<String, String> course) {
+//		Page<Course> courses = courseService.getCourses(course);
+//
+//		PageDTO dto = new PageDTO(courses);
+//
+//		return ResponseEntity.ok(dto);
+//	}
+
 	@PreAuthorize("hasAuthority('course:write')")
 	@PutMapping("{id}")
-	public ResponseEntity<?> update(@PathVariable("id") Long courseId, @RequestBody CourseDTO courseUpdate){
+	public ResponseEntity<?> update(@PathVariable("id") Long courseId, @RequestBody CourseDTO courseUpdate) {
 		Course course = courseMapper.toCourse(courseUpdate);
 		Course update = courseService.update(courseId, course);
-		return ResponseEntity.ok(courseMapper.toCourseDTO(course));
+		return ResponseEntity.ok(courseMapper.toCourseDTO(update));
 	}
-	
+
 	@DeleteMapping("{id}")
-	public ResponseEntity<?> deleteById(@PathVariable("id") Long courseId){
+	public ResponseEntity<?> deleteById(@PathVariable("id") Long courseId) {
 		courseService.delete(courseId);
 		return ResponseEntity.ok().build();
+	}
+
+	@PreAuthorize("hasAuthority('course:read')")
+	@GetMapping
+	public ResponseEntity<?> getCourses(@RequestParam Map<String, String> course) {
+		Page<Course> courses = courseService.getCourses(course);
+		PageDTO dto = new PageDTO(courses.map(courseMapper::toCourseSummaryDTO));
+		return ResponseEntity.ok(dto);
+	}
+
+	@PreAuthorize("hasAuthority('course:read')")
+	@GetMapping("/{id}")
+	public ResponseEntity<?> getCourseDetail(@PathVariable Long id){
+		CourseDetailDTO courseDetail = courseService.getCourseDetail(id);
+		return ResponseEntity.ok(courseDetail);
 	}
 }

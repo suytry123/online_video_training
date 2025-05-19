@@ -1,14 +1,20 @@
 package com.java.school.online_video_training.service.impl;
 
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.java.school.online_video_training.dto.CourseDetailDTO;
+import com.java.school.online_video_training.dto.CourseSummaryDTO;
+import com.java.school.online_video_training.dto.VideoDTO;
 import com.java.school.online_video_training.entity.Course;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
 import com.java.school.online_video_training.repository.CourseRepository;
+import com.java.school.online_video_training.repository.VideoRepository;
 import com.java.school.online_video_training.service.CourseService;
 import com.java.school.online_video_training.service.util.PageUtil;
 import com.java.school.online_video_training.spec.CourseFilter;
@@ -18,17 +24,19 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
-public class CourseServiceImpl implements CourseService{
-	private final CourseRepository courseRepository; 
-	
-	//private final CourseMapper courseMapper;
+public class CourseServiceImpl implements CourseService {
+
+	private final CourseRepository courseRepository;
+	private final VideoRepository videoRepository;
+
+	// private final CourseMapper courseMapper;
 
 //	@Override
 //	public Course create(CourseDTO courseDTO) {
 //		Course course = courseMapper.toCourse(courseDTO);
 //		return courseRepository.save(course);
 //	}
-	
+
 	@Override
 	public Course create(Course course) {
 		return courseRepository.save(course);
@@ -36,40 +44,39 @@ public class CourseServiceImpl implements CourseService{
 
 	@Override
 	public Course getById(Long id) {
-		return courseRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Course", id));
+		return courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course", id));
 	}
 
 	@Override
 	public Page<Course> getCourses(Map<String, String> course) {
 		CourseFilter courseFilter = new CourseFilter();
-		
-		if(course.containsKey("name")) {
+
+		if (course.containsKey("name")) {
 			String name = course.get("name");
 			courseFilter.setName(name);
 		}
-		
-		if(course.containsKey("id")) {
+
+		if (course.containsKey("id")) {
 			String id = course.get("id");
 			courseFilter.setCategoryId(Long.parseLong(id));
 		}
-		
+
 		int pageLimit = PageUtil.DEFAULT_PAGE_LIMIT;
-		if(course.containsKey(PageUtil.PAGE_LIMIT)) {
+		if (course.containsKey(PageUtil.PAGE_LIMIT)) {
 			pageLimit = Integer.parseInt(course.get(PageUtil.PAGE_LIMIT));
 		}
-		
+
 		int pageNumber = PageUtil.DEFAULT_PAGE_NUMBER;
-		if(course.containsKey(PageUtil.PAGE_NUMBER)){
+		if (course.containsKey(PageUtil.PAGE_NUMBER)) {
 			pageNumber = Integer.parseInt(course.get(PageUtil.PAGE_NUMBER));
 		}
-		
+
 		CourseSpec courseSpec = new CourseSpec(courseFilter);
-		
-		 Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
-		
-		 Page<Course> page = courseRepository.findAll(courseSpec, pageable);
-		 return page;
+
+		Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
+
+		Page<Course> page = courseRepository.findAll(courseSpec, pageable);
+		return page;
 	}
 
 	@Override
@@ -82,6 +89,44 @@ public class CourseServiceImpl implements CourseService{
 	@Override
 	public void delete(Long id) {
 		courseRepository.deleteById(id);
+	}
+
+	@Override
+	public List<CourseSummaryDTO> getAllCourses() {
+	    return courseRepository.findAll().stream().map(course -> {
+	        CourseSummaryDTO dto = new CourseSummaryDTO();
+	        dto.setId(course.getId());
+	        dto.setName(course.getName());
+	        dto.setCategoryId(course.getCategory_id() != null ? course.getCategory_id().getId() : null);
+	        dto.setAuthorName(course.getAuthor() != null ? course.getAuthor().getUsername() : null);
+	        dto.setViews(course.getViews());
+	        dto.setLikes(course.getLikes());
+	        return dto;
+	    }).collect(Collectors.toList());
+	}
+
+	@Override
+	public CourseDetailDTO getCourseDetail(Long courseId) {
+	    Course course = courseRepository.findById(courseId)
+	        .orElseThrow(() -> new RuntimeException("Course not found"));
+	    CourseDetailDTO dto = new CourseDetailDTO();
+	    dto.setId(course.getId());
+	    dto.setName(course.getName());
+	    dto.setCategoryId(course.getCategory_id() != null ? course.getCategory_id().getId() : null);
+	    dto.setAuthorName(course.getAuthor() != null ? course.getAuthor().getUsername() : null);
+	    dto.setViews(course.getViews());
+	    dto.setLikes(course.getLikes());
+	    List<VideoDTO> videos = course.getVideos().stream().map(video -> {
+	        VideoDTO vdto = new VideoDTO();
+	        vdto.setId(video.getId());
+	        vdto.setCourseId(course.getId());
+	        vdto.setTitle(video.getTitle());
+	        vdto.setDescription(video.getDescription());
+	        // vdto.setVideoUrl(video.getVideoUrl()); // Only if you have this field
+	        return vdto;
+	    }).collect(Collectors.toList());
+	    dto.setVideos(videos);
+	    return dto;
 	}
 
 }

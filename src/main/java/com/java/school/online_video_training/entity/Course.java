@@ -1,15 +1,17 @@
 package com.java.school.online_video_training.entity;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 import lombok.Data;
 
@@ -27,5 +29,18 @@ public class Course {
 	 
 	@ManyToOne
 	@JoinColumn(name = "category_id")
-	private Category category;
+	private Category category_id;
+	
+	@ManyToOne
+	@JoinColumn(name = "author_id")
+	private User author;
+
+	@Column(name = "views")
+	private Integer views = 0;
+
+	@Column(name = "likes")
+	private Integer likes = 0;
+
+	@OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
+	private List<Video> videos;
 }
