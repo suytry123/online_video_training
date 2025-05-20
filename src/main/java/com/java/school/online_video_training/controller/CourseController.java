@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.java.school.online_video_training.dto.CourseDTO;
 import com.java.school.online_video_training.dto.CourseDetailDTO;
+import com.java.school.online_video_training.dto.CourseEnrollDTO;
 import com.java.school.online_video_training.dto.PageDTO;
 import com.java.school.online_video_training.entity.Course;
 import com.java.school.online_video_training.mapper.CourseMapper;
@@ -83,5 +84,12 @@ public class CourseController {
 	public ResponseEntity<?> getCourseDetail(@PathVariable Long id){
 		CourseDetailDTO courseDetail = courseService.getCourseDetail(id);
 		return ResponseEntity.ok(courseDetail);
+	}
+	
+	@PreAuthorize("hasAuthority('course:read')")
+	@PostMapping("/enroll")
+	public ResponseEntity<?> enroll(@RequestBody CourseEnrollDTO enrollDTO) {
+	    courseService.enroll(enrollDTO.getCourseId(), enrollDTO.getUserId());
+	    return ResponseEntity.ok("Enrollment request submitted to the author.");
 	}
 }

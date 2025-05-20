@@ -6,4 +6,5 @@ import lombok.Data;
 public class CourseDTO {
 	private Long categoryId;
 	private String name;
+	private Long authorId;
 }

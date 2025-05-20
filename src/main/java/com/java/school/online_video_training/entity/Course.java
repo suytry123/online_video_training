@@ -33,7 +33,7 @@ public class Course {
 	
 	@ManyToOne
 	@JoinColumn(name = "author_id")
-	private User author;
+	private User author_id;
 
 	@Column(name = "views")
 	private Integer views = 0;

@@ -18,4 +18,5 @@ public interface CourseService {
 	void delete(Long id);
 	List<CourseSummaryDTO> getAllCourses();
 	CourseDetailDTO getCourseDetail(Long courseId);
+	void enroll(Long courseId, Long userId);
 }

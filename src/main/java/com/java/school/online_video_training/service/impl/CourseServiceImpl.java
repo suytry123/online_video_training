@@ -12,8 +12,12 @@ import com.java.school.online_video_training.dto.CourseDetailDTO;
 import com.java.school.online_video_training.dto.CourseSummaryDTO;
 import com.java.school.online_video_training.dto.VideoDTO;
 import com.java.school.online_video_training.entity.Course;
+import com.java.school.online_video_training.entity.Enrollment;
+import com.java.school.online_video_training.entity.User;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
 import com.java.school.online_video_training.repository.CourseRepository;
+import com.java.school.online_video_training.repository.EnrollmentRepository;
+import com.java.school.online_video_training.repository.UserRepository;
 import com.java.school.online_video_training.repository.VideoRepository;
 import com.java.school.online_video_training.service.CourseService;
 import com.java.school.online_video_training.service.util.PageUtil;
@@ -28,6 +32,8 @@ public class CourseServiceImpl implements CourseService {
 
 	private final CourseRepository courseRepository;
 	private final VideoRepository videoRepository;
+	private final UserRepository userRepository;
+	private final EnrollmentRepository enrollmentRepository;
 
 	// private final CourseMapper courseMapper;
 
@@ -98,7 +104,7 @@ public class CourseServiceImpl implements CourseService {
 	        dto.setId(course.getId());
 	        dto.setName(course.getName());
 	        dto.setCategoryId(course.getCategory_id() != null ? course.getCategory_id().getId() : null);
-	        dto.setAuthorName(course.getAuthor() != null ? course.getAuthor().getUsername() : null);
+	        dto.setAuthorName(course.getAuthor_id() != null ? course.getAuthor_id().getUsername() : null);
 	        dto.setViews(course.getViews());
 	        dto.setLikes(course.getLikes());
 	        return dto;
@@ -113,7 +119,7 @@ public class CourseServiceImpl implements CourseService {
 	    dto.setId(course.getId());
 	    dto.setName(course.getName());
 	    dto.setCategoryId(course.getCategory_id() != null ? course.getCategory_id().getId() : null);
-	    dto.setAuthorName(course.getAuthor() != null ? course.getAuthor().getUsername() : null);
+	    dto.setAuthorName(course.getAuthor_id() != null ? course.getAuthor_id().getUsername() : null);
 	    dto.setViews(course.getViews());
 	    dto.setLikes(course.getLikes());
 	    List<VideoDTO> videos = course.getVideos().stream().map(video -> {
@@ -129,4 +135,20 @@ public class CourseServiceImpl implements CourseService {
 	    return dto;
 	}
 
+	@Override
+	public void enroll(Long courseId, Long userId) {
+	    Course course = courseRepository.findById(courseId)
+	        .orElseThrow(() -> new RuntimeException("Course not found"));
+	    User user = userRepository.findById(userId)
+	        .orElseThrow(() -> new RuntimeException("User not found"));
+
+	    Enrollment enrollment = new Enrollment();
+	    enrollment.setCourse(course);
+	    enrollment.setUser(user);
+	    enrollment.setStatus("PENDING"); // or whatever status you use
+
+	    enrollmentRepository.save(enrollment);
+
+	    // Optionally: notify the author, send email, etc.
+	}
 }
