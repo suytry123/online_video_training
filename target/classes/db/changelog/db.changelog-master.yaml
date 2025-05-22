@@ -23,3 +23,5 @@ databaseChangeLog:
       file: db/changelog/011_add_views_likes_to_course.yml
   - include:
       file: db/changelog/012_alter_join_date_to_datetime.yml
+  - include:
+      file: db/changelog/013_add_unique_constraints_to_images.yml

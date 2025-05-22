@@ -1,8 +1,5 @@
 package com.java.school.online_video_training.controller;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -78,7 +77,8 @@ public class VideoController {
 		videoService.deleteVideo(id);
 		return ResponseEntity.ok().build();
 	}
-
+	
+/*
 	@PreAuthorize("hasAuthority('video:write')")
 	@PostMapping("/upload/{id}")
 	public ResponseEntity<?> uploadPicture(@PathVariable Long id, @RequestParam("file") MultipartFile file)
@@ -99,7 +99,7 @@ public class VideoController {
 
 	@PreAuthorize("hasAuthority('video:read')")
 	@GetMapping("path/{path}")
-	public ResponseEntity<?> getByPath(@PathVariable String path) throws Exception {
+	public ResponseEntity<?> getById(@PathVariable String path) throws Exception {
 		if (path == null || path.isEmpty()) {
 			throw new IllegalArgumentException("File name cannot be null or empty.");
 		}
@@ -120,10 +120,10 @@ public class VideoController {
 
 	@PreAuthorize("hasAuthority('video:write')")
 	@PutMapping("update/{path}")
-	public ResponseEntity<?> updateVideoImage(@PathVariable String path, @RequestParam("file") MultipartFile file) {
+	public ResponseEntity<?> updateVideoImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
 		try {
 			// Call the service method to update the video image (path)
-			videoService.updateImage(path, file);
+			videoService.updateImage(id, file);
 			return ResponseEntity.ok().build();
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update video image.");
@@ -151,17 +151,99 @@ public class VideoController {
 	}
 
 	@DeleteMapping("/delete/{url}")
-	public ResponseEntity<?> deleteByPath(@PathVariable String url) throws Exception {
+	public ResponseEntity<?> deleteById(@PathVariable Long id) throws Exception {
 		try {
 			// Call the service method to delete the file
-			videoService.deleteImageByPath(url);
-			log.info("Delete successfully: " + url);
+			videoService.deleteImageById(id);
+			log.info("Delete successfully: " + id);
 			return ResponseEntity.ok("Image deleted successfully.");
 		} catch (Exception e) {
 			// Log the error and send the failure response
 			log.error("Delete failed: " + e.getMessage());
 			return ResponseEntity.status(500).body("Error deleting image: " + e.getMessage());
 		}
+	}*/
+	
+	@PreAuthorize("hasAuthority('video:write')")
+	@PostMapping("/upload/{id}")
+	public ResponseEntity<?> uploadPicture(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws Exception {
+	    if (file.isEmpty()) {
+	        throw new RuntimeException("Please load a file");
+	    }
+	    videoService.saveImage(id, file);
+	    log.info("Image saved successfully.");
+	    return ResponseEntity.ok().build();
+	}
+
+	@PreAuthorize("hasAuthority('video:read')")
+	@GetMapping("/image/{id}")
+	public ResponseEntity<?> getImageCoverById(@PathVariable Long id) throws Exception {
+		 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		 log.info("Authorities: " + auth.getAuthorities()); // Debug: print current user's authorities
+		
+	    byte[] fileBytes = videoService.getImageCoverById(id);
+	    String contentType = "image/jpeg"; // Or detect dynamically if needed
+	    return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType)).body(fileBytes);
+	}
+
+	@PreAuthorize("hasAuthority('video:write')")
+	@PutMapping("/update/{id}")
+	public ResponseEntity<?> updateVideoImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
+	    try {
+	        videoService.updateImage(id, file);
+	        return ResponseEntity.ok().build();
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update video image.");
+	    }
+	}
+
+	/*
+	//@PreAuthorize("hasAuthority('video:read')")
+	@GetMapping("/images")
+	public ResponseEntity<?> getImages(@RequestParam Map<String, String> image) {
+	    Path directoryPath = Paths.get("src", "main", "resources", "file-repository");
+	    log.info("Directory Path: {}", directoryPath);
+
+	    try {
+	        Page<String> images = videoService.getImages(image);
+	        Path imagePath = Paths.get(directoryPath.toString(), images.getContent().get(0));
+	        byte[] imageBytes = Files.readAllBytes(imagePath);
+	        PageDTO dto = new PageDTO(images);
+	        log.info("Images retrieved successfully");
+	        return ResponseEntity.ok(dto);
+	    } catch (Exception e) {
+	        log.error("Failed to get images", e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Failed to retrieve images: " + e.getMessage());
+	    }
+	}*/
+	
+	@PreAuthorize("hasAuthority('video:read')")
+	@GetMapping("/images")
+	public ResponseEntity<?> getImages(@RequestParam Map<String, String> image) {
+	    try {
+	        Page<Map<String, String>> images = videoService.getImages(image);
+	        PageDTO dto = new PageDTO(images);
+	        log.info("Image metadata retrieved successfully");
+	        return ResponseEntity.ok(dto);
+	    } catch (Exception e) {
+	        log.error("Failed to get image metadata", e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Failed to retrieve image metadata: " + e.getMessage());
+	    }
+	}
+	
+	@PreAuthorize("hasAuthority('video:write')")
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<?> deleteById(@PathVariable Long id) throws Exception {
+	    try {
+	        videoService.deleteImageById(id);
+	        log.info("Delete successfully: " + id);
+	        return ResponseEntity.ok("Image deleted successfully.");
+	    } catch (Exception e) {
+	        log.error("Delete failed: " + e.getMessage());
+	        return ResponseEntity.status(500).body("Error deleting image: " + e.getMessage());
+	    }
 	}
 
 	@PreAuthorize("hasAuthority('video:write')")
@@ -201,6 +283,7 @@ public class VideoController {
 		return ResponseEntity.ok(link);
 	}
 
+	@PreAuthorize("hasAuthority('video:write')")
 	@DeleteMapping("/{id}/deleteLink")
 	public ResponseEntity<String> deleteLink(@PathVariable Long id) {
 		videoService.deleteLink(id);

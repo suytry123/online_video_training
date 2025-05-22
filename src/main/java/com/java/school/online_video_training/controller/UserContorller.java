@@ -1,5 +1,8 @@
 package com.java.school.online_video_training.controller;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -7,20 +10,29 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.java.school.online_video_training.config.security.UserService;
+import com.java.school.online_video_training.dto.PageDTO;
 import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserRegistrationDTO;
 import com.java.school.online_video_training.entity.User;
@@ -144,90 +156,65 @@ public class UserContorller {
 		}
 	}
 	
-/*
-	@GetMapping("/author/approve")
-	public ResponseEntity<String> approveAuthor(@RequestParam String token) {
+	@PostMapping("/photo/{userId}")
+	public ResponseEntity<?> uploadPhoto(@PathVariable Long userId, @RequestPart("photo") MultipartFile photo) {
 		try {
-			String result = userService.handleAuthorApproval(token);
-			String htmlResponse = String.format("""
-			    <html>
-			      <head><title>Author Approval</title></head>
-			      <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
-			        <h2 style='color:green;'>✅ %s</h2>
-			        <p>You may now close this window.</p>
-			      </body>
-			    </html>
-			    """, result);
-			return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(htmlResponse);
+			User user = userService.uploadPhoto(userId, photo);
+			return ResponseEntity.ok(user);
 		} catch (Exception e) {
-			String errorHtml = String.format("""
-			    <html>
-			      <head><title>Approval Error</title></head>
-			      <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
-			        <h2 style='color:red;'>❌ Error: %s</h2>
-			        <p>Please try again later.</p>
-			      </body>
-			    </html>
-			    """, e.getMessage());
-			return ResponseEntity.badRequest().contentType(MediaType.TEXT_HTML).body(errorHtml);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Photo upload failed");
 		}
 	}
 
-	@GetMapping("/author/reject")
-	public ResponseEntity<String> rejectAuthor(@RequestParam String token) {
+	@GetMapping("/photo/{userId}")
+	public ResponseEntity<?> getPhoto(@PathVariable Long userId) {
 		try {
-			String result = userService.handleAuthorRejection(token); // Use correct method if different
-			String htmlResponse = String.format("""
-			    <html>
-			      <head><title>Author Rejection</title></head>
-			      <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
-			        <h2 style='color:orange;'>⚠️ %s</h2>
-			        <p>You may now close this window.</p>
-			      </body>
-			    </html>
-			    """, result);
-			return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(htmlResponse);
+			User user = userService.getPhotoById(userId);
+			String photo = user.getPhoto();
+			if (photo == null) {
+				return ResponseEntity.notFound().build();
+			}
+			Path filePath = Paths.get("src/main/resources/file-repository/", photo);
+			if (!Files.exists(filePath)) {
+				return ResponseEntity.notFound().build();
+			}
+			String contentType = Files.probeContentType(filePath);
+			byte[] fileBytes = Files.readAllBytes(filePath);
+			return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType)).body(fileBytes);
 		} catch (Exception e) {
-			String errorHtml = String.format("""
-			    <html>
-			      <head><title>Rejection Error</title></head>
-			      <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
-			        <h2 style='color:red;'>❌ Error: %s</h2>
-			        <p>Please try again later.</p>
-			      </body>
-			    </html>
-			    """, e.getMessage());
-			return ResponseEntity.badRequest().contentType(MediaType.TEXT_HTML).body(errorHtml);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Photo retrieval failed");
 		}
-	}*/
-	/*
-	@GetMapping("/author/approve")
-	public ResponseEntity<String> approveAuthor(@RequestParam("token") String token) {
-	    String result = userService.handleAuthorApproval(token);
-	    if (result != null && result.contains("AUTHOR")) {
-	        return ResponseEntity.ok()
-	            .header("Content-Type", "text/html")
-	            .body("<h2>User has been promoted to AUTHOR.</h2>");
-	    } else {
-	        return ResponseEntity.badRequest()
-	            .header("Content-Type", "text/html")
-	            .body("<h2>Invalid or expired approval token.</h2>");
+	}
+
+	@GetMapping("/photos")
+	public ResponseEntity<?> getPhotos(@RequestParam Map<String, String> photos) {
+	    try {
+	        Page<Map<String, String>> photoMetadata = userService.getPhotoMetadata(photos);
+	        PageDTO dto = new PageDTO(photoMetadata);
+	        log.info("Photo metadata retrieved successfully");
+	        return ResponseEntity.ok(dto);
+	    } catch (Exception e) {
+	        log.error("Failed to get photo metadata", e);
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("Failed to retrieve photo metadata: " + e.getMessage());
 	    }
 	}
 
-	@GetMapping("/author/reject")
-	public ResponseEntity<String> rejectAuthor(@RequestParam("token") String token) {
-	    String result = userService.handleAuthorRejection(token);
-	    if (result != null && result.contains("rejected")) {
-	        return ResponseEntity.ok()
-	            .header("Content-Type", "text/html")
-	            .body("<h2>User's author request has been rejected.</h2>");
-	    } else {
-	        return ResponseEntity.badRequest()
-	            .header("Content-Type", "text/html")
-	            .body("<h2>Invalid or expired rejection token.</h2>");
-	    }
-	}*/
+	@PutMapping("/photo/{userId}")
+	public ResponseEntity<?> updatePhoto(@PathVariable Long userId, @RequestPart("photo") MultipartFile photo) {
+		try {
+			User user = userService.updatePhoto(userId, photo);
+			return ResponseEntity.ok(user);
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Photo update failed");
+		}
+	}
+
+	@DeleteMapping("/photo/{userId}")
+	public ResponseEntity<?> deletePhoto(@PathVariable Long userId) {
+		userService.deletePhoto(userId);
+		return ResponseEntity.ok().build();
+	}
 	
 	@PostMapping("/signup_user")
 	public ResponseEntity<?> createUserAcc(@Valid @RequestBody SignupUser signupUser) {

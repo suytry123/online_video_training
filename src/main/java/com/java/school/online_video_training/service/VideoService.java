@@ -18,11 +18,14 @@ public interface VideoService {
 //	VideoLink videoLink(String url);
 	void saveImage(Long id, MultipartFile file) throws Exception;
 	//String saveImage(MultipartFile file) throws Exception;
-	byte[] getByPath(String path) throws Exception;
-	void updateImage(String path, MultipartFile file) throws Exception;
-	Page<String> getImages(Map<String, String> image) throws Exception;
+	//byte[] getByPath(String path) throws Exception;
+	byte[] getImageCoverById(Long id) throws Exception;
+//	void updateImage(String path, MultipartFile file) throws Exception;
+	void updateImage(Long id, MultipartFile file) throws Exception;
+	Page<Map<String, String>> getImages(Map<String, String> images);
 //	Page<String> getImages(Map<String, String> image) throws Exception;
-	void deleteImageByPath(String url) throws Exception;
+//	void deleteImageByPath(String url) throws Exception;
+	void deleteImageById(Long id) throws Exception;
 	void videoLink(Long id, List<String> link);
 	String getLink(Long id);
 	Page<String> getLinks(Map<String, String> link);

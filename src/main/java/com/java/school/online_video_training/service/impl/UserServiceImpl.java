@@ -1,19 +1,26 @@
 package com.java.school.online_video_training.service.impl;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.transaction.Transactional;
 
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.java.school.online_video_training.config.security.AuthUser;
 import com.java.school.online_video_training.config.security.JwtUtils;
@@ -22,6 +29,7 @@ import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserRegistrationDTO;
 import com.java.school.online_video_training.entity.Role;
 import com.java.school.online_video_training.entity.User;
+import com.java.school.online_video_training.entity.Video;
 import com.java.school.online_video_training.exception.ApiException;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
 import com.java.school.online_video_training.mapper.UserMapper;
@@ -29,6 +37,11 @@ import com.java.school.online_video_training.repository.RoleRepository;
 import com.java.school.online_video_training.repository.UserRepository;
 import com.java.school.online_video_training.service.EmailService;
 import com.java.school.online_video_training.service.UserValidationService;
+import com.java.school.online_video_training.service.util.PageUtil;
+import com.java.school.online_video_training.spec.ImageFilter;
+import com.java.school.online_video_training.spec.ImageSpec;
+import com.java.school.online_video_training.spec.UserFilter;
+import com.java.school.online_video_training.spec.UserSpec;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -514,6 +527,130 @@ public class UserServiceImpl implements UserService {
 		emailService.sendVerificationEmail(user.getEmail(), subject, body);
 	}
 
+	@Override
+	public User uploadPhoto(Long userId, MultipartFile photo) {
+	    User user = userRepository.findById(userId)
+	        .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+	    // Only allow upload if no photo exists
+	    if (user.getPhoto() != null && !user.getPhoto().isEmpty()) {
+	        throw new IllegalStateException("Photo already exists. Use PUT to update.");
+	    }
+	    // Save new photo
+	    String uploadDir = "src/main/resources/file-repository/";
+	    try {
+	        Files.createDirectories(Paths.get(uploadDir));
+	        String ext = photo.getOriginalFilename() != null && photo.getOriginalFilename().contains(".") ?
+	            photo.getOriginalFilename().substring(photo.getOriginalFilename().lastIndexOf('.')) : "";
+	        String fileName = java.util.UUID.randomUUID() + ext;
+	        Path filePath = Paths.get(uploadDir, fileName);
+	        Files.write(filePath, photo.getBytes());
+	        user.setPhoto(fileName);
+	        return userRepository.save(user);
+	    } catch (Exception e) {
+	        throw new RuntimeException("Photo upload failed", e);
+	    }
+	}
+	
+	@Override
+	public User updatePhoto(Long userId, MultipartFile photo) {
+	    try {
+	        User user = userRepository.findById(userId)
+	            .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+	        // Delete old photo if exists
+	        String oldPhoto = user.getPhoto();
+	        if (oldPhoto != null) {
+	            Path oldFilePath = Paths.get("src/main/resources/file-repository/", oldPhoto);
+	            Files.deleteIfExists(oldFilePath);
+	        }
+	        String uploadDir = "src/main/resources/file-repository/";
+	        Files.createDirectories(Paths.get(uploadDir));
+	        String fileName = UUID.randomUUID() + "_" + photo.getOriginalFilename();
+	        Path filePath = Paths.get(uploadDir, fileName);
+	        Files.write(filePath, photo.getBytes());
+	        user.setPhoto(fileName);
+	        return userRepository.save(user);
+	    } catch (Exception e) {
+	        throw new RuntimeException("Photo update failed", e);
+	    }
+	}
+	
+	@Override
+	public User getPhotoById(Long userId) {
+	    return userRepository.findById(userId)
+	        .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+	}
+
+	/*
+	@Override
+	public Page<String> getPhoto(Map<String, String> photos) {
+		 UserFilter imageFilter = new UserFilter();
+
+		if (photos.containsKey("photo")) {
+			String name = photos.get("photo");
+			imageFilter.setPhoto(name);
+		}
+
+		int pageLimit = PageUtil.DEFAULT_PAGE_LIMIT;
+		if (photos.containsKey(PageUtil.PAGE_LIMIT)) {
+			pageLimit = Integer.parseInt(photos.get(PageUtil.PAGE_LIMIT));
+		}
+
+		int pageNumber = PageUtil.DEFAULT_PAGE_NUMBER;
+		if (photos.containsKey(PageUtil.PAGE_NUMBER)) {
+			pageNumber = Integer.parseInt(photos.get(PageUtil.PAGE_NUMBER));
+		}
+
+		UserSpec spec = new UserSpec(imageFilter);
+
+		Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
+
+		Page<User> page = userRepository.findAll(spec, pageable);
+		Page<String> imagePaths = page.map(video -> video.getPhoto());
+
+		return imagePaths;
+	}*/
+	
+	@Override
+	public Page<Map<String, String>> getPhotoMetadata(Map<String, String> photos) {
+	    UserFilter imageFilter = new UserFilter();
+	    if (photos.containsKey("photo")) {
+	        String name = photos.get("photo");
+	        imageFilter.setPhoto(name);
+	    }
+	    int pageLimit = PageUtil.DEFAULT_PAGE_LIMIT;
+	    if (photos.containsKey(PageUtil.PAGE_LIMIT)) {
+	        pageLimit = Integer.parseInt(photos.get(PageUtil.PAGE_LIMIT));
+	    }
+	    int pageNumber = PageUtil.DEFAULT_PAGE_NUMBER;
+	    if (photos.containsKey(PageUtil.PAGE_NUMBER)) {
+	        pageNumber = Integer.parseInt(photos.get(PageUtil.PAGE_NUMBER));
+	    }
+	    // UserSpec must filter for non-null and non-empty photo
+	    UserSpec spec = new UserSpec(imageFilter);
+	    Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
+	    Page<User> page = userRepository.findAll(spec, pageable);
+	    return page.map(user -> {
+	        Map<String, String> dto = new java.util.HashMap<>();
+	        dto.put("userId", String.valueOf(user.getId()));
+	        dto.put("filename", user.getPhoto());
+	        dto.put("url", "/api/user/" + user.getId() + "/photo");
+	        return dto;
+	    });
+	}
+
+	@Override
+	public void deletePhoto(Long userId) {
+	    User user = userRepository.findById(userId)
+	        .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+	    String oldPhoto = user.getPhoto();
+	    if (oldPhoto != null) {
+	        Path oldFilePath = Paths.get("src/main/resources/file-repository/", oldPhoto);
+	        try { Files.deleteIfExists(oldFilePath); } catch (Exception ignored) {}
+	    }
+	    user.setPhoto(null);
+	    userRepository.save(user);
+	}
+	
 	@Override
 	public String signupUser(SignupUser signupUser) {
 		if (userRepository.existsByUsername(signupUser.getUsername())) {

@@ -1,6 +1,11 @@
 package com.java.school.online_video_training.config.security;
 
+import java.util.Map;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserRegistrationDTO;
@@ -14,6 +19,12 @@ public interface UserService {
 	void sendAuthorConfirmationEmail(User user);
 	String handleAuthorApproval(String token);
 	String handleAuthorRejection(String token);
+	User uploadPhoto(Long userId, MultipartFile photo);
+	User updatePhoto(Long userId, MultipartFile photo);
+	User getPhotoById(Long userId);
+	//Page<String> getPhoto(Map<String, String> photos);
+	Page<Map<String, String>> getPhotoMetadata(Map<String, String> photos);
+	void deletePhoto(Long userId);
 	//String approveAuthor(String token);
 	//String rejectAuthor(String token);
 	//for user signup
