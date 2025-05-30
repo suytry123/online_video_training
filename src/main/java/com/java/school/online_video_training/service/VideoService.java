@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.java.school.online_video_training.dto.VideoDTO;
 import com.java.school.online_video_training.entity.Video;
 
 public interface VideoService {
@@ -31,4 +32,5 @@ public interface VideoService {
 	Page<String> getLinks(Map<String, String> link);
 	void updateLink(Long id, List<String> link);
 	void deleteLink(Long id);
+	Page<VideoDTO> getVideosForUser(Long courseId, Long userId, Map<String, String> params);
 }

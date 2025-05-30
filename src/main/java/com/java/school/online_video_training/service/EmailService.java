@@ -9,4 +9,5 @@ public interface EmailService {
     void sendAuthorApprovalStatusEmail(User user, boolean approved);
 	void sendVerificationEmail(User user);
 	void sendAdminActionConfirmation(User user, boolean approved);
+	void sendOtp(String to, String otp);
 }

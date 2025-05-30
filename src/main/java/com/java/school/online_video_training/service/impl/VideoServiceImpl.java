@@ -15,9 +15,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.java.school.online_video_training.dto.VideoDTO;
+import com.java.school.online_video_training.entity.Enrollment;
 import com.java.school.online_video_training.entity.Video;
 import com.java.school.online_video_training.exception.FileDeletionException;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
+import com.java.school.online_video_training.mapper.VideoMapper;
+import com.java.school.online_video_training.repository.EnrollmentRepository;
 import com.java.school.online_video_training.repository.VideoRepository;
 import com.java.school.online_video_training.service.VideoService;
 import com.java.school.online_video_training.service.util.PageUtil;
@@ -36,6 +40,8 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class VideoServiceImpl implements VideoService {
 	private final VideoRepository videoRepository;
+	private final EnrollmentRepository enrollmentRepository;
+	private final VideoMapper videoMapper;
 
 	@Override
 	public Video createVideo(Video video) {
@@ -436,5 +442,98 @@ public class VideoServiceImpl implements VideoService {
 																						// are present
 		}
 	}
+	
+	@Override
+	public Page<VideoDTO> getVideosForUser(Long courseId, Long userId, Map<String, String> params) {
+        // Find enrollment for user and course
+        Enrollment enrollment = enrollmentRepository.findAll().stream()
+            .filter(e -> e.getCourse().getId().equals(courseId) && e.getUser().getId().equals(userId))
+            .findFirst().orElse(null);
+        if (enrollment == null || "REJECTED".equalsIgnoreCase(enrollment.getStatus())) {
+            return Page.empty();
+        }
+        // Check payment status if needed
+        boolean isPaid = "PAID".equalsIgnoreCase(String.valueOf(enrollment.getPaymentStatus()));
+
+        // Parse pagination params
+        int pageLimit = PageUtil.DEFAULT_PAGE_LIMIT;
+        if (params.containsKey(PageUtil.PAGE_LIMIT)) {
+            pageLimit = Integer.parseInt(params.get(PageUtil.PAGE_LIMIT));
+        }
+        int pageNumber = PageUtil.DEFAULT_PAGE_NUMBER;
+        if (params.containsKey(PageUtil.PAGE_NUMBER)) {
+            pageNumber = Integer.parseInt(params.get(PageUtil.PAGE_NUMBER));
+        }
+        Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
+
+        // Only show videos for this course
+        Page<Video> videos = videoRepository.findAll(
+            (root, query, cb) -> cb.equal(root.get("course").get("id"), courseId), pageable);
+
+        // If not paid, you can filter for free videos here if you have such a flag
+        // For now, just return the page as is
+        return videos.map(videoMapper::toVideoDTO);
+    }
+	
+	/*
+	@Override
+	public Page<VideoDTO> getVideosForUser(Long courseId, Long userId, Map<String, String> params) {
+        // 1. Check enrollment status
+        // 2. If not enrolled or rejected, return empty page
+        // 3. If approved but not paid, return only free/limited videos (e.g., videos with isFree=true or first N videos)
+        // 4. If paid, return all videos
+
+        // This is a placeholder implementation. You must adapt it to your actual logic and DB structure.
+        // You may need to inject EnrollmentRepository and PaymentRepository (if exists) here.
+        // For now, let's assume only APPROVED status and paymentStatus in Enrollment entity.
+
+        // TODO: Inject EnrollmentRepository and PaymentRepository if needed
+        // Example: private final EnrollmentRepository enrollmentRepository;
+        // Example: private final PaymentRepository paymentRepository;
+
+        // 1. Find enrollment
+        Enrollment enrollment = enrollmentRepository.findAll().stream()
+            .filter(e -> e.getCourse().getId().equals(courseId) && e.getUser().getId().equals(userId))
+            .findFirst().orElse(null);
+        if (enrollment == null || "REJECTED".equalsIgnoreCase(enrollment.getStatus())) {
+            // Not enrolled or rejected
+            return Page.empty();
+        }
+        // 2. Check payment (for now, just check if status is APPROVED and paymentStatus is PAID)
+        boolean isPaid = false;
+        // If you have payment info in Enrollment, check it here. Otherwise, check Payment table.
+        // Example: isPaid = "PAID".equalsIgnoreCase(enrollment.getPaymentStatus());
+        // Or query PaymentRepository for a PAID payment for this user/course
+
+        // 3. Pagination
+        int pageLimit = PageUtil.DEFAULT_PAGE_LIMIT;
+        if (params.containsKey(PageUtil.PAGE_LIMIT)) {
+            pageLimit = Integer.parseInt(params.get(PageUtil.PAGE_LIMIT));
+        }
+        int pageNumber = PageUtil.DEFAULT_PAGE_NUMBER;
+        if (params.containsKey(PageUtil.PAGE_NUMBER)) {
+            pageNumber = Integer.parseInt(params.get(PageUtil.PAGE_NUMBER));
+        }
+        Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
+
+        Page<Video> videos;
+        if ("APPROVED".equalsIgnoreCase(enrollment.getStatus())) {
+            if (isPaid) {
+                // Return all videos for the course
+                videos = videoRepository.findAll((root, query, cb) -> cb.equal(root.get("course").get("id"), courseId), pageable);
+            } else {
+                // Return only free/limited videos (for demo, first 1 video)
+                videos = videoRepository.findAll((root, query, cb) -> cb.equal(root.get("course").get("id"), courseId), pageable);
+                // You may want to filter by a flag (e.g., isFree) or limit to first N videos
+                // This is a placeholder: you should implement your own logic
+                videos = videos.map(v -> v); // No-op, replace with actual filter
+            }
+        } else {
+            // Not approved
+            return Page.empty();
+        }
+        // Map to DTO
+        return videos.map(videoMapper::toVideoDTO);
+    }*/
 
 }

@@ -3,7 +3,7 @@ databaseChangeLog:
     id: 012_alter_join_date_to_datetime
     author: soksoytry200@gmail.com
     changes:
-      - modifyDataType:
-          tableName: users
-          columnName: join_date
-          newDataType: DATETIME
+    - modifyDataType:
+        tableName: users
+        columnName: join_date
+        newDataType: DATETIME

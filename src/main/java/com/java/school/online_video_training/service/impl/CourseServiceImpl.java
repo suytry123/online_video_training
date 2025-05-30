@@ -1,5 +1,6 @@
 package com.java.school.online_video_training.service.impl;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -134,7 +135,35 @@ public class CourseServiceImpl implements CourseService {
 	    dto.setVideos(videos);
 	    return dto;
 	}
+	
+	@Override
+	public void enroll(Long courseId, Long userId) {
+        // 1. Fetch course and user
+        Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new RuntimeException("Course not found"));
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // 2. Prevent duplicate enrollments (simple check)
+        boolean alreadyEnrolled = enrollmentRepository.findAll().stream()
+        		 .anyMatch(e -> e.getCourse().getId().equals(courseId)
+                         && e.getUser().getId().equals(userId)
+                         && (e.getStatus() == null || !"CANCELLED".equalsIgnoreCase(e.getStatus()))); // Null-safe check
+        if (alreadyEnrolled) {
+            throw new RuntimeException("User is already enrolled or has a pending enrollment for this course.");
+        }
+
+        // 3. Create and save enrollment
+        Enrollment enrollment = new Enrollment();
+        enrollment.setCourse(course);
+        enrollment.setUser(user);
+        enrollment.setStatus("PENDING");
+        enrollment.setPaymentStatus("UNPAID");
+        enrollment.setPrice(BigDecimal.ZERO); // Set to 0.0 to satisfy NOT NULL constraint
+        enrollmentRepository.save(enrollment);
+    }
+	
+/*
 	@Override
 	public void enroll(Long courseId, Long userId) {
 	    Course course = courseRepository.findById(courseId)
@@ -145,10 +174,9 @@ public class CourseServiceImpl implements CourseService {
 	    Enrollment enrollment = new Enrollment();
 	    enrollment.setCourse(course);
 	    enrollment.setUser(user);
-	    enrollment.setStatus("PENDING"); // or whatever status you use
-
+	    enrollment.setStatus("PENDING");
+	    enrollment.setPaymentStatus("UNPAID");
 	    enrollmentRepository.save(enrollment);
-
-	    // Optionally: notify the author, send email, etc.
-	}
+	}*/
+	
 }

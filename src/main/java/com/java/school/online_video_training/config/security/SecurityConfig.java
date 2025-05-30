@@ -40,7 +40,7 @@ public class SecurityConfig {
 		http.csrf().disable()
 			.addFilter(new JwtLoginFilter(authenticationManager(authenticationConfiguration))) // Add JWT login filter
 			.addFilterBefore(filterChainExceptionHandler, JwtLoginFilter.class) // Add exception handler filter before JwtLoginFilter
-			.addFilterBefore(new RequestLoggingFilter(), UsernamePasswordAuthenticationFilter.class) // Add logging filter before UsernamePasswordAuthenticationFilter
+			//.addFilterBefore(new RequestLoggingFilter(), UsernamePasswordAuthenticationFilter.class) // Add logging filter before UsernamePasswordAuthenticationFilter
 			.addFilterAfter(new TokenVerifyFIlter(), JwtLoginFilter.class)
 //			.addFilter(new JwtLoginFilter(authenticationManager(authenticationConfiguration)))
 //			.addFilterBefore(filterChainExceptionHandler, JwtLoginFilter.class)

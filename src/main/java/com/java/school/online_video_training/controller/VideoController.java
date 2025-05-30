@@ -289,5 +289,13 @@ public class VideoController {
 		videoService.deleteLink(id);
 		return ResponseEntity.ok("Link deleted successfully");
 	}
+	
+	@PreAuthorize("hasAuthority('video:read')")
+	@GetMapping("/user-access")
+	public ResponseEntity<?> getVideosForUser(@RequestParam Long courseId, @RequestParam Long userId, @RequestParam Map<String, String> params) {
+		Page<VideoDTO> videos = videoService.getVideosForUser(courseId, userId, params);
+		PageDTO dto = new PageDTO(videos);
+		return ResponseEntity.ok(dto);
+	}
 
 }

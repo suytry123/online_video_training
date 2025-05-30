@@ -1,5 +1,6 @@
 package com.java.school.online_video_training.entity;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -40,6 +41,9 @@ public class Course {
 
 	@Column(name = "likes")
 	private Integer likes = 0;
+	
+	@Column(nullable = false, precision = 19, scale = 2)
+	private BigDecimal price;
 
 	@OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
 	private List<Video> videos;

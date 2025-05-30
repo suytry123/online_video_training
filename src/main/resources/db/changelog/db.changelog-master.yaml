@@ -25,3 +25,5 @@ databaseChangeLog:
       file: db/changelog/012_alter_join_date_to_datetime.yml
   - include:
       file: db/changelog/013_add_unique_constraints_to_images.yml
+  - include:
+      file: db/changelog/014_fix_null_price_in_enrollment.yml
