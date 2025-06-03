@@ -7,9 +7,6 @@ databaseChangeLog:
         tableName: permissions
         columns:
         - column:
-            name: id
-            type: NUMERIC
-        - column:
             name: name
             type: STRING
         file: db/data/004_permissions.csv

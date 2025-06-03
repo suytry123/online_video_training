@@ -4,12 +4,11 @@ import static com.java.school.online_video_training.config.security.PermissionEn
 import static com.java.school.online_video_training.config.security.PermissionEnum.CATEGORY_WRITE;
 import static com.java.school.online_video_training.config.security.PermissionEnum.COURSE_READ;
 import static com.java.school.online_video_training.config.security.PermissionEnum.COURSE_WRITE;
-import static com.java.school.online_video_training.config.security.PermissionEnum.VIDEO_WRITE;
-import static com.java.school.online_video_training.config.security.PermissionEnum.VIDEO_READ;
+import static com.java.school.online_video_training.config.security.PermissionEnum.LOGO_UPDATE;
 import static com.java.school.online_video_training.config.security.PermissionEnum.USER_READ;
 import static com.java.school.online_video_training.config.security.PermissionEnum.USER_WRITE;
-
-
+import static com.java.school.online_video_training.config.security.PermissionEnum.VIDEO_READ;
+import static com.java.school.online_video_training.config.security.PermissionEnum.VIDEO_WRITE;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,9 +23,9 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum RoleEnum {
 	ADMIN(Set.of(CATEGORY_WRITE, CATEGORY_READ, COURSE_WRITE, COURSE_READ, VIDEO_WRITE
-			, VIDEO_READ, USER_WRITE, USER_READ)),
+			, VIDEO_READ, USER_WRITE, USER_READ, LOGO_UPDATE)),
 	AUTHOR(Set.of(CATEGORY_READ, COURSE_READ, VIDEO_READ)),
-	USER(Set.of());
+	USER(Set.of(USER_READ, USER_WRITE));
 	
 	private Set<PermissionEnum> permissions;
 	

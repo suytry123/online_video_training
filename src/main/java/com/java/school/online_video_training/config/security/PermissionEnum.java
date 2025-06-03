@@ -14,7 +14,8 @@ public enum PermissionEnum {
 	VIDEO_WRITE("video:write"),
 	VIDEO_READ("video:read"),
 	USER_WRITE("user:write"),
-	USER_READ("user:read");
+	USER_READ("user:read"),
+	LOGO_UPDATE("logo:update");
 	
 	
 	private String description;

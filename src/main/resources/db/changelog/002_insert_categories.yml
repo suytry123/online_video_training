@@ -7,9 +7,6 @@ databaseChangeLog:
         tableName: categories
         columns:
         - column:
-            name: category_id
-            type: NUMERIC
-        - column:
             name: category_name
             type: STRING
             constraints:

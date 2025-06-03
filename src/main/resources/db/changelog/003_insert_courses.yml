@@ -7,9 +7,6 @@ databaseChangeLog:
         tableName: courses
         columns:
         - column:
-            name: course_id
-            type: NUMERIC
-        - column:
             name: course_name
             type: STRING
             constraints:
@@ -17,4 +14,16 @@ databaseChangeLog:
         - column:
             name: category_id
             type: NUMERIC
+            constraints:
+              nullable: false
+        - column:
+            name: author_id
+            type: NUMERIC
+            constraints:
+              nullable: false
+        - column:
+            name: price
+            type: NUMERIC
+            constraints:
+              nullable: false
         file: db/data/003_courses.csv

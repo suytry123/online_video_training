@@ -253,7 +253,7 @@ public class UserServiceImpl implements UserService {
 			String adminEmail = "Boysoy331@gmail.com";
 			String subject = "ALERT: New Author Application Requires Your Attention";
 
-			String baseUrl = "https://e641-154-214-2-4.ngrok-free.app"; // No space
+			String baseUrl = "https://2fbe-154-214-2-4.ngrok-free.app"; // No space
 
 			String approveLink = baseUrl + "/api/user/author/approve?token=" + approveToken;
 			String rejectLink = baseUrl + "/api/user/author/reject?token=" + rejectToken;
@@ -514,7 +514,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void sendVerificationEmail(User user, String token) {
 		//String baseUrl = System.getenv("BASE_URL") != null ? System.getenv("BASE_URL") : "http://localhost:8080";
-		String baseUrl = "https://e641-154-214-2-4.ngrok-free.app";
+		String baseUrl = "https://2fbe-154-214-2-4.ngrok-free.app";
 		String confirmationUrl = baseUrl + "/api/auth/verify?token=" + token;
 
 		String subject = "ALERT: Email Verification Required";

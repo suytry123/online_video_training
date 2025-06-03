@@ -4,6 +4,8 @@ databaseChangeLog:
   - include:
       file: db/changelog/002_insert_categories.yml
   - include:
+      file: db/changelog/007_insert_users.yml
+  - include:
       file: db/changelog/003_insert_courses.yml
   - include:
       file: db/changelog/004_insert_permissions.yml
@@ -11,8 +13,6 @@ databaseChangeLog:
       file: db/changelog/005_insert_roles.yml
   - include:
       file: db/changelog/006_insert_roles_permissions.yml
-  - include:
-      file: db/changelog/007_insert_users.yml
   - include:
       file: db/changelog/008_insert_users_roles.yml
   - include:
@@ -26,4 +26,4 @@ databaseChangeLog:
   - include:
       file: db/changelog/013_add_unique_constraints_to_images.yml
   - include:
-      file: db/changelog/014_fix_null_price_in_enrollment.yml
+      file: db/changelog/014_add_missing_user_fields.yml

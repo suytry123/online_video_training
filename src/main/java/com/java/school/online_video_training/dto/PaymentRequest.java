@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
 public class PaymentRequest {
-	private final BigDecimal price;
+	private BigDecimal price;
 }

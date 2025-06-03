@@ -72,6 +72,7 @@ public class VideoController {
 		return ResponseEntity.ok(video);
 	}
 
+	@PreAuthorize("hasAuthority('video:write')")
 	@DeleteMapping("{id}")
 	public ResponseEntity<?> deleteVideo(@PathVariable Long id) {
 		videoService.deleteVideo(id);

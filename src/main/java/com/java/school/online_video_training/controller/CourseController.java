@@ -65,6 +65,7 @@ public class CourseController {
 		return ResponseEntity.ok(courseMapper.toCourseDTO(update));
 	}
 
+	@PreAuthorize("hasAuthority('course:write')")
 	@DeleteMapping("{id}")
 	public ResponseEntity<?> deleteById(@PathVariable("id") Long courseId) {
 		courseService.delete(courseId);

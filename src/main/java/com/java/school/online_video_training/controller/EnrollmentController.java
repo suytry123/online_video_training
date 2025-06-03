@@ -1,17 +1,16 @@
 package com.java.school.online_video_training.controller;
 
-import java.math.BigDecimal;
-
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.java.school.online_video_training.dto.PaymentRequest;
 import com.java.school.online_video_training.service.EnrollmentService;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -20,18 +19,21 @@ import lombok.RequiredArgsConstructor;
 public class EnrollmentController {
     private final EnrollmentService enrollmentService;
 
+    @PreAuthorize("hasAuthority('course:write')")
     @PostMapping("/{enrollmentId}/approve")
     public ResponseEntity<?> approve(@PathVariable Long enrollmentId) {
         enrollmentService.approve(enrollmentId);
         return ResponseEntity.ok("Enrollment approved.");
     }
 
+    @PreAuthorize("hasAuthority('course:write')")
     @PostMapping("/{enrollmentId}/reject")
     public ResponseEntity<?> reject(@PathVariable Long enrollmentId) {
         enrollmentService.reject(enrollmentId);
         return ResponseEntity.ok("Enrollment rejected.");
     }
     
+    @PreAuthorize("hasAuthority('course:read')")
     @PostMapping("/{id}/pay")
     public ResponseEntity<?> payForEnrollment(
             @PathVariable Long id,

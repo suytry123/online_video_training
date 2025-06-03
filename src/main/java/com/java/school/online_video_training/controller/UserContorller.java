@@ -11,12 +11,11 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,9 +35,12 @@ import com.java.school.online_video_training.dto.PageDTO;
 import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserRegistrationDTO;
 import com.java.school.online_video_training.entity.User;
+import com.java.school.online_video_training.service.LogoService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+@RequiredArgsConstructor
 @Slf4j
 @RestController
 @RequestMapping("/api/user")
@@ -47,14 +49,10 @@ public class UserContorller {
 	private final UserService userService;
 	private final LocalValidatorFactoryBean validator;
 	private final ObjectMapper objectMapper;
-
-	public UserContorller(UserService userService, LocalValidatorFactoryBean validator, ObjectMapper objectMapper) {
-		this.userService = userService;
-		this.validator = validator;
-		this.objectMapper = objectMapper;
-	}
+	private final LogoService logoService;
 
 	@PostMapping("/applyForAuthor")
+	@PreAuthorize("hasAuthority('user:write')")
 	public ResponseEntity<?> applyForAuthor(@RequestBody String rawBody) {
 		try {
 			log.info("Raw request body for author application: {}", rawBody);
@@ -157,6 +155,7 @@ public class UserContorller {
 	}
 	
 	@PostMapping("/photo/{userId}")
+	@PreAuthorize("hasAuthority('user:write')")
 	public ResponseEntity<?> uploadPhoto(@PathVariable Long userId, @RequestPart("photo") MultipartFile photo) {
 		try {
 			User user = userService.uploadPhoto(userId, photo);
@@ -167,6 +166,7 @@ public class UserContorller {
 	}
 
 	@GetMapping("/photo/{userId}")
+	@PreAuthorize("hasAuthority('user:read')")
 	public ResponseEntity<?> getPhoto(@PathVariable Long userId) {
 		try {
 			User user = userService.getPhotoById(userId);
@@ -187,6 +187,7 @@ public class UserContorller {
 	}
 
 	@GetMapping("/photos")
+	@PreAuthorize("hasAuthority('user:read')")
 	public ResponseEntity<?> getPhotos(@RequestParam Map<String, String> photos) {
 	    try {
 	        Page<Map<String, String>> photoMetadata = userService.getPhotoMetadata(photos);
@@ -201,6 +202,7 @@ public class UserContorller {
 	}
 
 	@PutMapping("/photo/{userId}")
+	@PreAuthorize("hasAuthority('user:write')")
 	public ResponseEntity<?> updatePhoto(@PathVariable Long userId, @RequestPart("photo") MultipartFile photo) {
 		try {
 			User user = userService.updatePhoto(userId, photo);
@@ -211,6 +213,7 @@ public class UserContorller {
 	}
 
 	@DeleteMapping("/photo/{userId}")
+	@PreAuthorize("hasAuthority('user:write')")
 	public ResponseEntity<?> deletePhoto(@PathVariable Long userId) {
 		userService.deletePhoto(userId);
 		return ResponseEntity.ok().build();
@@ -224,4 +227,22 @@ public class UserContorller {
 		responseHeaders.set("Authorization", "Bearer " + jwt);
 		return ResponseEntity.ok().headers(responseHeaders).build();
 	}
+	
+	
+	@PreAuthorize("hasAuthority('logo:update')")
+    @PutMapping("/logo")
+    public ResponseEntity<?> updateLogo(@RequestParam("file") MultipartFile file) {
+        // Debug: Print current user's authorities
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        log.info("Current user authorities: {}", auth.getAuthorities());
+        try {
+            String logoUrl = logoService.updateLogo(file);
+            Map<String, String> response = new HashMap<>();
+            response.put("logoUrl", logoUrl);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Failed to update logo", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update logo: " + e.getMessage());
+        }
+    }
 }

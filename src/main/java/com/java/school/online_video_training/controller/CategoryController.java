@@ -65,6 +65,7 @@ public class CategoryController {
 		return ResponseEntity.ok(pageDTO);
 	}
 
+	@PreAuthorize("hasAuthority('category:write')")
 	@DeleteMapping
 	public ResponseEntity<?> delete(@RequestParam("id") Long categoryId) {
 		categoryService.deleteById(categoryId);

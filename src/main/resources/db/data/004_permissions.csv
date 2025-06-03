@@ -5,3 +5,6 @@ course:write
 course:read
 video:write
 video:read
+logo:update
+user:write
+user:read

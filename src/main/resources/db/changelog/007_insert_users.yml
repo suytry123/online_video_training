@@ -7,9 +7,6 @@ databaseChangeLog:
         tableName: users
         columns:
         - column:
-            name: user_id
-            type: NUMERIC
-        - column:
             name: user_name
             type: STRING
         - column:
