@@ -20,23 +20,10 @@ public class WebConfig implements WebMvcConfigurer {
 //		registry.addResourceHandler("/test/**").addResourceLocations("file:///./ext-resources/").setCachePeriod(0);
 	}
 	
+//	@Bean
+//    public StandardServletMultipartResolver multipartResolver() {
+//        return new StandardServletMultipartResolver();
+//    }
 
-//	 @Override
-//	    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-//	        registry.addResourceHandler("/favicon.ico")
-//	                .addResourceLocations("classpath:/static/")
-//	                .resourceChain(true)
-//	                .addResolver(new PathResourceResolver() {
-//	                    @Override
-//	                    protected Resource getResource(String resourcePath, Resource location) {
-//	                        try {
-//	                            Resource requestedResource = location.createRelative(resourcePath);
-//	                            return requestedResource.exists() && requestedResource.isReadable() ? 
-//	                                   requestedResource : new ClassPathResource("/static/favicon.ico");
-//	                        } catch (Exception e) {
-//	                            return null;
-//	                        }
-//	                    }
-//	                });
-//	    }
+
 }

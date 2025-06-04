@@ -35,7 +35,6 @@ import com.java.school.online_video_training.dto.PageDTO;
 import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserRegistrationDTO;
 import com.java.school.online_video_training.entity.User;
-import com.java.school.online_video_training.service.LogoService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +48,6 @@ public class UserContorller {
 	private final UserService userService;
 	private final LocalValidatorFactoryBean validator;
 	private final ObjectMapper objectMapper;
-	private final LogoService logoService;
 
 	@PostMapping("/applyForAuthor")
 	@PreAuthorize("hasAuthority('user:write')")
@@ -86,74 +84,73 @@ public class UserContorller {
 		String message = userService.verifyEmail(token);
 		return ResponseEntity.ok(message);
 	}
-	
 
 	@GetMapping("/test")
 	public ResponseEntity<String> test() {
 		String html = """
-			<html><body><h2>Test endpoint works!</h2></body></html>
-		""";
+					<html><body><h2>Test endpoint works!</h2></body></html>
+				""";
 		return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(html);
 	}
-	
+
 	@GetMapping("/author/approve")
 	public ResponseEntity<String> approveAuthor(@RequestParam String token) {
-	    try {
-	        String result = userService.handleAuthorApproval(token);
-	        String htmlResponse = String.format("""
-	            <html>
-	              <head><title>Author Approval</title></head>
-	              <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
-	                <h2 style='color:green;'>✅ %s</h2>
-	                <p>You may now close this window.</p>
-	              </body>
-	            </html>
-	            """, result);
-	        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(htmlResponse);
-	    } catch (Exception e) {
-	        log.error("Error in approveAuthor for token {}: ", token, e); // Add this line
-	        String errorMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
-	        String errorHtml = String.format("""
-	            <html>
-	              <head><title>Approval Error</title></head>
-	              <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
-	                <h2 style='color:red;'>❌ Error: %s</h2>
-	                <p>Please try again later.</p>
-	              </body>
-	            </html>
-	            """, errorMsg);
-	        return ResponseEntity.badRequest().contentType(MediaType.TEXT_HTML).body(errorHtml);
-	    }
+		try {
+			String result = userService.handleAuthorApproval(token);
+			String htmlResponse = String.format("""
+					<html>
+					  <head><title>Author Approval</title></head>
+					  <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
+					    <h2 style='color:green;'>✅ %s</h2>
+					    <p>You may now close this window.</p>
+					  </body>
+					</html>
+					""", result);
+			return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(htmlResponse);
+		} catch (Exception e) {
+			log.error("Error in approveAuthor for token {}: ", token, e); // Add this line
+			String errorMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+			String errorHtml = String.format("""
+					<html>
+					  <head><title>Approval Error</title></head>
+					  <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
+					    <h2 style='color:red;'>❌ Error: %s</h2>
+					    <p>Please try again later.</p>
+					  </body>
+					</html>
+					""", errorMsg);
+			return ResponseEntity.badRequest().contentType(MediaType.TEXT_HTML).body(errorHtml);
+		}
 	}
-	
+
 	@GetMapping("/author/reject")
 	public ResponseEntity<?> rejectAuthor(@RequestParam String token) {
 		try {
 			String result = userService.handleAuthorRejection(token);
 			String htmlResponse = String.format("""
-				<html>
-				  <head><title>Author Rejection</title></head>
-				  <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
-					<h2 style='color:orange;'>⚠️ %s</h2>
-					<p>You may now close this window.</p>
-				  </body>
-				</html>
-				""", result);
+					<html>
+					  <head><title>Author Rejection</title></head>
+					  <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
+						<h2 style='color:orange;'>⚠️ %s</h2>
+						<p>You may now close this window.</p>
+					  </body>
+					</html>
+					""", result);
 			return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(htmlResponse);
 		} catch (Exception e) {
 			String errorHtml = String.format("""
-				<html>
-				  <head><title>Rejection Error</title></head>
-				  <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
-					<h2 style='color:red;'>❌ Error: %s</h2>
-					<p>Please try again later.</p>
-				  </body>
-				</html>
-				""", e.getMessage());
+					<html>
+					  <head><title>Rejection Error</title></head>
+					  <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
+						<h2 style='color:red;'>❌ Error: %s</h2>
+						<p>Please try again later.</p>
+					  </body>
+					</html>
+					""", e.getMessage());
 			return ResponseEntity.badRequest().contentType(MediaType.TEXT_HTML).body(errorHtml);
 		}
 	}
-	
+
 	@PostMapping("/photo/{userId}")
 	@PreAuthorize("hasAuthority('user:write')")
 	public ResponseEntity<?> uploadPhoto(@PathVariable Long userId, @RequestPart("photo") MultipartFile photo) {
@@ -189,16 +186,16 @@ public class UserContorller {
 	@GetMapping("/photos")
 	@PreAuthorize("hasAuthority('user:read')")
 	public ResponseEntity<?> getPhotos(@RequestParam Map<String, String> photos) {
-	    try {
-	        Page<Map<String, String>> photoMetadata = userService.getPhotoMetadata(photos);
-	        PageDTO dto = new PageDTO(photoMetadata);
-	        log.info("Photo metadata retrieved successfully");
-	        return ResponseEntity.ok(dto);
-	    } catch (Exception e) {
-	        log.error("Failed to get photo metadata", e);
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body("Failed to retrieve photo metadata: " + e.getMessage());
-	    }
+		try {
+			Page<Map<String, String>> photoMetadata = userService.getPhotoMetadata(photos);
+			PageDTO dto = new PageDTO(photoMetadata);
+			log.info("Photo metadata retrieved successfully");
+			return ResponseEntity.ok(dto);
+		} catch (Exception e) {
+			log.error("Failed to get photo metadata", e);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("Failed to retrieve photo metadata: " + e.getMessage());
+		}
 	}
 
 	@PutMapping("/photo/{userId}")
@@ -218,31 +215,13 @@ public class UserContorller {
 		userService.deletePhoto(userId);
 		return ResponseEntity.ok().build();
 	}
-	
+
 	@PostMapping("/signup_user")
 	public ResponseEntity<?> createUserAcc(@Valid @RequestBody SignupUser signupUser) {
 		String jwt = userService.signupUser(signupUser);
-		
+
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Authorization", "Bearer " + jwt);
 		return ResponseEntity.ok().headers(responseHeaders).build();
 	}
-	
-	
-	@PreAuthorize("hasAuthority('logo:update')")
-    @PutMapping("/logo")
-    public ResponseEntity<?> updateLogo(@RequestParam("file") MultipartFile file) {
-        // Debug: Print current user's authorities
-        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        log.info("Current user authorities: {}", auth.getAuthorities());
-        try {
-            String logoUrl = logoService.updateLogo(file);
-            Map<String, String> response = new HashMap<>();
-            response.put("logoUrl", logoUrl);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            log.error("Failed to update logo", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update logo: " + e.getMessage());
-        }
-    }
 }
