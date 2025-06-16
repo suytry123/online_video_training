@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.java.school.online_video_training.projection.UserPaidReportProjection;
 import com.java.school.online_video_training.projection.UserReportProjection;
 import com.java.school.online_video_training.projection.VideoReportProjection;
 import com.java.school.online_video_training.service.ReportService;
@@ -19,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/report")
+@RequestMapping("/api/report")
 public class ReportController {
 
     private final ReportService reportService;
@@ -57,5 +58,15 @@ public class ReportController {
             return ResponseEntity.badRequest().body(Collections.emptyList());
         }
         return ResponseEntity.ok(reportService.getUserReportBetweenDate(start, end));
+    }
+    
+    @GetMapping("/paid-users/{startDate}/{endDate}")
+    public ResponseEntity<List<UserPaidReportProjection>> getPaidUserReport(
+            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @PathVariable("startDate") LocalDateTime start,
+            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") @PathVariable("endDate") LocalDateTime end) {
+        if (start.isAfter(end)) {
+            return ResponseEntity.badRequest().body(Collections.emptyList());
+        }
+        return ResponseEntity.ok(reportService.getPaidUserReportBetweenDate(start, end));
     }
 }

@@ -9,7 +9,6 @@ C:\online-video-training\src\main\java\com\java\school\online_video_training\con
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\AsyncConfig.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\repository\RoleRepository.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\repository\UserRepository.java
-C:\online-video-training\src\main\java\com\java\school\online_video_training\service\LogoService.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\security\UserDetailsServiceImpl.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\service\CourseService.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\config\security\RoleEnum.java
@@ -37,7 +36,6 @@ C:\online-video-training\src\main\java\com\java\school\online_video_training\con
 C:\online-video-training\src\main\java\com\java\school\online_video_training\controller\ReportController.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\exception\ValidationErrorResponse.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\mapper\UserMapper.java
-C:\online-video-training\src\main\java\com\java\school\online_video_training\service\impl\LogoServiceImpl.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\service\impl\EnrollmentServiceImpl.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\entity\Course.java
 C:\online-video-training\src\main\java\com\java\school\online_video_training\service\UserValidationService.java

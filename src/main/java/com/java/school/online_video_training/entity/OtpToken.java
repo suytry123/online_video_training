@@ -27,7 +27,7 @@ public class OtpToken {
     private User user;
 
     @Column(nullable = false)
-    private LocalDateTime expiryDate;
+    private LocalDateTime expireDate;
 
     @Column(nullable = false)
     private boolean used = false;

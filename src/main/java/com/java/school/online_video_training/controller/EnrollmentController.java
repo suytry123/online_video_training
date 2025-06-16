@@ -14,7 +14,7 @@ import com.java.school.online_video_training.service.EnrollmentService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/enrollments")
+@RequestMapping("/api/enrollments")
 @RequiredArgsConstructor
 public class EnrollmentController {
     private final EnrollmentService enrollmentService;

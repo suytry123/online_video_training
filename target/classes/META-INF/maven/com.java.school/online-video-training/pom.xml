@@ -60,12 +60,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-   			 <groupId>org.liquibase</groupId>
-   			 <artifactId>liquibase-core</artifactId>
+    			<groupId>org.liquibase</groupId>
+    			<artifactId>liquibase-core</artifactId>
 		</dependency>
-		 <dependency>
+		<dependency>
     		<groupId>org.mapstruct</groupId>
-   			<artifactId>mapstruct</artifactId>
+    		<artifactId>mapstruct</artifactId>
     		<version>1.6.2</version>
 		</dependency>
 		<dependency>
@@ -145,6 +145,17 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>10.0.0</version>
+		</dependency>
+		<!-- Google libphonenumber for phone number formatting -->
+        <dependency>
+            <groupId>com.googlecode.libphonenumber</groupId>
+            <artifactId>libphonenumber</artifactId>
+            <version>8.13.32</version>
+        </dependency>
 	</dependencies>
 
 	<build>

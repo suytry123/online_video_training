@@ -37,6 +37,11 @@ spring:
     liquibase:
       change-log: classpath:db/changelog/db.changelog-master.yaml 
       enabled: true  
+    servlet:
+      multipart:
+        enabled: true
+        max-file-size: 10MB
+        max-request-size: 10MB
 app:
 #  base-url: http://localhost:8080/api
   base-url: https://2fbe-154-214-2-4.ngrok-free.app
@@ -44,3 +49,7 @@ app:
   jwtSecret: ======================Suy===========================
   jwtExpirationMs: 86400000
   admin-email: Boysoy331@gmail.com
+twilio:
+  account-sid: dummy_value
+  auth-token: dummy_token
+  from-number: +12516071287

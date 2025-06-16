@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,11 @@ import com.java.school.online_video_training.repository.OtpTokenRepository;
 import com.java.school.online_video_training.repository.UserRepository;
 import com.java.school.online_video_training.service.EmailService;
 import com.java.school.online_video_training.service.OtpService;
+import com.java.school.online_video_training.service.util.PhoneNumberUtil;
+import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,44 +27,147 @@ import lombok.RequiredArgsConstructor;
 public class OtpServiceImpl implements OtpService {
     private final UserRepository userRepository;
     private final OtpTokenRepository otpTokenRepository;
-    private final EmailService emailService; // Or SmsService if you want SMS
+    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
+    private static final Logger log = LoggerFactory.getLogger(OtpServiceImpl.class);
+
+    @Value("${twilio.account-sid}")
+    private String twilioAccountSid;
+    @Value("${twilio.auth-token}")
+    private String twilioAuthToken;
+    @Value("${twilio.from-number}")
+    private String twilioFromNumber;
 
     @Override
-    public void sendOtp(String usernameOrEmailOrPhone) {
-        // Find user by email or phone (simplified for demo)
+    public void sendOtpForEmail(String usernameOrEmailOrPhone) {
         Optional<User> userOpt = userRepository.findByEmail(usernameOrEmailOrPhone);
         if (!userOpt.isPresent()) {
             userOpt = userRepository.findByPhoneNumber(usernameOrEmailOrPhone);
         }
         User user = userOpt.orElseThrow(() -> new RuntimeException("User not found"));
-
-        String otp = String.valueOf(100000 + new Random().nextInt(900000)); // 6-digit OTP
+        String otp = String.valueOf(100000 + new Random().nextInt(900000));
         OtpToken otpToken = new OtpToken();
         otpToken.setOtp(otp);
         otpToken.setUser(user);
-        otpToken.setExpiryDate(LocalDateTime.now().plusMinutes(10));
+        otpToken.setExpireDate(LocalDateTime.now().plusMinutes(10));
         otpTokenRepository.save(otpToken);
-
-        // Send OTP via email or SMS
-        emailService.sendOtp(user.getEmail(), otp); // Or use SMS service
+        emailService.sendOtp(user.getEmail(), otp);
     }
 
     @Override
-    public boolean verifyOtp(String otp, String newPassword) {
+    public boolean verifyOtpForEmail(String otp, String newPassword) {
         Optional<OtpToken> otpTokenOpt = otpTokenRepository.findByOtp(otp);
         if (otpTokenOpt.isEmpty()) return false;
-
         OtpToken otpToken = otpTokenOpt.get();
-        if (otpToken.isUsed() || otpToken.getExpiryDate().isBefore(LocalDateTime.now())) return false;
-
+        if (otpToken.isUsed() || otpToken.getExpireDate().isBefore(LocalDateTime.now())) return false;
         User user = otpToken.getUser();
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-
         otpToken.setUsed(true);
         otpTokenRepository.save(otpToken);
-
         return true;
     }
+    
+    @Override
+    public void sendOtpForPhone(String phoneNumber) {
+        String normalizedPhone;
+        try {
+            normalizedPhone = PhoneNumberUtil.toE164(phoneNumber);
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid phone number for OTP: {}", phoneNumber);
+            return;
+        }
+        Optional<User> userOpt = userRepository.findByPhoneNumber(normalizedPhone);
+        if (userOpt.isEmpty()) {
+            log.warn("No user found for phone: {}", normalizedPhone);
+            return;
+        }
+        User user = userOpt.get();
+        String otp = String.valueOf(100000 + new Random().nextInt(900000));
+        OtpToken otpToken = new OtpToken();
+        otpToken.setOtp(otp);
+        otpToken.setUser(user);
+        otpToken.setExpireDate(LocalDateTime.now().plusMinutes(10));
+        otpTokenRepository.save(otpToken);
+        // Send OTP via Twilio SMS (best practice: handle exceptions)
+        try {
+            Twilio.init(twilioAccountSid, twilioAuthToken);
+            Message.creator(
+                new com.twilio.type.PhoneNumber(normalizedPhone),
+                new com.twilio.type.PhoneNumber(twilioFromNumber),
+                "Your verification code is: " + otp + ". It will expire in 10 minutes. "
+                		+ "Do not share this code with anyone."
+            ).create();
+            log.info("OTP SMS sent to {}", normalizedPhone);
+        } catch (Exception e) {
+            log.error("Failed to send OTP SMS to {}: {}", normalizedPhone, e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public boolean verifyOtpForPhone(String phoneNumber, String otp, String newPassword) {
+        String normalizedPhone;
+        try {
+            normalizedPhone = PhoneNumberUtil.toE164(phoneNumber);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+        Optional<User> userOpt = userRepository.findByPhoneNumber(normalizedPhone);
+        if (!userOpt.isPresent()) return false;
+        User user = userOpt.get();
+        Optional<OtpToken> otpTokenOpt = otpTokenRepository.findByOtp(otp);
+        if (otpTokenOpt.isEmpty()) return false;
+        OtpToken otpToken = otpTokenOpt.get();
+        if (!otpToken.getUser().getId().equals(user.getId())) return false;
+        if (otpToken.isUsed() || otpToken.getExpireDate().isBefore(LocalDateTime.now())) return false;
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        otpToken.setUsed(true);
+        otpTokenRepository.save(otpToken);
+        return true;
+    }
+
+    /*
+    @Override
+    public void sendOtpForPhone(String phoneNumber) {
+        Optional<User> userOpt = userRepository.findByPhoneNumber(phoneNumber);
+        if (userOpt.isEmpty()) return;
+        User user = userOpt.get();
+        String otp = String.valueOf(100000 + new Random().nextInt(900000));
+        OtpToken otpToken = new OtpToken();
+        otpToken.setOtp(otp);
+        otpToken.setUser(user);
+        otpToken.setExpireDate(LocalDateTime.now().plusMinutes(10));
+        otpTokenRepository.save(otpToken);
+        // Send OTP via Twilio SMS (best practice: handle exceptions)
+        try {
+            Twilio.init(twilioAccountSid, twilioAuthToken);
+            Message.creator(
+                new com.twilio.type.PhoneNumber(phoneNumber),
+                new com.twilio.type.PhoneNumber(twilioFromNumber),
+                "Your OTP code is: " + otp
+            ).create();
+        } catch (Exception e) {
+            // Log error (best practice: use a logger, not System.out)
+            // logger.error("Failed to send OTP SMS", e);
+        }
+    }
+
+    @Override
+    public boolean verifyOtpForPhone(String phoneNumber, String otp, String newPassword) {
+        Optional<User> userOpt = userRepository.findByPhoneNumber(phoneNumber);
+        if (!userOpt.isPresent()) return false;
+        User user = userOpt.get();
+        Optional<OtpToken> otpTokenOpt = otpTokenRepository.findByOtp(otp);
+        if (otpTokenOpt.isEmpty()) return false;
+        OtpToken otpToken = otpTokenOpt.get();
+        if (!otpToken.getUser().getId().equals(user.getId())) return false;
+        if (otpToken.isUsed() || otpToken.getExpireDate().isBefore(LocalDateTime.now())) return false;
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        otpToken.setUsed(true);
+        otpTokenRepository.save(otpToken);
+        return true;
+    }*/
 }
+
