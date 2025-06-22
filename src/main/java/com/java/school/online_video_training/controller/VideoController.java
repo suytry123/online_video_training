@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/videos")
+@RequestMapping("/videos")
 public class VideoController {
 	private final VideoService videoService;
 	private final VideoMapper videoMapper;

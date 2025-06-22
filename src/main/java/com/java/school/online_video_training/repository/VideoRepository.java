@@ -13,13 +13,13 @@ import com.java.school.online_video_training.projection.VideoReportProjection;
 
 @Repository
 public interface VideoRepository extends JpaRepository<Video, Long>, JpaSpecificationExecutor<Video> {
-	// String findByImageCover(String path);
-	// Video findByCoverImage(String coverImage);
+	//String findByImageCover(String path);
+	//Video findByCoverImage(String coverImage);
 	Optional<Video> findByImageCover(String path);
-
-	@Query("SELECT v.title AS title, c.name AS courseName, v.userCreated AS userCreated, "
-			+ "v.userModified AS userModified, v.dateCreated AS dateCreated, v.dateModified AS dateModified "
-			+ "FROM Video v JOIN v.course c ORDER BY v.dateCreated DESC")
+	
+	@Query("SELECT v.title AS title, c.name AS courseName, v.userCreated AS userCreated, " +
+		       "v.userModified AS userModified, v.dateCreate AS dateCreate, v.dateModified AS dateModified " +
+		       "FROM Video v JOIN v.course c ORDER BY v.dateCreate DESC")
 	List<VideoReportProjection> findAllVideoDetails();
-
+	
 }

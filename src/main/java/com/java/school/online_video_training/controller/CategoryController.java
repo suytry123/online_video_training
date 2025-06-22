@@ -25,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("api/categories")
+@RequestMapping("categories")
 public class CategoryController {
 
 //	@Autowired

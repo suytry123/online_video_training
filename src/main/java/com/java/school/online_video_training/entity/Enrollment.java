@@ -10,7 +10,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -19,7 +18,6 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "enrollments")
 public class Enrollment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,16 +37,14 @@ public class Enrollment {
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal price; // Amount paid for this enrollment (null or 0 if unpaid)
 
-    @Column(name = "payment_status", nullable = false)
+    @Column(nullable = false)
     private String paymentStatus; // e.g., "UNPAID", "PAID"
 
     // (Optional) Add timestamps for auditing
      @CreationTimestamp
-     @Column(name = "created_at")
      private LocalDateTime createdAt;
      
      @UpdateTimestamp
-     @Column(name = "updated_at")
      private LocalDateTime updatedAt;
     
 //    private PaymentStatus paymentStatus = PaymentStatus.UNPAID;

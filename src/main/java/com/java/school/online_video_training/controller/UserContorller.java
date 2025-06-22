@@ -32,7 +32,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.java.school.online_video_training.config.security.UserService;
 import com.java.school.online_video_training.dto.PageDTO;
-import com.java.school.online_video_training.dto.ResetPasswordRequest;
 import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserRegistrationDTO;
 import com.java.school.online_video_training.entity.User;
