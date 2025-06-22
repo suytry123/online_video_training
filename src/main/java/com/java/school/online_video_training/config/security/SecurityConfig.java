@@ -21,14 +21,14 @@ import com.java.school.online_video_training.config.jwt.TokenVerifyFIlter;
 
 import lombok.RequiredArgsConstructor;
 
-@Configuration
-@RequiredArgsConstructor
+//@Configuration
+//@RequiredArgsConstructor
 @EnableGlobalMethodSecurity(
 		  prePostEnabled = true, 
 		  securedEnabled = true, 
 		  jsr250Enabled = true)
 public class SecurityConfig {
-	
+	/*
 	private final PasswordEncoder passwordEncoder;
 	private final UserDetailsService userDetailsService;
 	private final FilterChainExceptionHandler filterChainExceptionHandler;
@@ -76,4 +76,5 @@ public class SecurityConfig {
 		authenticationProvider.setPasswordEncoder(passwordEncoder);
 		return authenticationProvider;
 	}
+	*/
 }
