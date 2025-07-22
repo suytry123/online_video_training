@@ -27,12 +27,17 @@ public class OtpServiceImpl implements OtpService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${twilio.account-sid}")
-    private String twilioAccountSid;
-    @Value("${twilio.auth-token}")
-    private String twilioAuthToken;
-    @Value("${twilio.from-number}")
-    private String twilioFromNumber;
+    
+//    @Value("${twilio.account-sid}")
+//    private String twilioAccountSid;
+//    @Value("${twilio.auth-token}")
+//    private String twilioAuthToken;
+//    @Value("${twilio.from-number}")
+//    private String twilioFromNumber;
+    
+    private final String twilioAccountSid = System.getenv("TWILIO_ACCOUNT_SID");
+    private final String twilioAuthToken = System.getenv("TWILIO_AUTH_TOKEN");
+    private final String twilioFromNumber = System.getenv("TWILIO_FROM_NUMBER");
 
     @Override
     public void sendOtpForEmail(String usernameOrEmailOrPhone) {

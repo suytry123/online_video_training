@@ -52,8 +52,7 @@ app:
 #  jwtSecret: "u8Qw1v2x3y4z5A6B7C8D9E0F1G2H3I4J5K6L7M8N9O0P1Q2R3S4T5U6V7W8X9Y0Z"
   jwtExpirationMs: 86400000
   admin-email: Boysoy331@gmail.com
-
 twilio:
-  account-sid: twilioAccountSid123
-  auth-token: twilioAuthToken123
-  from-number: 069492821
+  account-sid: ""
+  auth-token: ""
+  from-number: ""
