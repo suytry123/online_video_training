@@ -48,12 +48,12 @@ spring:
 app:
   base-url: https://2fbe-154-214-2-4.ngrok-free.app
   logo-upload-dir: file-repository
-#  jwtSecret: ======================Suy===========================
-  jwtSecret: "u8Qw1v2x3y4z5A6B7C8D9E0F1G2H3I4J5K6L7M8N9O0P1Q2R3S4T5U6V7W8X9Y0Z"
+  jwtSecret: ======================Suy===========================
+#  jwtSecret: "u8Qw1v2x3y4z5A6B7C8D9E0F1G2H3I4J5K6L7M8N9O0P1Q2R3S4T5U6V7W8X9Y0Z"
   jwtExpirationMs: 86400000
   admin-email: Boysoy331@gmail.com
 
 twilio:
-  account-sid: ACe96c8b448fe9e818cd07c05dc4bb66f6
-  auth-token: c669d2f5347171980814c576d74d501a
+  account-sid: twilioAccountSid123
+  auth-token: twilioAuthToken123
   from-number: 069492821
