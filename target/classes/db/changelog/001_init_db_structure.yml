@@ -221,15 +221,15 @@ databaseChangeLog:
                    constraints:
                      nullable: false
                - column:
-                   name: paymentStatus
+                   name: payment_status
                    type: VARCHAR(32)
                    constraints:
                      nullable: true
                - column:
-                   name: createdAt
+                   name: created_at
                    type: DATETIME
                - column:
-                   name: updatedAt
+                   name: updated_at
                    type: DATETIME        
         - addForeignKeyConstraint:
             baseTableName: enrollments
@@ -244,7 +244,7 @@ databaseChangeLog:
             referencedColumnNames: user_id
             constraintName: fk_enrollments_users
         - createTable:
-            tableName: otps
+            tableName: otp_token
             columns:
               - column:
                   name: id
@@ -253,8 +253,8 @@ databaseChangeLog:
                   constraints:
                     primaryKey: true
               - column:
-                  name: code
-                  type: VARCHAR(10)
+                  name: otp
+                  type: VARCHAR(255)
                   constraints:
                     nullable: false
               - column:
@@ -262,6 +262,27 @@ databaseChangeLog:
                   type: BIGINT
                   constraints:
                     nullable: false
+              - column:
+                  name: expire_date
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: used
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: otp_token
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: user_id
+            constraintName: fk_otp_token_users
         - createTable:
             tableName: email_verifications_token
             columns:
