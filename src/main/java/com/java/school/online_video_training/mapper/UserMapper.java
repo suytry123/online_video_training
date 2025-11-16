@@ -1,10 +1,9 @@
 package com.java.school.online_video_training.mapper;
 
-import javax.validation.Valid;
-
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import com.java.school.online_video_training.dto.UserPhotoDTO;
 import com.java.school.online_video_training.dto.UserRegistrationDTO;
 import com.java.school.online_video_training.entity.User;
 
@@ -20,4 +19,5 @@ public interface UserMapper {
     @Mapping(target = "password", ignore = true)  // Ignore password when mapping back to DTO
     UserRegistrationDTO toUserDTO(UserRegistrationDTO registrationDTO);
 	
+    UserPhotoDTO toPhotoDTO(User user);
 }

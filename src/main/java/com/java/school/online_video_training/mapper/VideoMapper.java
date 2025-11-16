@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import com.java.school.online_video_training.dto.VideoDTO;
+import com.java.school.online_video_training.entity.Course;
 import com.java.school.online_video_training.entity.Video;
 import com.java.school.online_video_training.service.CourseService;
 
@@ -15,4 +16,11 @@ public interface VideoMapper {
 	
 	@Mapping(target = "courseId", source = "course.id")
 	VideoDTO toVideoDTO(Video video);
+	
+	default Course mapCourse(Long courseId) {
+	    if (courseId == null) return null;
+	    com.java.school.online_video_training.entity.Course course = new com.java.school.online_video_training.entity.Course();
+	    course.setId(courseId);
+	    return course;
+	}
 }

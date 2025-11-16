@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.java.school.online_video_training.dto.CourseDTO;
 import com.java.school.online_video_training.dto.CourseDetailDTO;
 import com.java.school.online_video_training.dto.CourseSummaryDTO;
 import com.java.school.online_video_training.dto.VideoDTO;
@@ -16,6 +17,7 @@ import com.java.school.online_video_training.entity.Course;
 import com.java.school.online_video_training.entity.Enrollment;
 import com.java.school.online_video_training.entity.User;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
+import com.java.school.online_video_training.mapper.CourseMapper;
 import com.java.school.online_video_training.repository.CourseRepository;
 import com.java.school.online_video_training.repository.EnrollmentRepository;
 import com.java.school.online_video_training.repository.UserRepository;
@@ -35,6 +37,7 @@ public class CourseServiceImpl implements CourseService {
 	private final VideoRepository videoRepository;
 	private final UserRepository userRepository;
 	private final EnrollmentRepository enrollmentRepository;
+	private final CourseMapper courseMapper;
 
 	// private final CourseMapper courseMapper;
 
@@ -44,18 +47,23 @@ public class CourseServiceImpl implements CourseService {
 //		return courseRepository.save(course);
 //	}
 
-	@Override
-	public Course create(Course course) {
-		return courseRepository.save(course);
-	}
+
+    @Override
+    public CourseDTO create(CourseDTO courseDTO) {
+        Course course = courseMapper.toCourse(courseDTO);
+        Course saved = courseRepository.save(course);
+        return courseMapper.toCourseDTO(saved);
+    }
+
+    @Override
+    public CourseDTO getById(Long id) {
+        Course course = courseRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Course", id));
+        return courseMapper.toCourseDTO(course);
+    }
 
 	@Override
-	public Course getById(Long id) {
-		return courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course", id));
-	}
-
-	@Override
-	public Page<Course> getCourses(Map<String, String> course) {
+	public Page<CourseDTO> getCourses(Map<String, String> course) {
 		CourseFilter courseFilter = new CourseFilter();
 
 		if (course.containsKey("name")) {
@@ -83,15 +91,20 @@ public class CourseServiceImpl implements CourseService {
 		Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
 
 		Page<Course> page = courseRepository.findAll(courseSpec, pageable);
-		return page;
+		return page.map(courseMapper::toCourseDTO);
 	}
 
-	@Override
-	public Course update(Long id, Course courseUpdate) {
-		Course course = getById(id);
-		course.setName(courseUpdate.getName());
-		return courseRepository.save(course);
-	}
+	  @Override
+	    public CourseDTO update(Long id, CourseDTO courseUpdate) {
+	        Course course = courseRepository.findById(id)
+	            .orElseThrow(() -> new ResourceNotFoundException("Course", id));
+	        Course updateEntity = courseMapper.toCourse(courseUpdate);
+	        course.setName(updateEntity.getName());
+	        course.setCategory_id(updateEntity.getCategory_id());
+	        course.setAuthor_id(updateEntity.getAuthor_id());
+	        Course updated = courseRepository.save(course);
+	        return courseMapper.toCourseDTO(updated);
+	    }
 
 	@Override
 	public void delete(Long id) {

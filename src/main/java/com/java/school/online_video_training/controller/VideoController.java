@@ -23,8 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.java.school.online_video_training.dto.PageDTO;
 import com.java.school.online_video_training.dto.VideoDTO;
-import com.java.school.online_video_training.entity.Video;
-import com.java.school.online_video_training.mapper.VideoMapper;
 import com.java.school.online_video_training.service.VideoService;
 
 import lombok.RequiredArgsConstructor;
@@ -36,48 +34,43 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/videos")
 public class VideoController {
 	private final VideoService videoService;
-	private final VideoMapper videoMapper;
 
 	@PreAuthorize("hasAuthority('video:write')")
 	@PostMapping
-	// @ResponseStatus(HttpStatus.CREATED)
 	public ResponseEntity<?> createVideo(@RequestBody VideoDTO videoDTO) {
-		Video video = videoMapper.toVideo(videoDTO);
-		video = videoService.createVideo(video);
-		return ResponseEntity.ok(videoMapper.toVideoDTO(video));
+	    VideoDTO created = videoService.createVideo(videoDTO);
+	    return ResponseEntity.ok(created);
 	}
 
 	@PreAuthorize("hasAuthority('video:read')")
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getVideoById(@PathVariable Long id) {
-		Video byId = videoService.getVideoById(id);
-		return ResponseEntity.ok(videoMapper.toVideoDTO(byId));
+	    VideoDTO video = videoService.getVideoById(id);
+	    return ResponseEntity.ok(video);
 	}
 
 	@PreAuthorize("hasAuthority('video:read')")
 	@GetMapping
-	public ResponseEntity<?> getCourses(@RequestParam Map<String, String> video) {
-		Page<Video> video1 = videoService.getVideos(video);
-
-		PageDTO dto = new PageDTO(video1);
-
-		return ResponseEntity.ok(dto);
+	public ResponseEntity<?> getVideos(@RequestParam Map<String, String> params) {
+	    Page<VideoDTO> videos = videoService.getVideos(params);
+	    PageDTO dto = new PageDTO(videos);
+	    return ResponseEntity.ok(dto);
 	}
 
 	@PreAuthorize("hasAuthority('video:write')")
 	@PutMapping("{id}")
 	public ResponseEntity<?> updateVideo(@PathVariable Long id, @RequestBody VideoDTO videoDTO) {
-		Video video = videoMapper.toVideo(videoDTO);
-		video = videoService.updateVideo(id, video);
-		return ResponseEntity.ok(video);
+	    VideoDTO updated = videoService.updateVideo(id, videoDTO);
+	    return ResponseEntity.ok(updated);
 	}
 
 	@PreAuthorize("hasAuthority('video:write')")
 	@DeleteMapping("{id}")
 	public ResponseEntity<?> deleteVideo(@PathVariable Long id) {
-		videoService.deleteVideo(id);
-		return ResponseEntity.ok().build();
+	    videoService.deleteVideo(id);
+	    return ResponseEntity.ok().build();
 	}
+	
 	
 /*
 	@PreAuthorize("hasAuthority('video:write')")

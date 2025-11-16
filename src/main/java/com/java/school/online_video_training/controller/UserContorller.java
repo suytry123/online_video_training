@@ -33,6 +33,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.java.school.online_video_training.config.security.UserService;
 import com.java.school.online_video_training.dto.PageDTO;
 import com.java.school.online_video_training.dto.SignupUser;
+import com.java.school.online_video_training.dto.UserPhotoDTO;
 import com.java.school.online_video_training.dto.UserRegistrationDTO;
 import com.java.school.online_video_training.entity.User;
 
@@ -155,7 +156,7 @@ public class UserContorller {
 	@PreAuthorize("hasAuthority('user:write')")
 	public ResponseEntity<?> uploadPhoto(@PathVariable Long userId, @RequestPart("photo") MultipartFile photo) {
 		try {
-			User user = userService.uploadPhoto(userId, photo);
+			UserPhotoDTO user = userService.uploadPhoto(userId, photo);
 			return ResponseEntity.ok(user);
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Photo upload failed");
@@ -166,8 +167,8 @@ public class UserContorller {
 	@PreAuthorize("hasAuthority('user:read')")
 	public ResponseEntity<?> getPhoto(@PathVariable Long userId) {
 		try {
-			User user = userService.getPhotoById(userId);
-			String photo = user.getPhoto();
+			UserPhotoDTO user = userService.getPhotoById(userId);
+			String photo = user.getUserPhoto();
 			if (photo == null) {
 				return ResponseEntity.notFound().build();
 			}
@@ -202,7 +203,7 @@ public class UserContorller {
 	@PreAuthorize("hasAuthority('user:write')")
 	public ResponseEntity<?> updatePhoto(@PathVariable Long userId, @RequestPart("photo") MultipartFile photo) {
 		try {
-			User user = userService.updatePhoto(userId, photo);
+			UserPhotoDTO user = userService.updatePhoto(userId, photo);
 			return ResponseEntity.ok(user);
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Photo update failed");

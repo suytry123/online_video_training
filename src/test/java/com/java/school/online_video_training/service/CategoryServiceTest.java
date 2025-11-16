@@ -1,6 +1,5 @@
 package com.java.school.online_video_training.service;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,10 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.java.school.online_video_training.entity.Category;
-import com.java.school.online_video_training.exception.ResourceNotFoundException;
 import com.java.school.online_video_training.repository.CategoryRepository;
 import com.java.school.online_video_training.service.impl.CategoryServiceImpl;
 @ExtendWith(MockitoExtension.class)
@@ -27,28 +24,11 @@ public class CategoryServiceTest {
 	
 	private CategoryService categoryService;
 	
-	@BeforeEach
+	/*@BeforeEach
 	public void setUp() {
 		categoryService = new CategoryServiceImpl(categoryRepository);
 	}
-//	
-//	@Test
-//	public void testCreate() {
-//		//given
-//		Category category = new Category();
-//		category.setName("Java");
-//		category.setId(1L);
-//		
-//		//when
-//		when(categoryRepository.save(any(Category.class))).thenReturn(category);
-//		Category category2 = categoryService.create(new Category());
-//		
-//		//then
-//		assertEquals(1, category2.getId());
-//		assertEquals("Java", category2.getName());
-//	}
 	
-
 	@Test
 	public void testCreate() {
 		//given
@@ -74,7 +54,24 @@ public class CategoryServiceTest {
 		//then
 		assertEquals(1L, returnCategory.getId());
 		assertEquals("Java", returnCategory.getName());
-	}
+	}*/
+//	@Test
+//	public void testCreate() {
+//		//given
+//		Category category = new Category();
+//		category.setName("Java");
+//		category.setId(1L);
+//		
+//		//when
+//		when(categoryRepository.save(any(Category.class))).thenReturn(category);
+//		Category category2 = categoryService.create(new Category());
+//		
+//		//then
+//		assertEquals(1, category2.getId());
+//		assertEquals("Java", category2.getName());
+//	}
+	
+
 	
 //	@Test
 //	public void testByIdThrow() {

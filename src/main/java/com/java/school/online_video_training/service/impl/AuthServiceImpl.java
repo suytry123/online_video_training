@@ -1,7 +1,10 @@
 package com.java.school.online_video_training.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -70,7 +73,12 @@ public class AuthServiceImpl implements AuthService{
 
 		user.setRoles(roles);
 		userRepository.save(user);
-		return jwtUtils.generateJwtToken(signUpRequest.getUsername());
+		Set<String> authorities = roles.stream()
+			    .map(Role::getName)
+			    .collect(Collectors.toSet());
+
+			return jwtUtils.generateJwtToken(signUpRequest.getUsername(), new ArrayList<>(authorities));
+//		return jwtUtils.generateJwtToken(signUpRequest.getUsername());
 	}
 
 	@Override
@@ -80,8 +88,15 @@ public class AuthServiceImpl implements AuthService{
 
 		    SecurityContextHolder.getContext().setAuthentication(authentication);
 		    AuthUser userPrincipal = (AuthUser) authentication.getPrincipal();
+		    
+		    List<String> authorities = userPrincipal.getAuthorities().stream()
+		    	    .map(grantedAuthority -> grantedAuthority.getAuthority())
+		    	    .collect(Collectors.toList());
 
-		    return jwtUtils.generateJwtToken(userPrincipal.getUsername());
+		    	// Pass username and authorities to JWT generator
+		    	return jwtUtils.generateJwtToken(userPrincipal.getUsername(), authorities);
+
+//		    return jwtUtils.generateJwtToken(userPrincipal.getUsername());
 	}
 	
 	

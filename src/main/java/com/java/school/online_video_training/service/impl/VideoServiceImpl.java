@@ -44,17 +44,21 @@ public class VideoServiceImpl implements VideoService {
 	private final VideoMapper videoMapper;
 
 	@Override
-	public Video createVideo(Video video) {
-		return videoRepository.save(video);
+	public VideoDTO createVideo(VideoDTO videoDTO) {
+	    Video video = videoMapper.toVideo(videoDTO);
+	    Video saved = videoRepository.save(video);
+	    return videoMapper.toVideoDTO(saved);
 	}
 
 	@Override
-	public Video getVideoById(Long id) {
-		return videoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Video", id));
+	public VideoDTO getVideoById(Long id) {
+	    Video video = videoRepository.findById(id)
+	        .orElseThrow(() -> new ResourceNotFoundException("Video", id));
+	    return videoMapper.toVideoDTO(video);
 	}
 
 	@Override
-	public Page<Video> getVideos(Map<String, String> video) {
+	public Page<VideoDTO> getVideos(Map<String, String> video) {
 		VideoFilter videoFilter = new VideoFilter();
 
 		if (video.containsKey("title")) {
@@ -82,21 +86,26 @@ public class VideoServiceImpl implements VideoService {
 		Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
 
 		Page<Video> page = videoRepository.findAll(videoSpec, pageable);
-		return page;
+		return page.map(videoMapper::toVideoDTO);
 	}
 
 	@Override
-	public Video updateVideo(Long id, Video videoUpdate) {
-		Video video = getVideoById(id);
-		video.setTitle(videoUpdate.getTitle());
-		return videoRepository.save(video);
+	public VideoDTO updateVideo(Long id, VideoDTO videoDTO) {
+	    Video video = videoRepository.findById(id)
+	        .orElseThrow(() -> new ResourceNotFoundException("Video", id));
+	    Video updateEntity = videoMapper.toVideo(videoDTO);
+	    video.setTitle(updateEntity.getTitle());
+	  
+	    Video updated = videoRepository.save(video);
+	    return videoMapper.toVideoDTO(updated);
 	}
 
 	@Override
 	public void deleteVideo(Long id) {
-		Video videoById = getVideoById(id);
-		videoRepository.delete(videoById);
-		log.info("video with id = %ld is deleted".formatted(id));
+	    Video video = videoRepository.findById(id)
+	        .orElseThrow(() -> new ResourceNotFoundException("Video", id));
+	    videoRepository.delete(video);
+	    log.info("Video with id = {} is deleted", id);
 	}
 
 	/*

@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.java.school.online_video_training.dto.CategoryDTO;
 import com.java.school.online_video_training.dto.PageDTO;
-import com.java.school.online_video_training.entity.Category;
 import com.java.school.online_video_training.mapper.CategoryMapper;
 import com.java.school.online_video_training.service.CategoryService;
 
@@ -35,30 +34,27 @@ public class CategoryController {
 	@PreAuthorize("hasAuthority('category:write')")
 	@PostMapping
 	public ResponseEntity<?> create(@RequestBody CategoryDTO dto) {
-		Category category = categoryMapper.toCategory(dto);
-		categoryService.create(category);
-		return ResponseEntity.ok(categoryMapper.toCategoryDTO(category));
+		return ResponseEntity.ok(categoryService.create(dto));
 	}
 
 	@PreAuthorize("hasAuthority('category:read')")
 	@GetMapping("{id}")
 	public ResponseEntity<?> getOneCategory(@PathVariable("id") Long categoryId) {
-		Category category = categoryService.getById(categoryId);
-		return ResponseEntity.ok(categoryMapper.toCategoryDTO(category));
+		CategoryDTO category = categoryService.getById(categoryId);
+		return ResponseEntity.ok(category);
 	}
 
 	@PreAuthorize("hasAuthority('category:write')")
 	@PutMapping("{id}")
 	public ResponseEntity<?> update(@PathVariable("id") Long categoryId, @RequestBody CategoryDTO categoryDTO) {
-		Category category = categoryMapper.toCategory(categoryDTO);
-		Category updatedCategory = categoryService.update(categoryId, category);
-		return ResponseEntity.ok(categoryMapper.toCategoryDTO(updatedCategory));
+		CategoryDTO updatedCategory = categoryService.update(categoryId, categoryDTO);
+		return ResponseEntity.ok(updatedCategory);
 	}
 
 	@PreAuthorize("hasAuthority('category:read')")
 	@GetMapping
 	public ResponseEntity<?> getCategories(@RequestParam Map<String, String> params) {
-		Page<Category> page = categoryService.getCategories(params);
+		Page<CategoryDTO> page = categoryService.getCategories(params);
 
 		PageDTO pageDTO = new PageDTO(page);
 

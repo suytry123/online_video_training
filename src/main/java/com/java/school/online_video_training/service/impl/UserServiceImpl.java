@@ -26,10 +26,10 @@ import com.java.school.online_video_training.config.security.AuthUser;
 import com.java.school.online_video_training.config.security.JwtUtils;
 import com.java.school.online_video_training.config.security.UserService;
 import com.java.school.online_video_training.dto.SignupUser;
+import com.java.school.online_video_training.dto.UserPhotoDTO;
 import com.java.school.online_video_training.dto.UserRegistrationDTO;
 import com.java.school.online_video_training.entity.Role;
 import com.java.school.online_video_training.entity.User;
-import com.java.school.online_video_training.entity.Video;
 import com.java.school.online_video_training.exception.ApiException;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
 import com.java.school.online_video_training.mapper.UserMapper;
@@ -38,8 +38,6 @@ import com.java.school.online_video_training.repository.UserRepository;
 import com.java.school.online_video_training.service.EmailService;
 import com.java.school.online_video_training.service.UserValidationService;
 import com.java.school.online_video_training.service.util.PageUtil;
-import com.java.school.online_video_training.spec.ImageFilter;
-import com.java.school.online_video_training.spec.ImageSpec;
 import com.java.school.online_video_training.spec.UserFilter;
 import com.java.school.online_video_training.spec.UserSpec;
 
@@ -528,56 +526,56 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User uploadPhoto(Long userId, MultipartFile photo) {
-	    User user = userRepository.findById(userId)
-	        .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-	    // Only allow upload if no photo exists
-	    if (user.getPhoto() != null && !user.getPhoto().isEmpty()) {
-	        throw new IllegalStateException("Photo already exists. Use PUT to update.");
-	    }
-	    // Save new photo
-	    String uploadDir = "src/main/resources/file-repository/";
-	    try {
-	        Files.createDirectories(Paths.get(uploadDir));
-	        String ext = photo.getOriginalFilename() != null && photo.getOriginalFilename().contains(".") ?
-	            photo.getOriginalFilename().substring(photo.getOriginalFilename().lastIndexOf('.')) : "";
-	        String fileName = java.util.UUID.randomUUID() + ext;
-	        Path filePath = Paths.get(uploadDir, fileName);
-	        Files.write(filePath, photo.getBytes());
-	        user.setPhoto(fileName);
-	        return userRepository.save(user);
-	    } catch (Exception e) {
-	        throw new RuntimeException("Photo upload failed", e);
-	    }
-	}
+	public UserPhotoDTO uploadPhoto(Long userId, MultipartFile photo) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+    if (user.getPhoto() != null && !user.getPhoto().isEmpty()) {
+        throw new IllegalStateException("Photo already exists. Use PUT to update.");
+    }
+    String uploadDir = "src/main/resources/file-repository/";
+    try {
+        Files.createDirectories(Paths.get(uploadDir));
+        String ext = photo.getOriginalFilename() != null && photo.getOriginalFilename().contains(".") ?
+            photo.getOriginalFilename().substring(photo.getOriginalFilename().lastIndexOf('.')) : "";
+        String fileName = java.util.UUID.randomUUID() + ext;
+        Path filePath = Paths.get(uploadDir, fileName);
+        Files.write(filePath, photo.getBytes());
+        user.setPhoto(fileName);
+        userRepository.save(user);
+        return mapper.toPhotoDTO(user);
+    } catch (Exception e) {
+        throw new RuntimeException("Photo upload failed", e);
+    }
+}
 	
 	@Override
-	public User updatePhoto(Long userId, MultipartFile photo) {
-	    try {
-	        User user = userRepository.findById(userId)
-	            .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-	        // Delete old photo if exists
-	        String oldPhoto = user.getPhoto();
-	        if (oldPhoto != null) {
-	            Path oldFilePath = Paths.get("src/main/resources/file-repository/", oldPhoto);
-	            Files.deleteIfExists(oldFilePath);
-	        }
-	        String uploadDir = "src/main/resources/file-repository/";
-	        Files.createDirectories(Paths.get(uploadDir));
-	        String fileName = UUID.randomUUID() + "_" + photo.getOriginalFilename();
-	        Path filePath = Paths.get(uploadDir, fileName);
-	        Files.write(filePath, photo.getBytes());
-	        user.setPhoto(fileName);
-	        return userRepository.save(user);
-	    } catch (Exception e) {
-	        throw new RuntimeException("Photo update failed", e);
-	    }
-	}
+	public UserPhotoDTO updatePhoto(Long userId, MultipartFile photo) {
+    try {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+        String oldPhoto = user.getPhoto();
+        if (oldPhoto != null) {
+            Path oldFilePath = Paths.get("src/main/resources/file-repository/", oldPhoto);
+            Files.deleteIfExists(oldFilePath);
+        }
+        String uploadDir = "src/main/resources/file-repository/";
+        Files.createDirectories(Paths.get(uploadDir));
+        String fileName = UUID.randomUUID() + "_" + photo.getOriginalFilename();
+        Path filePath = Paths.get(uploadDir, fileName);
+        Files.write(filePath, photo.getBytes());
+        user.setPhoto(fileName);
+        userRepository.save(user);
+        return mapper.toPhotoDTO(user);
+    } catch (Exception e) {
+        throw new RuntimeException("Photo update failed", e);
+    }
+}
 	
 	@Override
-	public User getPhotoById(Long userId) {
-	    return userRepository.findById(userId)
-	        .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+	public UserPhotoDTO getPhotoById(Long userId) {
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+    return mapper.toPhotoDTO(user);
 	}
 
 	/*

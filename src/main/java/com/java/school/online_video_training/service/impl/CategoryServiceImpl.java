@@ -2,13 +2,14 @@ package com.java.school.online_video_training.service.impl;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.java.school.online_video_training.dto.CategoryDTO;
 import com.java.school.online_video_training.entity.Category;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
+import com.java.school.online_video_training.mapper.CategoryMapper;
 import com.java.school.online_video_training.repository.CategoryRepository;
 import com.java.school.online_video_training.service.CategoryService;
 import com.java.school.online_video_training.service.util.PageUtil;
@@ -19,64 +20,58 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CategoryServiceImpl implements CategoryService{
-	
-	@Autowired
+public class CategoryServiceImpl implements CategoryService {
+
 	private final CategoryRepository categoryRepository;
-	
+
+	private final CategoryMapper categoryMapper;
+
 	@Override
-	public Category create(Category category) {
-		return categoryRepository.save(category);
+	public CategoryDTO create(CategoryDTO dto) {
+		Category category = categoryMapper.toCategory(dto);
+		Category save = categoryRepository.save(category);
+		return categoryMapper.toCategoryDTO(save);
 	}
 
 	@Override
-	public Category getById(Long id) {
-		return categoryRepository.findById(id)
-			.orElseThrow(() -> new ResourceNotFoundException("Category", id));
+	public CategoryDTO getById(Long id) {
+		Category category = categoryRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Category", id));
+		return categoryMapper.toCategoryDTO(category);
 	}
 
 	@Override
-	public Category update(Long id, Category categoryUpdate) {
-		Category category = getById(id);
+	public CategoryDTO update(Long id, CategoryDTO categoryUpdate) {
+		Category category = categoryRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Category", id));
 		category.setName(categoryUpdate.getName());
-		return categoryRepository.save(category);
+		Category updated = categoryRepository.save(category);
+		return categoryMapper.toCategoryDTO(updated);
 	}
 
-//	@Override
-//	public List<Category> getCategories(String name) {
-//		return categoryRepository.findByNameContaining(name);
-//	}
-
 	@Override
-	public Page<Category> getCategories(Map<String, String> params) {
+	public Page<CategoryDTO> getCategories(Map<String, String> params) {
 		CategoryFilter categoryFilter = new CategoryFilter();
-		
-		if(params.containsKey("name")) {
+		if (params.containsKey("name")) {
 			String name = params.get("name");
 			categoryFilter.setName(name);
 		}
-		
-		if(params.containsKey("id")) {
+		if (params.containsKey("id")) {
 			String id = params.get("id");
 			categoryFilter.setId(Long.parseLong(id));
 		}
-		
 		int pageLimit = PageUtil.DEFAULT_PAGE_LIMIT;
-		if(params.containsKey(PageUtil.PAGE_LIMIT)) {
+		if (params.containsKey(PageUtil.PAGE_LIMIT)) {
 			pageLimit = Integer.parseInt(params.get(PageUtil.PAGE_LIMIT));
 		}
-		
 		int pageNumber = PageUtil.DEFAULT_PAGE_NUMBER;
-		if(params.containsKey(PageUtil.PAGE_NUMBER)){
+		if (params.containsKey(PageUtil.PAGE_NUMBER)) {
 			pageNumber = Integer.parseInt(params.get(PageUtil.PAGE_NUMBER));
 		}
-		
 		CategorySpec categorySpec = new CategorySpec(categoryFilter);
-		
-		 Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
-		
-		 Page<Category> page = categoryRepository.findAll(categorySpec, pageable);
-		 return page;
+		Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
+		Page<Category> page = categoryRepository.findAll(categorySpec, pageable);
+		return page.map(categoryMapper::toCategoryDTO);
 	}
 
 	@Override
@@ -85,6 +80,35 @@ public class CategoryServiceImpl implements CategoryService{
 		categoryRepository.deleteById(id);
 	}
 
+//	@Override
+//	public List<Category> getCategories(String name) {
+//		return categoryRepository.findByNameContaining(name);
+//	}
 
+	/*
+	 * @Override public Page<CategoryDTO> getCategories(Map<String, String> params)
+	 * { CategoryFilter categoryFilter = new CategoryFilter();
+	 * 
+	 * if(params.containsKey("name")) { String name = params.get("name");
+	 * categoryFilter.setName(name); }
+	 * 
+	 * if(params.containsKey("id")) { String id = params.get("id");
+	 * categoryFilter.setId(Long.parseLong(id)); }
+	 * 
+	 * int pageLimit = PageUtil.DEFAULT_PAGE_LIMIT;
+	 * if(params.containsKey(PageUtil.PAGE_LIMIT)) { pageLimit =
+	 * Integer.parseInt(params.get(PageUtil.PAGE_LIMIT)); }
+	 * 
+	 * int pageNumber = PageUtil.DEFAULT_PAGE_NUMBER;
+	 * if(params.containsKey(PageUtil.PAGE_NUMBER)){ pageNumber =
+	 * Integer.parseInt(params.get(PageUtil.PAGE_NUMBER)); }
+	 * 
+	 * CategorySpec categorySpec = new CategorySpec(categoryFilter);
+	 * 
+	 * Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
+	 * 
+	 * Page<CategoryDTO> page = categoryRepository.findAll(categorySpec, pageable);
+	 * return page; }
+	 */
 
 }
