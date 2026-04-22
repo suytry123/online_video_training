@@ -77,7 +77,7 @@ public class AuthServiceImpl implements AuthService{
 			    .map(Role::getName)
 			    .collect(Collectors.toSet());
 
-			return jwtUtils.generateJwtToken(signUpRequest.getUsername(), new ArrayList<>(authorities));
+			return jwtUtils.generateJwtToken(signUpRequest.getEmail(), new ArrayList<>(authorities));
 //		return jwtUtils.generateJwtToken(signUpRequest.getUsername());
 	}
 
