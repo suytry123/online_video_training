@@ -11,13 +11,16 @@ import org.springframework.stereotype.Service;
 
 import com.java.school.online_video_training.dto.CourseDTO;
 import com.java.school.online_video_training.dto.CourseDetailDTO;
+import com.java.school.online_video_training.dto.CourseResponseDTO;
 import com.java.school.online_video_training.dto.CourseSummaryDTO;
 import com.java.school.online_video_training.dto.VideoDTO;
+import com.java.school.online_video_training.entity.Category;
 import com.java.school.online_video_training.entity.Course;
 import com.java.school.online_video_training.entity.Enrollment;
 import com.java.school.online_video_training.entity.User;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
 import com.java.school.online_video_training.mapper.CourseMapper;
+import com.java.school.online_video_training.repository.CategoryRepository;
 import com.java.school.online_video_training.repository.CourseRepository;
 import com.java.school.online_video_training.repository.EnrollmentRepository;
 import com.java.school.online_video_training.repository.UserRepository;
@@ -34,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 public class CourseServiceImpl implements CourseService {
 
 	private final CourseRepository courseRepository;
+	private final CategoryRepository categoryRepository;
 	private final VideoRepository videoRepository;
 	private final UserRepository userRepository;
 	private final EnrollmentRepository enrollmentRepository;
@@ -49,21 +53,41 @@ public class CourseServiceImpl implements CourseService {
 
 
     @Override
-    public CourseDTO create(CourseDTO courseDTO) {
+    public CourseResponseDTO create(CourseDTO courseDTO) {
+    	
+    	 if (courseDTO.getCategoryId() == null) {
+    	     throw new RuntimeException("Category ID is required");
+    	 }
+
+    	 if (courseDTO.getAuthorId() == null) {
+    	     throw new RuntimeException("Author ID is required");
+    	 }
+        
+        Category category = categoryRepository.findById(courseDTO.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        User author = userRepository.findById(courseDTO.getAuthorId())
+                .orElseThrow(() -> new RuntimeException("Author not found"));
+        
         Course course = courseMapper.toCourse(courseDTO);
+        
+        course.setCategory(category);
+        course.setAuthor(author);
+        
         Course saved = courseRepository.save(course);
+        
         return courseMapper.toCourseDTO(saved);
     }
 
     @Override
-    public CourseDTO getById(Long id) {
+    public CourseResponseDTO getCourseById(Long id) {
         Course course = courseRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Course", id));
         return courseMapper.toCourseDTO(course);
     }
 
 	@Override
-	public Page<CourseDTO> getCourses(Map<String, String> course) {
+	public Page<CourseResponseDTO> getCourses(Map<String, String> course) {
 		CourseFilter courseFilter = new CourseFilter();
 
 		if (course.containsKey("name")) {
@@ -95,13 +119,13 @@ public class CourseServiceImpl implements CourseService {
 	}
 
 	  @Override
-	    public CourseDTO update(Long id, CourseDTO courseUpdate) {
+	    public CourseResponseDTO update(Long id, CourseDTO courseUpdate) {
 	        Course course = courseRepository.findById(id)
 	            .orElseThrow(() -> new ResourceNotFoundException("Course", id));
 	        Course updateEntity = courseMapper.toCourse(courseUpdate);
 	        course.setName(updateEntity.getName());
-	        course.setCategory_id(updateEntity.getCategory_id());
-	        course.setAuthor_id(updateEntity.getAuthor_id());
+	        course.setCategory(updateEntity.getCategory());
+	        course.setAuthor(updateEntity.getAuthor());
 	        Course updated = courseRepository.save(course);
 	        return courseMapper.toCourseDTO(updated);
 	    }
@@ -117,8 +141,8 @@ public class CourseServiceImpl implements CourseService {
 	        CourseSummaryDTO dto = new CourseSummaryDTO();
 	        dto.setId(course.getId());
 	        dto.setName(course.getName());
-	        dto.setCategoryId(course.getCategory_id() != null ? course.getCategory_id().getId() : null);
-	        dto.setAuthorName(course.getAuthor_id() != null ? course.getAuthor_id().getUsername() : null);
+	        dto.setCategoryId(course.getCategory() != null ? course.getCategory().getId() : null);
+	        dto.setAuthorName(course.getAuthor() != null ? course.getAuthor().getUsername() : null);
 	        dto.setViews(course.getViews());
 	        dto.setLikes(course.getLikes());
 	        return dto;
@@ -132,8 +156,8 @@ public class CourseServiceImpl implements CourseService {
 	    CourseDetailDTO dto = new CourseDetailDTO();
 	    dto.setId(course.getId());
 	    dto.setName(course.getName());
-	    dto.setCategoryId(course.getCategory_id() != null ? course.getCategory_id().getId() : null);
-	    dto.setAuthorName(course.getAuthor_id() != null ? course.getAuthor_id().getUsername() : null);
+	    dto.setCategoryId(course.getCategory() != null ? course.getCategory().getId() : null);
+	    dto.setAuthorName(course.getAuthor() != null ? course.getAuthor().getUsername() : null);
 	    dto.setViews(course.getViews());
 	    dto.setLikes(course.getLikes());
 	    List<VideoDTO> videos = course.getVideos().stream().map(video -> {

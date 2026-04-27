@@ -30,11 +30,11 @@ public class Course {
 	 
 	@ManyToOne
 	@JoinColumn(name = "category_id")
-	private Category category_id;
+	private Category category;
 	
 	@ManyToOne
 	@JoinColumn(name = "author_id")
-	private User author_id;
+	private User author;
 
 	@Column(name = "views")
 	private Integer views = 0;

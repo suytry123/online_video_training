@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.java.school.online_video_training.dto.CourseDTO;
 import com.java.school.online_video_training.dto.CourseDetailDTO;
 import com.java.school.online_video_training.dto.CourseEnrollDTO;
+import com.java.school.online_video_training.dto.CourseResponseDTO;
 import com.java.school.online_video_training.dto.PageDTO;
 import com.java.school.online_video_training.mapper.CourseMapper;
 import com.java.school.online_video_training.service.CourseService;
@@ -34,7 +35,9 @@ public class CourseController {
 	@PreAuthorize("hasAuthority('course:write')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CourseDTO courseDTO) {
-        CourseDTO created = courseService.create(courseDTO);
+		  System.out.println("DTO: " + courseDTO);
+		  System.out.println("CategoryId: " + courseDTO.getCategoryId());
+        CourseResponseDTO created = courseService.create(courseDTO);
         return ResponseEntity.ok(created);
     }
 
@@ -58,14 +61,14 @@ public class CourseController {
 	@PreAuthorize("hasAuthority('course:read')")
     @GetMapping("{id}")
     public ResponseEntity<?> getById(@PathVariable("id") Long id) {
-        CourseDTO course = courseService.getById(id);
+		CourseResponseDTO course = courseService.getCourseById(id);
         return ResponseEntity.ok(course);
     }
 
     @PreAuthorize("hasAuthority('course:write')")
     @PutMapping("{id}")
     public ResponseEntity<?> update(@PathVariable("id") Long courseId, @RequestBody CourseDTO courseUpdate) {
-        CourseDTO updated = courseService.update(courseId, courseUpdate);
+    	CourseResponseDTO updated = courseService.update(courseId, courseUpdate);
         return ResponseEntity.ok(updated);
     }
 
@@ -79,7 +82,7 @@ public class CourseController {
     @PreAuthorize("hasAuthority('course:read')")
     @GetMapping
     public ResponseEntity<?> getCourses(@RequestParam Map<String, String> course) {
-        Page<CourseDTO> courses = courseService.getCourses(course);
+        Page<CourseResponseDTO> courses = courseService.getCourses(course);
         PageDTO dto = new PageDTO(courses);
         return ResponseEntity.ok(dto);
     }

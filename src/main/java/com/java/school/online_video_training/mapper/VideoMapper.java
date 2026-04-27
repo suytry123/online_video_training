@@ -19,7 +19,7 @@ public interface VideoMapper {
 	
 	default Course mapCourse(Long courseId) {
 	    if (courseId == null) return null;
-	    com.java.school.online_video_training.entity.Course course = new com.java.school.online_video_training.entity.Course();
+	    Course course = new Course();
 	    course.setId(courseId);
 	    return course;
 	}

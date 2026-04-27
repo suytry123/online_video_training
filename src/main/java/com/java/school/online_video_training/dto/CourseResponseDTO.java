@@ -3,13 +3,12 @@ package com.java.school.online_video_training.dto;
 import java.math.BigDecimal;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-public class CourseDTO {
-	private Long categoryId;
+public class CourseResponseDTO {
+	private Long id;
 	private String name;
-	private Long authorId;
 	private BigDecimal price;
+	private String categoryName;
+	private String authorName;
 }
