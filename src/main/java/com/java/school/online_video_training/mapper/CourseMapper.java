@@ -30,8 +30,8 @@ public interface CourseMapper {
 //	@Mapping(target = "categoryId", source = "category_id.id")
 //	CourseDTO toCourseDTO(Course course);
 	
-	@Mapping(target = "author", source = "authorId", ignore = true)
-    @Mapping(target = "category", source = "categoryId", ignore = true)
+	@Mapping(target = "author", source = "authorId")
+    @Mapping(target = "category", source = "categoryId")
     Course toCourse(CourseDTO courseDTO);
 
     @Mapping(target = "categoryName", source = "category.name")

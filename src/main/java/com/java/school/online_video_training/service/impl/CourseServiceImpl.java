@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.java.school.online_video_training.dto.CourseDTO;
 import com.java.school.online_video_training.dto.CourseDetailDTO;
@@ -52,7 +53,8 @@ public class CourseServiceImpl implements CourseService {
 //	}
 
 
-    @Override
+	@Override
+	@Transactional
     public CourseResponseDTO create(CourseDTO courseDTO) {
     	
     	 if (courseDTO.getCategoryId() == null) {
@@ -66,8 +68,11 @@ public class CourseServiceImpl implements CourseService {
         Category category = categoryRepository.findById(courseDTO.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
 
-        User author = userRepository.findById(courseDTO.getAuthorId())
-                .orElseThrow(() -> new RuntimeException("Author not found"));
+        User author = userRepository.findUserById(courseDTO.getAuthorId())
+        	    .filter(user -> user.getRoles()
+        	        .stream()
+        	        .anyMatch(role -> role.getName().equals("AUTHOR")))
+        	    .orElseThrow(() -> new RuntimeException("Author not found or not AUTHOR"));
         
         Course course = courseMapper.toCourse(courseDTO);
         

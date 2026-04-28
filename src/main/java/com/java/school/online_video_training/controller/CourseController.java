@@ -20,7 +20,6 @@ import com.java.school.online_video_training.dto.CourseDetailDTO;
 import com.java.school.online_video_training.dto.CourseEnrollDTO;
 import com.java.school.online_video_training.dto.CourseResponseDTO;
 import com.java.school.online_video_training.dto.PageDTO;
-import com.java.school.online_video_training.mapper.CourseMapper;
 import com.java.school.online_video_training.service.CourseService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/courses")
 public class CourseController {
 	private final CourseService courseService;
-	private final CourseMapper courseMapper;
+//	private final CourseMapper courseMapper;
 
 	@PreAuthorize("hasAuthority('course:write')")
     @PostMapping

@@ -9,6 +9,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
@@ -51,6 +53,11 @@ public class User {
 	private LocalDateTime joinDate;
 	
 	@ManyToMany(fetch = FetchType.EAGER)
+	@JoinTable(
+		    name = "users_roles", 
+		    joinColumns = @JoinColumn(name = "user_user_id"),
+		    inverseJoinColumns = @JoinColumn(name = "roles_id")
+		)
 	private Set<Role> roles;
 	
 	private boolean accountNonExpired;
