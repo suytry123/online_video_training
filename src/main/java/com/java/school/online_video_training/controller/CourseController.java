@@ -34,8 +34,6 @@ public class CourseController {
 	@PreAuthorize("hasAuthority('course:write')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CourseDTO courseDTO) {
-		  System.out.println("DTO: " + courseDTO);
-		  System.out.println("CategoryId: " + courseDTO.getCategoryId());
         CourseResponseDTO created = courseService.create(courseDTO);
         return ResponseEntity.ok(created);
     }
