@@ -7,11 +7,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.java.school.online_video_training.dto.VideoDTO;
+import com.java.school.online_video_training.entity.Video;
 
 public interface VideoService {
 	VideoDTO createVideo(VideoDTO video);
 	//Video createVideo(MultipartFile file,Video video)throws Exception;
 	VideoDTO getVideoById(Long id);
+	List<VideoDTO> getVideosByCourse(Long courseId);
 	Page<VideoDTO> getVideos(Map<String, String> video);
 	VideoDTO updateVideo(Long id, VideoDTO videoUpdate);
 	void deleteVideo(Long id);

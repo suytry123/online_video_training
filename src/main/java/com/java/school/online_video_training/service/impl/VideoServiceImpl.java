@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,11 +17,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.java.school.online_video_training.dto.VideoDTO;
+import com.java.school.online_video_training.entity.Course;
 import com.java.school.online_video_training.entity.Enrollment;
 import com.java.school.online_video_training.entity.Video;
 import com.java.school.online_video_training.exception.FileDeletionException;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
 import com.java.school.online_video_training.mapper.VideoMapper;
+import com.java.school.online_video_training.repository.CourseRepository;
 import com.java.school.online_video_training.repository.EnrollmentRepository;
 import com.java.school.online_video_training.repository.VideoRepository;
 import com.java.school.online_video_training.service.VideoService;
@@ -41,11 +44,23 @@ import lombok.extern.slf4j.Slf4j;
 public class VideoServiceImpl implements VideoService {
 	private final VideoRepository videoRepository;
 	private final EnrollmentRepository enrollmentRepository;
+	private final CourseRepository courseRepository;
 	private final VideoMapper videoMapper;
 
 	@Override
 	public VideoDTO createVideo(VideoDTO videoDTO) {
+		
+		 if (videoDTO.getCourseId() == null) {
+		        throw new RuntimeException("CourseId must not be null");
+		  }
+	    
+	    Course course = courseRepository.findById(videoDTO.getCourseId())
+	            .orElseThrow(() -> new RuntimeException("Course not found"));
+	    
 	    Video video = videoMapper.toVideo(videoDTO);
+	    
+	    video.setCourse(course);
+	    
 	    Video saved = videoRepository.save(video);
 	    return videoMapper.toVideoDTO(saved);
 	}
@@ -55,6 +70,20 @@ public class VideoServiceImpl implements VideoService {
 	    Video video = videoRepository.findById(id)
 	        .orElseThrow(() -> new ResourceNotFoundException("Video", id));
 	    return videoMapper.toVideoDTO(video);
+	}
+	
+	@Override
+	public List<VideoDTO> getVideosByCourse(Long courseId) {
+
+	    if (!courseRepository.existsById(courseId)) {
+	        throw new RuntimeException("Course not found");
+	    }
+
+	    List<Video> videos = videoRepository.findByCourseId(courseId);
+
+	    return videos.stream()
+	            .map(videoMapper::toVideoDTO)
+	            .collect(Collectors.toList());
 	}
 
 	@Override

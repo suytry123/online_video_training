@@ -48,6 +48,11 @@ public class VideoController {
 	    VideoDTO video = videoService.getVideoById(id);
 	    return ResponseEntity.ok(video);
 	}
+	
+	@GetMapping("/course/{courseId}")
+	public ResponseEntity<List<VideoDTO>> getByCourse(@PathVariable Long courseId) {
+	    return ResponseEntity.ok(videoService.getVideosByCourse(courseId));
+	}
 
 	@PreAuthorize("hasAuthority('video:read')")
 	@GetMapping

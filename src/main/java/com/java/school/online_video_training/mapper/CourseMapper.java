@@ -36,6 +36,8 @@ public interface CourseMapper {
 
     @Mapping(target = "categoryName", source = "category.name")
     @Mapping(target = "authorName", source = "author.username")
+    @Mapping(target = "categoryId", source = "category.id") 
+    @Mapping(target = "authorId", source = "author.id")  
     CourseResponseDTO  toCourseDTO(Course course);
 
     @Mapping(target = "category", source = "categoryId")

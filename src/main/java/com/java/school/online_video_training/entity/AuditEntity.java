@@ -15,13 +15,13 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @MappedSuperclass
 public abstract class AuditEntity {
 	@CreatedDate
-	private LocalDateTime dateCreate;
+	private LocalDateTime dateCreated;
 	
 	@LastModifiedDate
 	private LocalDateTime dateModified;
 	
 	@CreatedBy
-	private String userCreated;
+    private String userCreated;
 	
 	@LastModifiedBy
 	private String userModified;

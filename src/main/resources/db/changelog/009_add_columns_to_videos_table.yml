@@ -8,13 +8,13 @@ databaseChangeLog:
         columns:
         - column:
             name: date_created
-            type: DATETIME
+            type: TIMESTAMP
         - column:
             name: date_modified
-            type: DATETIME
+            type: TIMESTAMP
         - column:
             name: user_created
-            type: VARCHAR(30)
+            type: VARCHAR(50)
         - column:
             name: user_modified
-            type: VARCHAR(30)
+            type: VARCHAR(50)
