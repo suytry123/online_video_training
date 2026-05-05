@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.java.school.online_video_training.dto.VideoDTO;
+import com.java.school.online_video_training.dto.VideoResponseDTO;
 import com.java.school.online_video_training.entity.Course;
 import com.java.school.online_video_training.entity.Enrollment;
 import com.java.school.online_video_training.entity.Video;
@@ -48,7 +49,7 @@ public class VideoServiceImpl implements VideoService {
 	private final VideoMapper videoMapper;
 
 	@Override
-	public VideoDTO createVideo(VideoDTO videoDTO) {
+	public VideoResponseDTO createVideo(VideoDTO videoDTO) {
 		
 		 if (videoDTO.getCourseId() == null) {
 		        throw new RuntimeException("CourseId must not be null");
@@ -62,18 +63,18 @@ public class VideoServiceImpl implements VideoService {
 	    video.setCourse(course);
 	    
 	    Video saved = videoRepository.save(video);
-	    return videoMapper.toVideoDTO(saved);
+	    return videoMapper.toVideoResponseDTO(saved);
 	}
 
 	@Override
-	public VideoDTO getVideoById(Long id) {
+	public VideoResponseDTO getVideoById(Long id) {
 	    Video video = videoRepository.findById(id)
 	        .orElseThrow(() -> new ResourceNotFoundException("Video", id));
-	    return videoMapper.toVideoDTO(video);
+	    return videoMapper.toVideoResponseDTO(video);
 	}
 	
 	@Override
-	public List<VideoDTO> getVideosByCourse(Long courseId) {
+	public List<VideoResponseDTO> getVideosByCourse(Long courseId) {
 
 	    if (!courseRepository.existsById(courseId)) {
 	        throw new RuntimeException("Course not found");
@@ -82,12 +83,12 @@ public class VideoServiceImpl implements VideoService {
 	    List<Video> videos = videoRepository.findByCourseId(courseId);
 
 	    return videos.stream()
-	            .map(videoMapper::toVideoDTO)
+	            .map(videoMapper::toVideoResponseDTO)
 	            .collect(Collectors.toList());
 	}
 
 	@Override
-	public Page<VideoDTO> getVideos(Map<String, String> video) {
+	public Page<VideoResponseDTO> getVideos(Map<String, String> video) {
 		VideoFilter videoFilter = new VideoFilter();
 
 		if (video.containsKey("title")) {
@@ -115,18 +116,18 @@ public class VideoServiceImpl implements VideoService {
 		Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
 
 		Page<Video> page = videoRepository.findAll(videoSpec, pageable);
-		return page.map(videoMapper::toVideoDTO);
+		return page.map(videoMapper::toVideoResponseDTO);
 	}
 
 	@Override
-	public VideoDTO updateVideo(Long id, VideoDTO videoDTO) {
+	public VideoResponseDTO updateVideo(Long id, VideoDTO videoDTO) {
 	    Video video = videoRepository.findById(id)
 	        .orElseThrow(() -> new ResourceNotFoundException("Video", id));
 	    Video updateEntity = videoMapper.toVideo(videoDTO);
 	    video.setTitle(updateEntity.getTitle());
 	  
 	    Video updated = videoRepository.save(video);
-	    return videoMapper.toVideoDTO(updated);
+	    return videoMapper.toVideoResponseDTO(updated);
 	}
 
 	@Override
@@ -410,7 +411,7 @@ public class VideoServiceImpl implements VideoService {
 //		video.setVideoLink(videoLink);
 //		videoRepository.save(video);
 //	}
-
+	/*
 	@Override
 	public void videoLink(Long id, List<String> link) {
 		Video video = videoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Video", id));
@@ -479,10 +480,10 @@ public class VideoServiceImpl implements VideoService {
 			throw new ResourceNotFoundException("No video links found for video", id); // Optional: Throw if no links
 																						// are present
 		}
-	}
+	}*/
 	
 	@Override
-	public Page<VideoDTO> getVideosForUser(Long courseId, Long userId, Map<String, String> params) {
+	public Page<VideoResponseDTO> getVideosForUser(Long courseId, Long userId, Map<String, String> params) {
         // Find enrollment for user and course
         Enrollment enrollment = enrollmentRepository.findAll().stream()
             .filter(e -> e.getCourse().getId().equals(courseId) && e.getUser().getId().equals(userId))
@@ -510,7 +511,7 @@ public class VideoServiceImpl implements VideoService {
 
         // If not paid, you can filter for free videos here if you have such a flag
         // For now, just return the page as is
-        return videos.map(videoMapper::toVideoDTO);
+        return videos.map(videoMapper::toVideoResponseDTO);
     }
 	
 	/*

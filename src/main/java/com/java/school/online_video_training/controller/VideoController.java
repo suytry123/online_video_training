@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.java.school.online_video_training.dto.PageDTO;
 import com.java.school.online_video_training.dto.VideoDTO;
+import com.java.school.online_video_training.dto.VideoResponseDTO;
 import com.java.school.online_video_training.service.VideoService;
 
 import lombok.RequiredArgsConstructor;
@@ -38,26 +39,27 @@ public class VideoController {
 	@PreAuthorize("hasAuthority('video:write')")
 	@PostMapping
 	public ResponseEntity<?> createVideo(@RequestBody VideoDTO videoDTO) {
-	    VideoDTO created = videoService.createVideo(videoDTO);
+		log.info("videoLink : " + videoDTO.getVideoLink());
+		VideoResponseDTO created = videoService.createVideo(videoDTO);
 	    return ResponseEntity.ok(created);
 	}
 
 	@PreAuthorize("hasAuthority('video:read')")
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getVideoById(@PathVariable Long id) {
-	    VideoDTO video = videoService.getVideoById(id);
+		VideoResponseDTO video = videoService.getVideoById(id);
 	    return ResponseEntity.ok(video);
 	}
 	
 	@GetMapping("/course/{courseId}")
-	public ResponseEntity<List<VideoDTO>> getByCourse(@PathVariable Long courseId) {
+	public ResponseEntity<List<VideoResponseDTO>> getByCourse(@PathVariable Long courseId) {
 	    return ResponseEntity.ok(videoService.getVideosByCourse(courseId));
 	}
 
 	@PreAuthorize("hasAuthority('video:read')")
 	@GetMapping
 	public ResponseEntity<?> getVideos(@RequestParam Map<String, String> params) {
-	    Page<VideoDTO> videos = videoService.getVideos(params);
+	    Page<VideoResponseDTO> videos = videoService.getVideos(params);
 	    PageDTO dto = new PageDTO(videos);
 	    return ResponseEntity.ok(dto);
 	}
@@ -65,7 +67,7 @@ public class VideoController {
 	@PreAuthorize("hasAuthority('video:write')")
 	@PutMapping("{id}")
 	public ResponseEntity<?> updateVideo(@PathVariable Long id, @RequestBody VideoDTO videoDTO) {
-	    VideoDTO updated = videoService.updateVideo(id, videoDTO);
+		VideoResponseDTO updated = videoService.updateVideo(id, videoDTO);
 	    return ResponseEntity.ok(updated);
 	}
 
@@ -245,6 +247,7 @@ public class VideoController {
 	    }
 	}
 
+	/*
 	@PreAuthorize("hasAuthority('video:write')")
 	@PostMapping("/{id}/linkVideo")
 	// @ResponseStatus(HttpStatus.CREATED)
@@ -292,9 +295,10 @@ public class VideoController {
 	@PreAuthorize("hasAuthority('video:read')")
 	@GetMapping("/user-access")
 	public ResponseEntity<?> getVideosForUser(@RequestParam Long courseId, @RequestParam Long userId, @RequestParam Map<String, String> params) {
-		Page<VideoDTO> videos = videoService.getVideosForUser(courseId, userId, params);
+		Page<VideoResponseDTO> videos = videoService.getVideosForUser(courseId, userId, params);
 		PageDTO dto = new PageDTO(videos);
 		return ResponseEntity.ok(dto);
 	}
+	*/
 
 }

@@ -167,7 +167,7 @@ public class CourseServiceImpl implements CourseService {
 	    dto.setLikes(course.getLikes());
 	    List<VideoDTO> videos = course.getVideos().stream().map(video -> {
 	        VideoDTO vdto = new VideoDTO();
-	        vdto.setId(video.getId());
+//	        vdto.setId(video.getId());
 	        vdto.setCourseId(course.getId());
 	        vdto.setTitle(video.getTitle());
 	        vdto.setDescription(video.getDescription());

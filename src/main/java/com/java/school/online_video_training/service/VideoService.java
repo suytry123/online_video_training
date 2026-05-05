@@ -7,15 +7,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.java.school.online_video_training.dto.VideoDTO;
+import com.java.school.online_video_training.dto.VideoResponseDTO;
 import com.java.school.online_video_training.entity.Video;
 
 public interface VideoService {
-	VideoDTO createVideo(VideoDTO video);
+	VideoResponseDTO createVideo(VideoDTO video);
 	//Video createVideo(MultipartFile file,Video video)throws Exception;
-	VideoDTO getVideoById(Long id);
-	List<VideoDTO> getVideosByCourse(Long courseId);
-	Page<VideoDTO> getVideos(Map<String, String> video);
-	VideoDTO updateVideo(Long id, VideoDTO videoUpdate);
+	VideoResponseDTO getVideoById(Long id);
+	List<VideoResponseDTO> getVideosByCourse(Long courseId);
+	Page<VideoResponseDTO> getVideos(Map<String, String> video);
+	VideoResponseDTO updateVideo(Long id, VideoDTO videoUpdate);
 	void deleteVideo(Long id);
 //	VideoLink videoLink(String url);
 	void saveImage(Long id, MultipartFile file) throws Exception;
@@ -28,10 +29,10 @@ public interface VideoService {
 //	Page<String> getImages(Map<String, String> image) throws Exception;
 //	void deleteImageByPath(String url) throws Exception;
 	void deleteImageById(Long id) throws Exception;
-	void videoLink(Long id, List<String> link);
-	String getLink(Long id);
-	Page<String> getLinks(Map<String, String> link);
-	void updateLink(Long id, List<String> link);
-	void deleteLink(Long id);
-	Page<VideoDTO> getVideosForUser(Long courseId, Long userId, Map<String, String> params);
+//	void videoLink(Long id, List<String> link);
+//	String getLink(Long id);
+//	Page<String> getLinks(Map<String, String> link);
+//	void updateLink(Long id, List<String> link);
+//	void deleteLink(Long id);
+	Page<VideoResponseDTO> getVideosForUser(Long courseId, Long userId, Map<String, String> params);
 }

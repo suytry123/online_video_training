@@ -32,10 +32,10 @@ public class Video extends AuditEntity{
 	private String description;
 	
 	@ElementCollection
-//	@CollectionTable(
-//			name = "video_video_link",//child table name
-//			joinColumns = @JoinColumn(name = "video_id")//FK col name
-//			)
+	@CollectionTable(
+	    name = "video_video_link", // table name
+	    joinColumns = @JoinColumn(name = "video_id") // FK column
+	)
 	@Column(name = "video_link")
 	private List<String> videoLink;
 	
