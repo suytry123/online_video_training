@@ -1,13 +1,13 @@
 package com.java.school.online_video_training.service.impl;
 
+import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
-import com.java.school.online_video_training.entity.Course;
-import com.java.school.online_video_training.entity.User;
-import com.java.school.online_video_training.entity.Video;
 import com.java.school.online_video_training.projection.UserReportProjection;
 import com.java.school.online_video_training.projection.VideoReportProjection;
 import com.java.school.online_video_training.repository.CourseRepository;
@@ -16,6 +16,12 @@ import com.java.school.online_video_training.repository.VideoRepository;
 import com.java.school.online_video_training.service.ReportService;
 
 import lombok.RequiredArgsConstructor;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 @RequiredArgsConstructor
 @Service

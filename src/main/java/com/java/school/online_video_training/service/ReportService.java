@@ -22,4 +22,5 @@ public interface ReportService {
 	List<VideoReportProjection> getDetailedVideoReport();
 
 	List<UserReportProjection> getUserReportBetweenDate(LocalDateTime start, LocalDateTime end);
+	
 }

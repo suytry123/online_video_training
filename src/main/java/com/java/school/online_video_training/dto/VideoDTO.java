@@ -12,5 +12,6 @@ public class VideoDTO {
     private Long courseId;
     private String title;
     private String description;
+    @JsonAlias({ "videoLink", "video_link" })
     private List<String> videoLink; 
 }

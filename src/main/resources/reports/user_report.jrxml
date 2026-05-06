@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports
+    http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+    name="user_report" pageWidth="595" pageHeight="842"
+    columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+
+    <!-- PARAMETERS -->
+    <parameter name="REPORT_TITLE" class="java.lang.String"/>
+    <parameter name="GENERATED_AT" class="java.lang.String"/>
+
+    <!-- FIELDS -->
+    <field name="id" class="java.lang.Long"/>
+    <field name="username" class="java.lang.String"/>
+    <field name="email" class="java.lang.String"/>
+    <field name="createdAt" class="java.time.LocalDateTime"/>
+
+    <!-- TITLE -->
+    <title>
+        <band height="70">
+
+            <!-- Title -->
+            <textField>
+                <reportElement x="0" y="10" width="555" height="30"/>
+                <textElement textAlignment="Center">
+                    <font size="18" isBold="true"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{REPORT_TITLE}]]></textFieldExpression>
+            </textField>
+
+            <!-- Generated time -->
+            <textField>
+                <reportElement x="0" y="45" width="555" height="20"/>
+                <textElement textAlignment="Right">
+                    <font size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Generated at: " + $P{GENERATED_AT}]]></textFieldExpression>
+            </textField>
+
+        </band>
+    </title>
+
+    <!-- HEADER -->
+    <columnHeader>
+        <band height="25">
+
+            <staticText>
+                <reportElement x="0" y="0" width="50" height="25"/>
+                <text><![CDATA[ID]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="50" y="0" width="150" height="25"/>
+                <text><![CDATA[Username]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="200" y="0" width="200" height="25"/>
+                <text><![CDATA[Email]]></text>
+            </staticText>
+
+            <staticText>
+                <reportElement x="400" y="0" width="150" height="25"/>
+                <text><![CDATA[Created At]]></text>
+            </staticText>
+
+        </band>
+    </columnHeader>
+
+    <!-- DATA -->
+    <detail>
+        <band height="20">
+
+            <textField>
+                <reportElement x="0" y="0" width="50" height="20"/>
+                <textFieldExpression><![CDATA[$F{id}]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="50" y="0" width="150" height="20"/>
+                <textFieldExpression><![CDATA[$F{username}]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="200" y="0" width="200" height="20"/>
+                <textFieldExpression><![CDATA[$F{email}]]></textFieldExpression>
+            </textField>
+
+            <textField>
+                <reportElement x="400" y="0" width="150" height="20"/>
+                <textFieldExpression><![CDATA[$F{createdAt}]]></textFieldExpression>
+            </textField>
+
+        </band>
+    </detail>
+
+</jasperReport>
