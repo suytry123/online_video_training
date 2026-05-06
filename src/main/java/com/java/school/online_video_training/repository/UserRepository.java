@@ -22,12 +22,26 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 	Optional<User> findByApproveToken(String token);
 	Optional<User> findByRejectToken(String token);
 	Optional<User> findByPhoneNumber(String number);
-	@Query("SELECT u.username AS username, u.email AS email, u.joinDate AS joinDate " +
-	           "FROM User u WHERE DATE(u.joinDate) = CURRENT_DATE")
+	
+	@Query("SELECT u.id AS id, u.username AS username, u.email AS email, "
+			+ "u.joinDate AS joinDate, u.joinDate AS createdAt " + "FROM User u WHERE DATE(u.joinDate) = CURRENT_DATE")
 	List<UserReportProjection> getTodayUsers();
 
-	@Query("SELECT u.username AS username, u.email AS email, u.joinDate AS joinDate " +
-	           "FROM User u WHERE u.joinDate >= :start AND u.joinDate <= :end")
-	List<UserReportProjection> getUsersBetween
-								(@Param("start") LocalDateTime start,
-	                              @Param("end") LocalDateTime end);}
+	@Query("SELECT u.id AS id, u.username AS username, u.email AS email, "
+			+ "u.joinDate AS joinDate, u.joinDate AS createdAt "
+			+ "FROM User u WHERE u.joinDate >= :start AND u.joinDate <= :end")
+	List<UserReportProjection> getUsersBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+}
+
+	
+	
+	
+//	@Query("SELECT u.username AS username, u.email AS email, u.joinDate AS joinDate " +
+//	           "FROM User u WHERE DATE(u.joinDate) = CURRENT_DATE")
+//	List<UserReportProjection> getTodayUsers();
+//
+//	@Query("SELECT u.username AS username, u.email AS email, u.joinDate AS joinDate " +
+//	           "FROM User u WHERE u.joinDate >= :start AND u.joinDate <= :end")
+//	List<UserReportProjection> getUsersBetween
+//								(@Param("start") LocalDateTime start,
+//	                              @Param("end") LocalDateTime end);}

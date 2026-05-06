@@ -11,21 +11,29 @@ import java.util.List;
 
 @Configuration
 public class ForceJsonConfig implements WebMvcConfigurer {
-    @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.removeIf(converter ->
-            !(converter instanceof MappingJackson2HttpMessageConverter)
-            || converter instanceof MappingJackson2XmlHttpMessageConverter
-        );
-    }
-
-    @Bean
-    public WebMvcConfigurer removeXmlConverter() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-                converters.removeIf(c -> c instanceof MappingJackson2XmlHttpMessageConverter);
-            }
-        };
-    }
+	
+	public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+		// Keep Spring's default converters (including byte[] for PDF responses)
+		// and only remove XML converter to enforce JSON response format.
+		converters.removeIf(c -> c instanceof MappingJackson2XmlHttpMessageConverter);
+	}
+	
+	
+//    @Override
+//    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+//        converters.removeIf(converter ->
+//            !(converter instanceof MappingJackson2HttpMessageConverter)
+//            || converter instanceof MappingJackson2XmlHttpMessageConverter
+//        );
+//    }
+//
+//    @Bean
+//    public WebMvcConfigurer removeXmlConverter() {
+//        return new WebMvcConfigurer() {
+//            @Override
+//            public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+//                converters.removeIf(c -> c instanceof MappingJackson2XmlHttpMessageConverter);
+//            }
+//        };
+//    }
 }

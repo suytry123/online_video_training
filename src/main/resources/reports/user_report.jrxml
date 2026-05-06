@@ -14,6 +14,7 @@
     <field name="id" class="java.lang.Long"/>
     <field name="username" class="java.lang.String"/>
     <field name="email" class="java.lang.String"/>
+    <field name="joinDate" class="java.time.LocalDateTime"/>
     <field name="createdAt" class="java.time.LocalDateTime"/>
 
     <!-- TITLE -->

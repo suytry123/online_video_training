@@ -7,6 +7,6 @@ public interface VideoReportProjection {
 	String getCourseName();
 	String getUserCreated();
 	String getUserModified();
-	LocalDateTime getDateCreate();
+	LocalDateTime getDateCreated();
 	LocalDateTime getDateModified();
 }
