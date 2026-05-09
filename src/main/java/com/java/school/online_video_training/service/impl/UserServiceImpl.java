@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -62,7 +63,7 @@ public class UserServiceImpl implements UserService {
 		User user = userRepository.findByUsername(username)
 				.orElseThrow(() -> new ResourceNotFoundException("User", username));
 
-		AuthUser authUser = AuthUser.builder().username(user.getUsername()).password(user.getPassword())
+		AuthUser authUser = AuthUser.builder().id(user.getId()).username(user.getUsername()).password(user.getPassword())
 				.authorities(getAuthorities(user.getRoles())).accountNonExpired(user.isAccountNonExpired())
 				.accountNonLocked(user.isAccountNonLocked()).credentialsNonExpired(user.isCredentialsNonExpired())
 				.enabled(user.isEnabled()).build();
@@ -71,7 +72,7 @@ public class UserServiceImpl implements UserService {
 
 	public Set<SimpleGrantedAuthority> getAuthorities(Set<Role> roles) {
 		Set<SimpleGrantedAuthority> authorities1 = roles.stream()
-				.map(role -> new SimpleGrantedAuthority("ROLE_" + role)).collect(Collectors.toSet());
+				.map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName())).collect(Collectors.toSet());
 		Set<SimpleGrantedAuthority> authorities = roles.stream().flatMap(role -> toStream(role))
 				.collect(Collectors.toSet());
 		authorities.addAll(authorities1);
@@ -524,58 +525,160 @@ public class UserServiceImpl implements UserService {
 
 		emailService.sendVerificationEmail(user.getEmail(), subject, body);
 	}
-
+	
 	@Override
 	public UserPhotoDTO uploadPhoto(Long userId, MultipartFile photo) {
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-    if (user.getPhoto() != null && !user.getPhoto().isEmpty()) {
-        throw new IllegalStateException("Photo already exists. Use PUT to update.");
-    }
-    String uploadDir = "src/main/resources/file-repository/";
-    try {
-        Files.createDirectories(Paths.get(uploadDir));
-        String ext = photo.getOriginalFilename() != null && photo.getOriginalFilename().contains(".") ?
-            photo.getOriginalFilename().substring(photo.getOriginalFilename().lastIndexOf('.')) : "";
-        String fileName = java.util.UUID.randomUUID() + ext;
-        Path filePath = Paths.get(uploadDir, fileName);
-        Files.write(filePath, photo.getBytes());
-        user.setPhoto(fileName);
-        userRepository.save(user);
-        return mapper.toPhotoDTO(user);
-    } catch (Exception e) {
-        throw new RuntimeException("Photo upload failed", e);
-    }
-}
-	
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+		if (user.getPhoto() != null && !user.getPhoto().isEmpty()) {
+
+			throw new IllegalStateException("Photo already exists. Use PUT to update.");
+		}
+
+		String uploadDir = "uploads/users/";
+
+		try {
+
+			Files.createDirectories(Paths.get(uploadDir));
+
+			String ext = photo.getOriginalFilename() != null && photo.getOriginalFilename().contains(".")
+					? photo.getOriginalFilename().substring(photo.getOriginalFilename().lastIndexOf('.'))
+					: "";
+
+			String fileName = UUID.randomUUID() + ext;
+
+			Path filePath = Paths.get(uploadDir, fileName);
+
+			Files.write(filePath, photo.getBytes());
+
+			user.setPhoto(fileName);
+
+			userRepository.save(user);
+
+			return mapper.toPhotoDTO(user);
+
+		} catch (Exception e) {
+
+			throw new RuntimeException("Photo upload failed", e);
+		}
+	}
+
 	@Override
 	public UserPhotoDTO updatePhoto(Long userId, MultipartFile photo) {
-    try {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-        String oldPhoto = user.getPhoto();
-        if (oldPhoto != null) {
-            Path oldFilePath = Paths.get("src/main/resources/file-repository/", oldPhoto);
-            Files.deleteIfExists(oldFilePath);
-        }
-        String uploadDir = "src/main/resources/file-repository/";
-        Files.createDirectories(Paths.get(uploadDir));
-        String fileName = UUID.randomUUID() + "_" + photo.getOriginalFilename();
-        Path filePath = Paths.get(uploadDir, fileName);
-        Files.write(filePath, photo.getBytes());
-        user.setPhoto(fileName);
-        userRepository.save(user);
-        return mapper.toPhotoDTO(user);
-    } catch (Exception e) {
-        throw new RuntimeException("Photo update failed", e);
-    }
-}
-	
+
+		try {
+
+			User user = userRepository.findById(userId)
+					.orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+			String oldPhoto = user.getPhoto();
+
+			if (oldPhoto != null) {
+
+				Path oldFilePath = Paths.get("uploads/users/", oldPhoto);
+
+				Files.deleteIfExists(oldFilePath);
+			}
+
+			String uploadDir = "uploads/users/";
+
+			Files.createDirectories(Paths.get(uploadDir));
+
+			String fileName = UUID.randomUUID() + "_" + photo.getOriginalFilename();
+
+			Path filePath = Paths.get(uploadDir, fileName);
+
+			Files.write(filePath, photo.getBytes());
+
+			user.setPhoto(fileName);
+
+			userRepository.save(user);
+
+			return mapper.toPhotoDTO(user);
+
+		} catch (Exception e) {
+
+			throw new RuntimeException("Photo update failed", e);
+		}
+	}
+
 	@Override
 	public UserPhotoDTO getPhotoById(Long userId) {
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-    return mapper.toPhotoDTO(user);
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+		return mapper.toPhotoDTO(user);
+	}
+
+	@Override
+	public Page<Map<String, String>> getPhotoMetadata(Map<String, String> photos) {
+
+		UserFilter imageFilter = new UserFilter();
+
+		if (photos.containsKey("photo")) {
+
+			String name = photos.get("photo");
+
+			imageFilter.setPhoto(name);
+		}
+
+		int pageLimit = PageUtil.DEFAULT_PAGE_LIMIT;
+
+		if (photos.containsKey(PageUtil.PAGE_LIMIT)) {
+
+			pageLimit = Integer.parseInt(photos.get(PageUtil.PAGE_LIMIT));
+		}
+
+		int pageNumber = PageUtil.DEFAULT_PAGE_NUMBER;
+
+		if (photos.containsKey(PageUtil.PAGE_NUMBER)) {
+
+			pageNumber = Integer.parseInt(photos.get(PageUtil.PAGE_NUMBER));
+		}
+
+		UserSpec spec = new UserSpec(imageFilter);
+
+		Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
+
+		Page<User> page = userRepository.findAll(spec, pageable);
+
+		return page.map(user -> {
+
+			Map<String, String> dto = new HashMap<>();
+
+			dto.put("userId", String.valueOf(user.getId()));
+
+			dto.put("filename", user.getPhoto());
+
+			dto.put("url", "/api/user/" + user.getId() + "/photo");
+
+			return dto;
+		});
+	}
+
+	@Override
+	public void deletePhoto(Long userId) {
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+		String oldPhoto = user.getPhoto();
+
+		if (oldPhoto != null) {
+
+			Path oldFilePath = Paths.get("uploads/users/", oldPhoto);
+
+			try {
+
+				Files.deleteIfExists(oldFilePath);
+
+			} catch (Exception ignored) {
+			}
+		}
+
+		user.setPhoto(null);
+
+		userRepository.save(user);
 	}
 
 	/*
@@ -609,47 +712,6 @@ public class UserServiceImpl implements UserService {
 	}*/
 	
 	@Override
-	public Page<Map<String, String>> getPhotoMetadata(Map<String, String> photos) {
-	    UserFilter imageFilter = new UserFilter();
-	    if (photos.containsKey("photo")) {
-	        String name = photos.get("photo");
-	        imageFilter.setPhoto(name);
-	    }
-	    int pageLimit = PageUtil.DEFAULT_PAGE_LIMIT;
-	    if (photos.containsKey(PageUtil.PAGE_LIMIT)) {
-	        pageLimit = Integer.parseInt(photos.get(PageUtil.PAGE_LIMIT));
-	    }
-	    int pageNumber = PageUtil.DEFAULT_PAGE_NUMBER;
-	    if (photos.containsKey(PageUtil.PAGE_NUMBER)) {
-	        pageNumber = Integer.parseInt(photos.get(PageUtil.PAGE_NUMBER));
-	    }
-	    // UserSpec must filter for non-null and non-empty photo
-	    UserSpec spec = new UserSpec(imageFilter);
-	    Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
-	    Page<User> page = userRepository.findAll(spec, pageable);
-	    return page.map(user -> {
-	        Map<String, String> dto = new java.util.HashMap<>();
-	        dto.put("userId", String.valueOf(user.getId()));
-	        dto.put("filename", user.getPhoto());
-	        dto.put("url", "/api/user/" + user.getId() + "/photo");
-	        return dto;
-	    });
-	}
-
-	@Override
-	public void deletePhoto(Long userId) {
-	    User user = userRepository.findById(userId)
-	        .orElseThrow(() -> new ResourceNotFoundException("User", userId));
-	    String oldPhoto = user.getPhoto();
-	    if (oldPhoto != null) {
-	        Path oldFilePath = Paths.get("src/main/resources/file-repository/", oldPhoto);
-	        try { Files.deleteIfExists(oldFilePath); } catch (Exception ignored) {}
-	    }
-	    user.setPhoto(null);
-	    userRepository.save(user);
-	}
-	
-	@Override
 	public String signupUser(SignupUser signupUser) {
 		if (userRepository.existsByUsername(signupUser.getUsername())) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Username is already taken!");
@@ -660,7 +722,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		// Create new user's account
-		User user = new User(signupUser.getUsername(), signupUser.getEmail(),
+		User user = new User(signupUser.getId(), signupUser.getUsername(), signupUser.getEmail(),
 		        passwordEncoder.encode(signupUser.getPassword()));
 
 //		user.setRoles(Role.USER);

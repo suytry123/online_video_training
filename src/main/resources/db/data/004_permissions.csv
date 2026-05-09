@@ -7,3 +7,5 @@ video:write
 video:read
 user:write
 user:read
+report:write
+report:read

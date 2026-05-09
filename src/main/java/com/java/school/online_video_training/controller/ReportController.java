@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,6 +28,7 @@ public class ReportController {
 	private final ReportService reportService;
 	private final JasperReportUtil jasperReportUtil;
 
+	@PreAuthorize("hasAuthority('report:read')")
     @GetMapping("/daily")
     public ResponseEntity<byte[]> daily() throws Exception {
         return buildUserReport(
@@ -36,6 +38,7 @@ public class ReportController {
         );
     }
 
+    @PreAuthorize("hasAuthority('report:read')")
     @GetMapping("/weekly")
     public ResponseEntity<byte[]> weekly() throws Exception {
         return buildUserReport(
@@ -45,6 +48,7 @@ public class ReportController {
         );
     }
 
+    @PreAuthorize("hasAuthority('report:read')")
     @GetMapping("/monthly")
     public ResponseEntity<byte[]> monthly() throws Exception {
         return buildUserReport(
@@ -54,6 +58,7 @@ public class ReportController {
         );
     }
 
+    @PreAuthorize("hasAuthority('report:read')")
     @GetMapping("/yearly")
     public ResponseEntity<byte[]> yearly() throws Exception {
         return buildUserReport(
@@ -63,6 +68,7 @@ public class ReportController {
         );
     }
 
+    @PreAuthorize("hasAuthority('report:read')")
     @GetMapping("/between")
     public ResponseEntity<byte[]> between(
             @RequestParam String start,
@@ -78,6 +84,7 @@ public class ReportController {
         );
     }
 
+    @PreAuthorize("hasAuthority('report:read')")
     @GetMapping("/video")
     public ResponseEntity<byte[]> video() throws Exception {
 
@@ -93,7 +100,6 @@ public class ReportController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }
-
 
     private ResponseEntity<byte[]> buildUserReport(
             List<UserReportProjection> data,

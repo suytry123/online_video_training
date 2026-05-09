@@ -86,13 +86,13 @@ public class UserContorller {
 		return ResponseEntity.ok(message);
 	}
 
-	@GetMapping("/test")
+	/*@GetMapping("/test")
 	public ResponseEntity<String> test() {
 		String html = """
 					<html><body><h2>Test endpoint works!</h2></body></html>
 				""";
 		return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(html);
-	}
+	}*/
 
 	@GetMapping("/author/approve")
 	public ResponseEntity<String> approveAuthor(@RequestParam String token) {
@@ -172,7 +172,7 @@ public class UserContorller {
 			if (photo == null) {
 				return ResponseEntity.notFound().build();
 			}
-			Path filePath = Paths.get("src/main/resources/file-repository/", photo);
+			Path filePath = Paths.get("uploads", "users", photo);
 			if (!Files.exists(filePath)) {
 				return ResponseEntity.notFound().build();
 			}

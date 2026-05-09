@@ -7,7 +7,3 @@ databaseChangeLog:
         columnNames: photo
         tableName: users
         constraintName: uq_user_photo
-    - addUniqueConstraint:
-        columnNames: image_cover
-        tableName: videos
-        constraintName: uq_video_image_cover

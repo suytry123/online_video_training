@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 009_rename_user_id_column
+      id: 010_rename_user_id_column
       author: soksoytry200@gmail.com
       changes:
         - renameColumn:

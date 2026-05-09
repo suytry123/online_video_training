@@ -165,38 +165,7 @@ public class VideoController {
 		}
 	}*/
 	
-	@PreAuthorize("hasAuthority('video:write')")
-	@PostMapping("/upload/{id}")
-	public ResponseEntity<?> uploadPicture(@PathVariable Long id, @RequestParam("file") MultipartFile file) throws Exception {
-	    if (file.isEmpty()) {
-	        throw new RuntimeException("Please load a file");
-	    }
-	    videoService.saveImage(id, file);
-	    log.info("Image saved successfully.");
-	    return ResponseEntity.ok().build();
-	}
-
-	@PreAuthorize("hasAuthority('video:read')")
-	@GetMapping("/image/{id}")
-	public ResponseEntity<?> getImageCoverById(@PathVariable Long id) throws Exception {
-		 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		 log.info("Authorities: " + auth.getAuthorities()); // Debug: print current user's authorities
-		
-	    byte[] fileBytes = videoService.getImageCoverById(id);
-	    String contentType = "image/jpeg"; // Or detect dynamically if needed
-	    return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType)).body(fileBytes);
-	}
-
-	@PreAuthorize("hasAuthority('video:write')")
-	@PutMapping("/update/{id}")
-	public ResponseEntity<?> updateVideoImage(@PathVariable Long id, @RequestParam("file") MultipartFile file) {
-	    try {
-	        videoService.updateImage(id, file);
-	        return ResponseEntity.ok().build();
-	    } catch (Exception e) {
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update video image.");
-	    }
-	}
+	
 
 	/*
 	//@PreAuthorize("hasAuthority('video:read')")
@@ -219,33 +188,7 @@ public class VideoController {
 	    }
 	}*/
 	
-	@PreAuthorize("hasAuthority('video:read')")
-	@GetMapping("/images")
-	public ResponseEntity<?> getImages(@RequestParam Map<String, String> image) {
-	    try {
-	        Page<Map<String, String>> images = videoService.getImages(image);
-	        PageDTO dto = new PageDTO(images);
-	        log.info("Image metadata retrieved successfully");
-	        return ResponseEntity.ok(dto);
-	    } catch (Exception e) {
-	        log.error("Failed to get image metadata", e);
-	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body("Failed to retrieve image metadata: " + e.getMessage());
-	    }
-	}
 	
-	@PreAuthorize("hasAuthority('video:write')")
-	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<?> deleteById(@PathVariable Long id) throws Exception {
-	    try {
-	        videoService.deleteImageById(id);
-	        log.info("Delete successfully: " + id);
-	        return ResponseEntity.ok("Image deleted successfully.");
-	    } catch (Exception e) {
-	        log.error("Delete failed: " + e.getMessage());
-	        return ResponseEntity.status(500).body("Error deleting image: " + e.getMessage());
-	    }
-	}
 
 	/*
 	@PreAuthorize("hasAuthority('video:write')")

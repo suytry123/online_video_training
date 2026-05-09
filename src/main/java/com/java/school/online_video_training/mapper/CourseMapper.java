@@ -47,7 +47,7 @@ public interface CourseMapper {
     @Mapping(target = "authorName", source = "author.username")
     CourseSummaryDTO toCourseSummaryDTO(Course course);
 
-    @Mapping(target = "categoryId", source = "category.id")
+    @Mapping(target = "categoryName", source = "category.name")
     @Mapping(target = "authorName", source = "author.username")
     @Mapping(target = "videos", source = "videos")
     CourseDetailDTO toCourseDetailDTO(Course course);

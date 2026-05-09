@@ -160,38 +160,7 @@ public class VideoServiceImpl implements VideoService {
 	 * updated entity }
 	 */
 
-	@Override
-	public void saveImage(Long id, MultipartFile file) throws Exception {
-		Video video = videoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Video", id));
-		// Only allow upload if no image_cover exists
-		if (video.getImageCover() != null && !video.getImageCover().isEmpty()) {
-			throw new IllegalStateException("Image cover already exists. Use PUT to update.");
-		}
-		String folder = Paths.get("src", "main", "resources", "file-repository").toString();
-		Files.createDirectories(Paths.get(folder));
-		String ext = file.getOriginalFilename() != null && file.getOriginalFilename().contains(".")
-				? file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.'))
-				: "";
-		String fileName = java.util.UUID.randomUUID() + ext;
-		Path path = Paths.get(folder, fileName);
-		Files.write(path, file.getBytes());
-		video.setImageCover(fileName);
-		videoRepository.save(video);
-	}
-
-	public byte[] getImageCoverById(Long id) throws Exception {
-		Video video = videoRepository.findById(id)
-				.orElseThrow(() -> new FileNotFoundException("Video not found for id: " + id));
-		String imageCover = video.getImageCover();
-		if (imageCover == null || imageCover.isEmpty()) {
-			throw new FileNotFoundException("No image cover for video id: " + id);
-		}
-		Path filePath = Paths.get("src", "main", "resources", "file-repository", imageCover);
-		if (!Files.exists(filePath)) {
-			throw new FileNotFoundException("File not found: " + filePath);
-		}
-		return Files.readAllBytes(filePath);
-	}
+	
 
 	/*
 	 * @Override public byte[] getByPath(String path) throws Exception { // Retrieve
@@ -275,58 +244,7 @@ public class VideoServiceImpl implements VideoService {
 	 * video.setImageCover(newFilename); videoRepository.save(video); }
 	 */
 
-	@Override
-	public void updateImage(Long id, MultipartFile file) throws Exception {
-		String folder = Paths.get("src", "main", "resources", "file-repository").toString();
-		if (file.isEmpty()) {
-			throw new Exception("File is empty");
-		}
-		// Retrieve the video entity by id
-		Video video = videoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Video", id));
-		// Delete the old file if it exists
-		String oldImage = video.getImageCover();
-		if (oldImage != null && !oldImage.isEmpty()) {
-			Path oldFilePath = Paths.get(folder, oldImage);
-			Files.deleteIfExists(oldFilePath);
-		}
-		Files.createDirectories(Paths.get(folder));
-		String ext = file.getOriginalFilename() != null && file.getOriginalFilename().contains(".")
-				? file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf('.'))
-				: "";
-		String newFilename = UUID.randomUUID() + ext;
-		Path newFilePath = Paths.get(folder, newFilename);
-		Files.write(newFilePath, file.getBytes());
-		// Update the video entity with the new unique image path
-		video.setImageCover(newFilename);
-		videoRepository.save(video);
-	}
-
-	@Override
-	public Page<Map<String, String>> getImages(Map<String, String> images) {
-		ImageFilter imageFilter = new ImageFilter();
-		if (images.containsKey("imageCover")) {
-			String name = images.get("imageCover");
-			imageFilter.setPath(name);
-		}
-		int pageLimit = PageUtil.DEFAULT_PAGE_LIMIT;
-		if (images.containsKey(PageUtil.PAGE_LIMIT)) {
-			pageLimit = Integer.parseInt(images.get(PageUtil.PAGE_LIMIT));
-		}
-		int pageNumber = PageUtil.DEFAULT_PAGE_NUMBER;
-		if (images.containsKey(PageUtil.PAGE_NUMBER)) {
-			pageNumber = Integer.parseInt(images.get(PageUtil.PAGE_NUMBER));
-		}
-		ImageSpec spec = new ImageSpec(imageFilter);
-		Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
-		Page<Video> page = videoRepository.findAll(spec, pageable);
-		return page.map(video -> {
-			Map<String, String> dto = new java.util.HashMap<>();
-			dto.put("videoId", String.valueOf(video.getId()));
-			dto.put("filename", video.getImageCover());
-			dto.put("url", "/videos/images/" + video.getImageCover());
-			return dto;
-		});
-	}
+	
 
 	/*
 	 * @Override public Page<String> getImages(Map<String, String> images) {
@@ -352,29 +270,6 @@ public class VideoServiceImpl implements VideoService {
 	 * 
 	 * return imagePaths; }
 	 */
-
-	public void deleteImageById(Long id) throws Exception {
-		String folder = Paths.get("src", "main", "resources", "file-repository").toString();
-		Video video = videoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Video", id));
-		String imageCover = video.getImageCover();
-		if (imageCover == null || imageCover.isEmpty()) {
-			throw new FileNotFoundException("No image cover for video id: " + id);
-		}
-		Path filePath = Paths.get(folder, imageCover);
-		if (!Files.exists(filePath)) {
-			log.warn("File not found: " + filePath);
-			throw new FileNotFoundException("File not found: " + filePath);
-		}
-		try {
-			Files.delete(filePath);
-			video.setImageCover(null);
-			videoRepository.save(video);
-			log.info("Successfully deleted file: " + filePath);
-		} catch (IOException e) {
-			log.error("Error deleting file: " + filePath, e);
-			throw new FileDeletionException("Error deleting file: " + filePath, e);
-		}
-	}
 
 	/*
 	 * @Override public void deleteImageByPath(String url) throws Exception {

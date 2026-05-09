@@ -15,7 +15,6 @@ import com.java.school.online_video_training.projection.VideoReportProjection;
 public interface VideoRepository extends JpaRepository<Video, Long>, JpaSpecificationExecutor<Video> {
 	// String findByImageCover(String path);
 	// Video findByCoverImage(String coverImage);
-	Optional<Video> findByImageCover(String path);
 	List<Video> findByCourseId(Long courseId);
 
 //	@Query("SELECT v.title AS title, c.name AS courseName, v.userCreated AS userCreated, " +

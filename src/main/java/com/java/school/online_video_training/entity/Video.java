@@ -39,8 +39,8 @@ public class Video extends AuditEntity{
 	@Column(name = "video_link")
 	private List<String> videoLink;
 	
-	@Column(name = "image_cover")
-	private String imageCover;
+//	@Column(name = "image_cover")
+//	private String imageCover;
 	
 	@ManyToOne
 	@JoinColumn(name = "course_id")

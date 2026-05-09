@@ -15,4 +15,5 @@ public class CourseResponseDTO {
 
 	private Long authorId;
 	private String authorName;
+	private String imageCover;
 }

@@ -15,6 +15,8 @@ public enum PermissionEnum {
 	VIDEO_READ("video:read"),
 	USER_WRITE("user:write"),
 	USER_READ("user:read"),
+	REPORT_READ("report:read"),
+	REPORT_WRITE("report:write"),
 	LOGO_UPDATE("logo:update");
 	
 	

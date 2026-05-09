@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class AuthUser implements UserDetails{
+	private Long id;
 	private String username;
 	private String password;
 	private Set<? extends GrantedAuthority> authorities;
@@ -27,6 +28,10 @@ public class AuthUser implements UserDetails{
 		return authorities;
 	}
 
+	public Long getId() {
+		return id;
+	}
+	
 	@Override
 	public String getPassword() {
 		return password;

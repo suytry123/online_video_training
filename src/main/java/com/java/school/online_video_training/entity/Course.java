@@ -42,6 +42,9 @@ public class Course {
 	@Column(name = "likes")
 	private Integer likes = 0;
 	
+	@Column(name = "image_cover")
+	private String imageCover;
+	
 	@Column(nullable = false, precision = 19, scale = 2)
 	private BigDecimal price;
 

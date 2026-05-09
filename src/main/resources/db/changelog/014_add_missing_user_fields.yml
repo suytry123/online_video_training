@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 015_add_missing_user_fields
+      id: 014_add_missing_user_fields
       author: soksoytry200@gmail.com
       changes:
         - addColumn:
