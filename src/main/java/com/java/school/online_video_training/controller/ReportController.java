@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.java.school.online_video_training.dto.ReportDashboardResponse;
 import com.java.school.online_video_training.projection.UserReportProjection;
 import com.java.school.online_video_training.projection.VideoReportProjection;
 import com.java.school.online_video_training.service.ReportService;
@@ -116,6 +118,14 @@ public class ReportController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }
+    
+    @GetMapping("/dashboard")
+	public ResponseEntity<ReportDashboardResponse> dashboard(
+			@RequestParam(defaultValue = "weekly") String period,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+		return ResponseEntity.ok(reportService.getReportDashboard(period, start, end));
+	}
 
 	/*
 	 * @GetMapping("/daily") public ResponseEntity<List<UserReportProjection>>

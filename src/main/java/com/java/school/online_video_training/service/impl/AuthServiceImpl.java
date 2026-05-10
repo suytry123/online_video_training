@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.java.school.online_video_training.config.jwt.LoginRequest;
+import com.java.school.online_video_training.config.jwt.LoginResponse;
 import com.java.school.online_video_training.config.security.AuthUser;
 import com.java.school.online_video_training.config.security.JwtUtils;
 import com.java.school.online_video_training.config.security.RoleEnum;
@@ -82,7 +83,7 @@ public class AuthServiceImpl implements AuthService{
 	}
 
 	@Override
-	public String authenticateUser(LoginRequest loginRequest) {
+	public LoginResponse authenticateUser(LoginRequest loginRequest) {
 		Authentication authentication = authenticationManager.authenticate(
 		        new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
@@ -94,10 +95,51 @@ public class AuthServiceImpl implements AuthService{
 		    	    .collect(Collectors.toList());
 
 		    	// Pass username and authorities to JWT generator
-		    	return jwtUtils.generateJwtToken(userPrincipal.getUsername(), authorities);
+//		    	return jwtUtils.generateJwtToken(userPrincipal.getUsername(), authorities);
+		    String token = jwtUtils.generateJwtToken(userPrincipal.getUsername(), authorities);
+	    	return new LoginResponse(token, userPrincipal.getUsername());
 
 //		    return jwtUtils.generateJwtToken(userPrincipal.getUsername());
 	}
 	
-	
+	/*
+	 @Override
+	public String createUser(SignupRequest signUpRequest) {
+		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Username is already taken!");
+		}
+
+		if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Email is already taken!");
+		}
+
+		// Create new user's account
+		User user = new User(signUpRequest.getUsername(), signUpRequest.getEmail(),
+		        passwordEncoder.encode(signUpRequest.getPassword()));
+
+		Set<String> strRoles = signUpRequest.getRoles();
+		Set<Role> roles = new HashSet<>();
+
+		if (strRoles == null) {
+			Role userRole = roleRepository.findByName(RoleEnum.USER.name())
+					.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Role is not found!"));
+			roles.add(userRole);
+		} else {
+			strRoles.forEach(role -> {
+				Role adminRole = roleRepository.findByName(role)
+						.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, role + " Role is not found!"));
+				roles.add(adminRole);
+			});
+		}
+
+		user.setRoles(roles);
+		userRepository.save(user);
+		Set<String> authorities = roles.stream()
+			    .map(Role::getName)
+			    .collect(Collectors.toSet());
+
+			return jwtUtils.generateJwtToken(signUpRequest.getEmail(), new ArrayList<>(authorities));
+//		return jwtUtils.generateJwtToken(signUpRequest.getUsername());
+	}
+	 */
 }

@@ -2,10 +2,12 @@ package com.java.school.online_video_training.exception;
 
 import java.util.UUID;
 
+import javax.security.sasl.AuthenticationException;
 import javax.validation.ValidationException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,6 +17,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @ControllerAdvice
 public class GlobleExceptionHandler {
+	
+	@ExceptionHandler({ BadCredentialsException.class, AuthenticationException.class })
+	public ResponseEntity<ErrorResponse> handleAuthenticationException(Exception ex) {
+		log.warn("Authentication failed: {}", ex.getMessage());
+		ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.UNAUTHORIZED.value(), "Invalid username or password");
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+	}
 
 	@ExceptionHandler(ApiException.class)
 	public ResponseEntity<?> handleApiException(ApiException e){
