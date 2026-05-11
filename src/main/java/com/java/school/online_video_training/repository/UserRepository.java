@@ -31,6 +31,14 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 			+ "u.joinDate AS joinDate, u.joinDate AS createdAt "
 			+ "FROM User u WHERE u.joinDate >= :start AND u.joinDate <= :end")
 	List<UserReportProjection> getUsersBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+	
+	@Query("""
+			SELECT COUNT(u)
+			FROM User u
+			JOIN u.roles r
+			WHERE r.name = :roleName
+			""")
+	long countByRoleName(@Param("roleName") String roleName);
 }
 
 	

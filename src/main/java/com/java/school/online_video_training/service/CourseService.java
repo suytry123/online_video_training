@@ -10,6 +10,7 @@ import com.java.school.online_video_training.dto.CourseDTO;
 import com.java.school.online_video_training.dto.CourseDetailDTO;
 import com.java.school.online_video_training.dto.CourseResponseDTO;
 import com.java.school.online_video_training.dto.CourseSummaryDTO;
+import com.java.school.online_video_training.dto.StatisticsDTO;
 
 public interface CourseService {
 //	Course create(CourseDTO courseDTO);
