@@ -1,5 +1,6 @@
 package com.java.school.online_video_training.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -15,4 +16,7 @@ public interface CategoryService {
 //	List<Category> getCategories(String name);
 	Page<CategoryDTO> getCategories(Map<String, String> params);
 	void deleteById(Long id);
+	List<CategoryDTO> getTrash();
+	void restore(Long id);
+
 }

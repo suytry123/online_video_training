@@ -82,6 +82,7 @@ public class CourseServiceImpl implements CourseService {
 		}
 
 		Category category = categoryRepository.findById(courseDTO.getCategoryId())
+				.filter(c -> !c.isDeleted())
 				.orElseThrow(() -> new RuntimeException("Category not found"));
 
 		User author = userRepository.findUserById(courseDTO.getAuthorId())
@@ -100,7 +101,9 @@ public class CourseServiceImpl implements CourseService {
 
 	@Override
 	public CourseResponseDTO getCourseById(Long id) {
-		Course course = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course", id));
+		Course course = courseRepository.findById(id)
+				.filter(c -> !c.isDeleted())
+				.orElseThrow(() -> new ResourceNotFoundException("Course", id));
 		return courseMapper.toCourseDTO(course);
 	}
 
@@ -136,20 +139,65 @@ public class CourseServiceImpl implements CourseService {
 		return page.map(courseMapper::toCourseDTO);
 	}
 
-	@Override
+	/*@Override
 	public CourseResponseDTO update(Long id, CourseDTO courseUpdate) {
-		Course course = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course", id));
+		Course course = courseRepository.findById(id)
+				.filter(c -> !c.isDeleted())
+				.orElseThrow(() -> new ResourceNotFoundException("Course", id));
 		Course updateEntity = courseMapper.toCourse(courseUpdate);
 		course.setName(updateEntity.getName());
 		course.setCategory(updateEntity.getCategory());
 		course.setAuthor(updateEntity.getAuthor());
 		Course updated = courseRepository.save(course);
 		return courseMapper.toCourseDTO(updated);
+	}*/
+	
+	@Override
+	public CourseResponseDTO update(Long id, CourseDTO courseUpdate) {
+
+//		Course course = courseRepository.findById(id).filter(c -> !c.isDeleted())
+//				.orElseThrow(() -> new ResourceNotFoundException("Course", id));
+		Course course = getEntityById(id);
+
+		if (courseUpdate.getCategoryId() != null) {
+
+			Category category = categoryRepository.findById(courseUpdate.getCategoryId())
+					.filter(c -> !c.isDeleted())
+					.orElseThrow(() -> new RuntimeException("Category not found"));
+
+			course.setCategory(category);
+
+		}
+
+		if (courseUpdate.getAuthorId() != null) {
+
+			User author = userRepository.findUserById(courseUpdate.getAuthorId())
+					.filter(user -> !user.isDeleted() && user.getRoles().stream().anyMatch(role -> role.getName().equals("AUTHOR")))
+					.orElseThrow(() -> new RuntimeException("Author not found"));
+
+			course.setAuthor(author);
+
+		}
+
+		course.setName(courseUpdate.getName());
+
+		Course updated = courseRepository.save(course);
+
+		return courseMapper.toCourseDTO(updated);
 	}
+
 
 	@Override
 	public void delete(Long id) {
-		courseRepository.deleteById(id);
+//		courseRepository.deleteById(id);
+		Course course = getEntityById(id); 
+		course.setDeleted(true); 
+		courseRepository.save(course);
+	}
+	
+	private Course getEntityById(Long id) {
+		return courseRepository.findById(id).filter(c -> !c.isDeleted())
+				.orElseThrow(() -> new ResourceNotFoundException("Course", id));
 	}
 
 	@Override
@@ -270,6 +318,27 @@ public class CourseServiceImpl implements CourseService {
 
 		courseRepository.save(course);
 	}
+	
+	@Override
+	public List<CourseResponseDTO> getTrash() {
+
+		List<Course> courses = courseRepository.findByIsDeletedTrue();
+
+		return courses.stream().map(courseMapper::toCourseDTO).toList();
+
+	}
+
+	@Override
+	public void restore(Long id) {
+
+		Course course = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course", id));
+
+		course.setDeleted(false);
+
+		courseRepository.save(course);
+
+	}
+
 
 	/*
 	 * @Override public CourseDetailDTO getCourseDetail(Long courseId) { Course

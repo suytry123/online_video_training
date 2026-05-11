@@ -74,9 +74,28 @@ public class VideoController {
 	@PreAuthorize("hasAuthority('video:write')")
 	@DeleteMapping("{id}")
 	public ResponseEntity<?> deleteVideo(@PathVariable Long id) {
-	    videoService.deleteVideo(id);
-	    return ResponseEntity.ok().build();
+		videoService.deleteVideo(id);
+		return ResponseEntity.ok().build();
 	}
+
+	@PreAuthorize("hasAuthority('video:read')")
+	@GetMapping("/trash")
+	public ResponseEntity<?> getTrash() {
+
+		return ResponseEntity.ok(videoService.getTrash());
+
+	}
+
+	@PreAuthorize("hasAuthority('video:write')")
+	@PutMapping("/{id}/restore")
+	public ResponseEntity<?> restore(@PathVariable Long id) {
+
+		videoService.restore(id);
+
+		return ResponseEntity.ok().build();
+
+	}
+
 	
 	
 /*

@@ -33,6 +33,9 @@ public class VideoSpec implements Specification<Video>{
 			predicates.add(id);
 		}
 		
+		Predicate isDeleted = cb.isFalse(video.get("isDeleted"));
+		predicates.add(isDeleted);
+		
 		return cb.and(predicates.toArray(Predicate[]::new));
 	}
 }

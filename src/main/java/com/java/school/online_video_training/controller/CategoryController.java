@@ -60,12 +60,29 @@ public class CategoryController {
 
 		return ResponseEntity.ok(pageDTO);
 	}
+	
+	@PreAuthorize("hasAuthority('category:write')")
+	@DeleteMapping("{id}")
+	public ResponseEntity<?> deleteById(@PathVariable("id") Long categoryId) {
+		categoryService.deleteById(categoryId);
+		return ResponseEntity.ok().build();
+	}
+
+	@PreAuthorize("hasAuthority('category:read')")
+	@GetMapping("/trash")
+	public ResponseEntity<?> getTrash() {
+
+		return ResponseEntity.ok(categoryService.getTrash());
+
+	}
 
 	@PreAuthorize("hasAuthority('category:write')")
-	@DeleteMapping("/{id}")
-	public ResponseEntity<?> delete(@PathVariable("id") Long categoryId) {
-		categoryService.deleteById(categoryId);
+	@PutMapping("/{id}/restore")
+	public ResponseEntity<?> restore(@PathVariable Long id) {
+
+		categoryService.restore(id);
 
 		return ResponseEntity.ok().build();
+
 	}
 }

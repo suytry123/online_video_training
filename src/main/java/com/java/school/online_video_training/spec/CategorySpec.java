@@ -34,7 +34,9 @@ public class CategorySpec implements Specification<Category>{
 			predicates.add(id);
 		}
 		
+		Predicate isDeleted = cb.isFalse(category.get("isDeleted"));
+		predicates.add(isDeleted);
+		
 		return cb.and(predicates.toArray(Predicate[]::new));
 	}
-
 }

@@ -1,5 +1,6 @@
 package com.java.school.online_video_training.service.impl;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
@@ -36,6 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
 	@Override
 	public CategoryDTO getById(Long id) {
 		Category category = categoryRepository.findById(id)
+				.filter(c -> !c.isDeleted())
 				.orElseThrow(() -> new ResourceNotFoundException("Category", id));
 		return categoryMapper.toCategoryDTO(category);
 	}
@@ -43,6 +45,7 @@ public class CategoryServiceImpl implements CategoryService {
 	@Override
 	public CategoryDTO update(Long id, CategoryDTO categoryUpdate) {
 		Category category = categoryRepository.findById(id)
+				.filter(c -> !c.isDeleted())
 				.orElseThrow(() -> new ResourceNotFoundException("Category", id));
 		category.setName(categoryUpdate.getName());
 		Category updated = categoryRepository.save(category);
@@ -68,6 +71,7 @@ public class CategoryServiceImpl implements CategoryService {
 		if (params.containsKey(PageUtil.PAGE_NUMBER)) {
 			pageNumber = Integer.parseInt(params.get(PageUtil.PAGE_NUMBER));
 		}
+		
 		CategorySpec categorySpec = new CategorySpec(categoryFilter);
 		Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
 		Page<Category> page = categoryRepository.findAll(categorySpec, pageable);
@@ -77,8 +81,37 @@ public class CategoryServiceImpl implements CategoryService {
 	@Override
 	public void deleteById(Long id) {
 //		Category byId = getById(id);
-		categoryRepository.deleteById(id);
+//		categoryRepository.deleteById(id);
+		Category category = getEntityById(id); 
+		category.setDeleted(true); 
+		categoryRepository.save(category);
 	}
+	
+	private Category getEntityById(Long id) {
+		return categoryRepository.findById(id).filter(c -> !c.isDeleted())
+				.orElseThrow(() -> new ResourceNotFoundException("Category", id));
+	}
+	
+	@Override
+	public List<CategoryDTO> getTrash() {
+		List<Category> categories = categoryRepository.findByIsDeletedTrue();
+
+		return categories.stream().map(categoryMapper::toCategoryDTO).toList();
+
+	}
+
+	@Override
+	public void restore(Long id) {
+
+		Category category = categoryRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Category", id));
+
+		category.setDeleted(false);
+
+		categoryRepository.save(category);
+
+	}
+
 
 //	@Override
 //	public List<Category> getCategories(String name) {

@@ -32,6 +32,9 @@ public class CourseSpec implements Specification<Course>{
 			predicates.add(id);
 		}
 		
+		Predicate isDeleted = cb.isFalse(course.get("isDeleted"));
+		predicates.add(isDeleted);
+		
 		return cb.and(predicates.toArray(Predicate[]::new));
 	}
 

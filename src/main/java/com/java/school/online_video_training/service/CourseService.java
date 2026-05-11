@@ -10,7 +10,6 @@ import com.java.school.online_video_training.dto.CourseDTO;
 import com.java.school.online_video_training.dto.CourseDetailDTO;
 import com.java.school.online_video_training.dto.CourseResponseDTO;
 import com.java.school.online_video_training.dto.CourseSummaryDTO;
-import com.java.school.online_video_training.dto.StatisticsDTO;
 
 public interface CourseService {
 //	Course create(CourseDTO courseDTO);
@@ -30,4 +29,7 @@ public interface CourseService {
 	void updateImage(Long id, MultipartFile file) throws Exception;
 	Page<Map<String, String>> getImages(Map<String, String> images);
 	void deleteImageById(Long id) throws Exception;
+	List<CourseResponseDTO> getTrash();
+	void restore(Long id);
+
 }

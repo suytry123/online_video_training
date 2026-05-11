@@ -1,27 +1,18 @@
 package com.java.school.online_video_training.service.impl;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.java.school.online_video_training.dto.VideoDTO;
 import com.java.school.online_video_training.dto.VideoResponseDTO;
 import com.java.school.online_video_training.entity.Course;
 import com.java.school.online_video_training.entity.Enrollment;
 import com.java.school.online_video_training.entity.Video;
-import com.java.school.online_video_training.exception.FileDeletionException;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
 import com.java.school.online_video_training.mapper.VideoMapper;
 import com.java.school.online_video_training.repository.CourseRepository;
@@ -29,10 +20,6 @@ import com.java.school.online_video_training.repository.EnrollmentRepository;
 import com.java.school.online_video_training.repository.VideoRepository;
 import com.java.school.online_video_training.service.VideoService;
 import com.java.school.online_video_training.service.util.PageUtil;
-import com.java.school.online_video_training.spec.ImageFilter;
-import com.java.school.online_video_training.spec.ImageSpec;
-import com.java.school.online_video_training.spec.LinkFilter;
-import com.java.school.online_video_training.spec.LinkSpec;
 import com.java.school.online_video_training.spec.VideoFilter;
 import com.java.school.online_video_training.spec.VideoSpec;
 
@@ -56,6 +43,7 @@ public class VideoServiceImpl implements VideoService {
 		  }
 	    
 	    Course course = courseRepository.findById(videoDTO.getCourseId())
+	    		.filter(c -> !c.isDeleted())
 	            .orElseThrow(() -> new RuntimeException("Course not found"));
 	    
 	    Video video = videoMapper.toVideo(videoDTO);
@@ -69,6 +57,7 @@ public class VideoServiceImpl implements VideoService {
 	@Override
 	public VideoResponseDTO getVideoById(Long id) {
 	    Video video = videoRepository.findById(id)
+	    	.filter(c -> !c.isDeleted())
 	        .orElseThrow(() -> new ResourceNotFoundException("Video", id));
 	    return videoMapper.toVideoResponseDTO(video);
 	}
@@ -76,11 +65,10 @@ public class VideoServiceImpl implements VideoService {
 	@Override
 	public List<VideoResponseDTO> getVideosByCourse(Long courseId) {
 
-	    if (!courseRepository.existsById(courseId)) {
-	        throw new RuntimeException("Course not found");
-	    }
+		courseRepository.findById(courseId).filter(c -> !c.isDeleted())
+				.orElseThrow(() -> new RuntimeException("Course not found"));
 
-	    List<Video> videos = videoRepository.findByCourseId(courseId);
+		List<Video> videos = videoRepository.findByCourseIdAndIsDeletedFalse(courseId);
 
 	    return videos.stream()
 	            .map(videoMapper::toVideoResponseDTO)
@@ -98,7 +86,7 @@ public class VideoServiceImpl implements VideoService {
 
 		if (video.containsKey("courseId")) {
 			String id = video.get("courseId");
-			videoFilter.setTitle(id);
+			videoFilter.setCourseId(Long.parseLong(id));
 		}
 
 		int pageLimit = PageUtil.DEFAULT_PAGE_LIMIT;
@@ -121,10 +109,9 @@ public class VideoServiceImpl implements VideoService {
 
 	@Override
 	public VideoResponseDTO updateVideo(Long id, VideoDTO videoDTO) {
-	    Video video = videoRepository.findById(id)
-	        .orElseThrow(() -> new ResourceNotFoundException("Video", id));
-	    Video updateEntity = videoMapper.toVideo(videoDTO);
-	    video.setTitle(updateEntity.getTitle());
+		Video video = getEntityById(id);
+//	    Video updateEntity = videoMapper.toVideo(videoDTO);
+	    video.setTitle(videoDTO.getTitle());
 	  
 	    Video updated = videoRepository.save(video);
 	    return videoMapper.toVideoResponseDTO(updated);
@@ -132,12 +119,43 @@ public class VideoServiceImpl implements VideoService {
 
 	@Override
 	public void deleteVideo(Long id) {
-	    Video video = videoRepository.findById(id)
-	        .orElseThrow(() -> new ResourceNotFoundException("Video", id));
-	    videoRepository.delete(video);
-	    log.info("Video with id = {} is deleted", id);
+
+		Video video = getEntityById(id);
+
+		video.setDeleted(true);
+
+		videoRepository.save(video);
+
+		log.info("Video with id = {} is deleted", id);
 	}
 
+
+	private Video getEntityById(Long id) {
+		return videoRepository.findById(id).filter(c -> !c.isDeleted())
+				.orElseThrow(() -> new ResourceNotFoundException("Video", id));
+	}
+	
+	@Override
+	public List<VideoResponseDTO> getTrash() {
+
+		List<Video> videos = videoRepository.findByIsDeletedTrue();
+
+		return videos.stream().map(videoMapper::toVideoResponseDTO).toList();
+
+	}
+
+	@Override
+	public void restore(Long id) {
+
+		Video video = videoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Video", id));
+
+		video.setDeleted(false);
+
+		videoRepository.save(video);
+
+	}
+
+	
 	/*
 	 * @Override public void saveImage(Long id, MultipartFile file) throws Exception
 	 * { String folder = Paths.get("src", "main", "resources",

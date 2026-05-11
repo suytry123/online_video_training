@@ -20,4 +20,7 @@ public class Category {
 	
 	@Column(name = "category_name", nullable = false)
 	private String name;
+	
+	@Column(nullable = false)
+	private boolean isDeleted = false;
 }

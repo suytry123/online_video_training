@@ -52,6 +52,9 @@ public class User {
 	@Column(name = "join_date")
 	private LocalDateTime joinDate;
 	
+	@Column(nullable = false)
+	private boolean isDeleted = false;
+	
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(
 		    name = "users_roles", 

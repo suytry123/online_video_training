@@ -1,0 +1,41 @@
+databaseChangeLog:
+- changeSet:
+    id: 016_add_soft_delete
+    author: soksoytry200@gmail.com
+    changes:
+    - addColumn:
+        tableName: categories
+        columns:
+        - column:
+            name: is_deleted
+            type: BOOLEAN
+            defaultValueBoolean: false
+            constraints:
+              nullable: false
+    - addColumn:
+        tableName: courses
+        columns:
+        - column:
+            name: is_deleted
+            type: BOOLEAN
+            defaultValueBoolean: false
+            constraints:
+              nullable: false
+    - addColumn:
+        tableName: videos
+        columns:
+        - column:
+            name: is_deleted
+            type: BOOLEAN
+            defaultValueBoolean: false
+            constraints:
+              nullable: false
+    - addColumn:
+        tableName: users
+        columns:
+        - column:
+            name: is_deleted
+            type: BOOLEAN
+            defaultValueBoolean: false
+            constraints:
+              nullable: false

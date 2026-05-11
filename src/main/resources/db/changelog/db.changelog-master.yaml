@@ -29,3 +29,5 @@ databaseChangeLog:
       file: db/changelog/014_add_missing_user_fields.yml
   - include:
       file: db/changelog/015_course_interaction.yml
+  - include:
+      file: db/changelog/016_add_soft_delete.yml

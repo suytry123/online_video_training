@@ -4,11 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.java.school.online_video_training.dto.VideoDTO;
 import com.java.school.online_video_training.dto.VideoResponseDTO;
-import com.java.school.online_video_training.entity.Video;
 
 public interface VideoService {
 	VideoResponseDTO createVideo(VideoDTO video);
@@ -35,4 +33,8 @@ public interface VideoService {
 //	void updateLink(Long id, List<String> link);
 //	void deleteLink(Long id);
 	Page<VideoResponseDTO> getVideosForUser(Long courseId, Long userId, Map<String, String> params);
+	List<VideoResponseDTO> getTrash();
+	void restore(Long id);
+
+
 }

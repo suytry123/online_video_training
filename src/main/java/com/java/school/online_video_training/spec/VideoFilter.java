@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class VideoFilter {
-	private Integer courseId;
+	private Long courseId;
 	private String title;
 }

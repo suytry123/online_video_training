@@ -31,6 +31,9 @@ public class Video extends AuditEntity{
 	@Column(name = "video_description")
 	private String description;
 	
+	@Column(nullable = false)
+	private boolean isDeleted = false;
+	
 	@ElementCollection
 	@CollectionTable(
 	    name = "video_video_link", // table name

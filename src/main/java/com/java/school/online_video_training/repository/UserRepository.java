@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.java.school.online_video_training.entity.User;
-import com.java.school.online_video_training.entity.Video;
 import com.java.school.online_video_training.projection.UserReportProjection;
 
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User>{
@@ -22,6 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 	Optional<User> findByApproveToken(String token);
 	Optional<User> findByRejectToken(String token);
 	Optional<User> findByPhoneNumber(String number);
+	List<User> findByIsDeletedFalse();
 	
 	@Query("SELECT u.id AS id, u.username AS username, u.email AS email, "
 			+ "u.joinDate AS joinDate, u.joinDate AS createdAt " + "FROM User u WHERE DATE(u.joinDate) = CURRENT_DATE")

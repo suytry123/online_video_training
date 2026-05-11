@@ -107,6 +107,25 @@ public class CourseController {
         CourseDetailDTO courseDetail = courseService.getCourseDetail(id);
         return ResponseEntity.ok(courseDetail);
     }
+    
+    @PreAuthorize("hasAuthority('course:read')")
+	@GetMapping("/trash")
+	public ResponseEntity<?> getTrash() {
+
+		return ResponseEntity.ok(courseService.getTrash());
+
+	}
+
+    @PreAuthorize("hasAuthority('course:write')")
+	@PutMapping("/{id}/restore")
+	public ResponseEntity<?> restore(@PathVariable Long id) {
+
+		courseService.restore(id);
+
+		return ResponseEntity.ok().build();
+
+	}
+
 
 	/*@PreAuthorize("isAuthenticated()")
 	@PostMapping("/{courseId}/view")
@@ -168,6 +187,8 @@ public class CourseController {
 
 		return ResponseEntity.ok(response);
 	}
+	
+
     
     
 //    @PostMapping("/{id}/view")

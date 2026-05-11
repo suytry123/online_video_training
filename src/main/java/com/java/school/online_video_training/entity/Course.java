@@ -47,6 +47,9 @@ public class Course {
 	
 	@Column(nullable = false, precision = 19, scale = 2)
 	private BigDecimal price;
+	
+	@Column(nullable = false)
+	private boolean isDeleted = false;
 
 	@OneToMany(mappedBy = "course", fetch = FetchType.LAZY)
 	private List<Video> videos;

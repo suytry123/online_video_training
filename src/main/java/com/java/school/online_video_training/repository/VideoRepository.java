@@ -1,7 +1,6 @@
 package com.java.school.online_video_training.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -16,6 +15,9 @@ public interface VideoRepository extends JpaRepository<Video, Long>, JpaSpecific
 	// String findByImageCover(String path);
 	// Video findByCoverImage(String coverImage);
 	List<Video> findByCourseId(Long courseId);
+	List<Video> findByCourseIdAndIsDeletedFalse(Long courseId);
+	List<Video> findByIsDeletedTrue();
+
 
 //	@Query("SELECT v.title AS title, c.name AS courseName, v.userCreated AS userCreated, " +
 //		       "v.userModified AS userModified, v.dateCreated AS dateCreated, v.dateModified AS dateModified " +
