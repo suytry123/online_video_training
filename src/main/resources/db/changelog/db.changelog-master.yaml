@@ -31,3 +31,5 @@ databaseChangeLog:
       file: db/changelog/015_course_interaction.yml
   - include:
       file: db/changelog/016_add_soft_delete.yml
+  - include:
+      file: db/changelog/017_add_course_description.yml

@@ -13,7 +13,8 @@ import com.java.school.online_video_training.dto.CourseSummaryDTO;
 
 public interface CourseService {
 //	Course create(CourseDTO courseDTO);
-	CourseResponseDTO create(CourseDTO courseDTO);
+//	CourseResponseDTO create(CourseDTO courseDTO);
+	CourseResponseDTO create(CourseDTO courseDTO, String username);
 	CourseResponseDTO getCourseById(Long id);
 	Page<CourseResponseDTO> getCourses(Map<String, String> course);
 	CourseResponseDTO update(Long id, CourseDTO courseUpdate);

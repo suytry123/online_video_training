@@ -9,6 +9,7 @@ public class CourseResponseDTO {
 	private Long id;
 	private String name;
 	private BigDecimal price;
+	private String courseDescription;
 
 	private Long categoryId; 
 	private String categoryName;

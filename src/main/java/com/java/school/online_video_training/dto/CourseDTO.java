@@ -15,9 +15,11 @@ public class CourseDTO {
 	@JsonAlias({ "categoryId", "category_id" })
 	private Long categoryId;
 	private String name;
-	@JsonAlias({ "authorId", "author_id" })
-	private Long authorId;
+//	@JsonAlias({ "authorId", "author_id" })
+//	private Long authorId;
 	@JsonAlias({ "imageCover", "image_cover" })
 	private String imageCover;
 	private BigDecimal price;
+	@JsonAlias({ "courseDescription", "course_description" })
+	private String courseDescription;
 }

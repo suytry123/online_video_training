@@ -48,12 +48,12 @@ public class CourseController {
 	private final CourseRepository courseRepository;
 //	private final CourseMapper courseMapper;
 
-	@PreAuthorize("hasAuthority('course:write')")
+	/*@PreAuthorize("hasAuthority('course:write')")
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CourseDTO courseDTO) {
         CourseResponseDTO created = courseService.create(courseDTO);
         return ResponseEntity.ok(created);
-    }
+    }*/
 	
 //	@PreAuthorize("hasAuthority('course:read')")
 //	@GetMapping("{id}")
@@ -71,6 +71,17 @@ public class CourseController {
 //
 //		return ResponseEntity.ok(dto);
 //	}
+	
+	@PreAuthorize("hasAuthority('course:write')")
+	@PostMapping
+	public ResponseEntity<?> create(@RequestBody CourseDTO courseDTO, Authentication authentication) {
+
+		String username = authentication.getName();
+
+		CourseResponseDTO created = courseService.create(courseDTO, username);
+
+		return ResponseEntity.ok(created);
+	}
 
 	@PreAuthorize("hasAuthority('course:read')")
     @GetMapping("{id}")
@@ -125,7 +136,6 @@ public class CourseController {
 		return ResponseEntity.ok().build();
 
 	}
-
 
 	/*@PreAuthorize("isAuthenticated()")
 	@PostMapping("/{courseId}/view")

@@ -69,7 +69,7 @@ public class CourseServiceImpl implements CourseService {
 //		return courseRepository.save(course);
 //	}
 
-	@Override
+	/*@Override
 	@Transactional
 	public CourseResponseDTO create(CourseDTO courseDTO) {
 
@@ -97,8 +97,35 @@ public class CourseServiceImpl implements CourseService {
 		Course saved = courseRepository.save(course);
 
 		return courseMapper.toCourseDTO(saved);
-	}
+	}*/
 
+	@Override
+	@Transactional
+	public CourseResponseDTO create(CourseDTO courseDTO, String username) {
+
+		if (courseDTO.getCategoryId() == null) {
+			throw new RuntimeException("Category ID is required");
+		}
+
+		Category category = categoryRepository.findById(courseDTO.getCategoryId()).filter(c -> !c.isDeleted())
+				.orElseThrow(() -> new RuntimeException("Category not found"));
+
+		User author = userRepository.findByUsername(username).filter(
+				user -> !user.isDeleted() && user.getRoles().stream().anyMatch(role -> role.getName().equals("AUTHOR")))
+				.orElseThrow(() -> new RuntimeException("Author not found"));
+
+		Course course = courseMapper.toCourse(courseDTO);
+
+		course.setCategory(category);
+
+		// IMPORTANT
+		course.setAuthor(author);
+
+		Course saved = courseRepository.save(course);
+
+		return courseMapper.toCourseDTO(saved);
+	}
+	
 	@Override
 	public CourseResponseDTO getCourseById(Long id) {
 		Course course = courseRepository.findById(id)
@@ -158,6 +185,19 @@ public class CourseServiceImpl implements CourseService {
 //		Course course = courseRepository.findById(id).filter(c -> !c.isDeleted())
 //				.orElseThrow(() -> new ResourceNotFoundException("Course", id));
 		Course course = getEntityById(id);
+		
+		if (courseUpdate.getName() != null) {
+		    course.setName(courseUpdate.getName());
+		}
+
+		if (courseUpdate.getCourseDescription() != null) {
+		    course.setCourseDescription(
+		            courseUpdate.getCourseDescription());
+		}
+
+		if (courseUpdate.getPrice() != null) {
+		    course.setPrice(courseUpdate.getPrice());
+		}
 
 		if (courseUpdate.getCategoryId() != null) {
 
@@ -169,7 +209,7 @@ public class CourseServiceImpl implements CourseService {
 
 		}
 
-		if (courseUpdate.getAuthorId() != null) {
+		/*if (courseUpdate.getAuthorId() != null) {
 
 			User author = userRepository.findUserById(courseUpdate.getAuthorId())
 					.filter(user -> !user.isDeleted() && user.getRoles().stream().anyMatch(role -> role.getName().equals("AUTHOR")))
@@ -177,9 +217,10 @@ public class CourseServiceImpl implements CourseService {
 
 			course.setAuthor(author);
 
-		}
+		}*/
 
-		course.setName(courseUpdate.getName());
+		//course.setName(courseUpdate.getName());
+		//course.setCourseDescription(courseUpdate.getCourseDescription());
 
 		Course updated = courseRepository.save(course);
 
@@ -212,6 +253,7 @@ public class CourseServiceImpl implements CourseService {
 			dto.setViews(course.getViews());
 			dto.setLikes(course.getLikes());
 			dto.setPrice(course.getPrice());
+			dto.setCourseDescription(course.getCourseDescription());
 			return dto;
 		}).collect(Collectors.toList());
 	}
@@ -387,11 +429,15 @@ public class CourseServiceImpl implements CourseService {
 		Course course = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course", id));
 
 		// Only allow upload if no image_cover exists
-		if (course.getImageCover() != null && !course.getImageCover().isEmpty()) {
+		if (course.getImageCover() != null && !course.getImageCover().isBlank()) {
 
 			throw new IllegalStateException("Image cover already exists. Use PUT to update.");
 		}
 
+		if (file == null || file.isEmpty()) {
+		    throw new RuntimeException("File is empty");
+		}
+		
 		String contentType = file.getContentType();
 
 		if (contentType == null || (!contentType.equals("image/jpeg") && !contentType.equals("image/png")
@@ -426,10 +472,9 @@ public class CourseServiceImpl implements CourseService {
 				.orElseThrow(() -> new FileNotFoundException("Course not found for id: " + id));
 
 		String imageCover = course.getImageCover();
-
-		if (imageCover == null || imageCover.isEmpty()) {
-
-			throw new FileNotFoundException("No image cover for course id: " + id);
+		
+		if (imageCover == null || imageCover.isBlank()) {
+		    throw new FileNotFoundException("No image cover for course id: " + id);
 		}
 
 		Path filePath = Paths.get("uploads", "courses", imageCover);
@@ -447,7 +492,7 @@ public class CourseServiceImpl implements CourseService {
 
 		String folder = Paths.get("uploads", "courses").toString();
 
-		if (file.isEmpty()) {
+		if (file == null || file.isEmpty()) {
 
 			throw new Exception("File is empty");
 		}
@@ -466,7 +511,7 @@ public class CourseServiceImpl implements CourseService {
 		// Delete the old file if it exists
 		String oldImage = course.getImageCover();
 
-		if (oldImage != null && !oldImage.isEmpty()) {
+		if (oldImage != null && !oldImage.isBlank()) {
 
 			Path oldFilePath = Paths.get(folder, oldImage);
 
@@ -546,7 +591,7 @@ public class CourseServiceImpl implements CourseService {
 
 		String imageCover = course.getImageCover();
 
-		if (imageCover == null || imageCover.isEmpty()) {
+		if (imageCover == null || imageCover.isBlank()) {
 
 			throw new FileNotFoundException("No image cover for course id: " + id);
 		}

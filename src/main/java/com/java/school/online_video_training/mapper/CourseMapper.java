@@ -30,7 +30,7 @@ public interface CourseMapper {
 //	@Mapping(target = "categoryId", source = "category_id.id")
 //	CourseDTO toCourseDTO(Course course);
 	
-	@Mapping(target = "author", source = "authorId")
+//	@Mapping(target = "author", source = "authorId")
     @Mapping(target = "category", source = "categoryId")
     Course toCourse(CourseDTO courseDTO);
 

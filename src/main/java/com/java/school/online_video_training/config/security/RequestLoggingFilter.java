@@ -18,19 +18,36 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(RequestLoggingFilter.class);
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Wrap the request
-        ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
+        ContentCachingRequestWrapper wrappedRequest =
+                new ContentCachingRequestWrapper(request);
 
-        // Continue filter chain using wrapped request
         filterChain.doFilter(wrappedRequest, response);
 
-        // Log the body AFTER it has been read by Spring
+        String uri = request.getRequestURI();
+
+        // Skip auth endpoints
+        if (uri.contains("/login") || uri.contains("/auth") || uri.contains("/signup_user")){
+            log.info("Sensitive request skipped: {}", uri);
+            return;
+        }
+
         byte[] buf = wrappedRequest.getContentAsByteArray();
+
         if (buf.length > 0) {
-            String body = new String(buf, 0, buf.length, StandardCharsets.UTF_8);
+            String body = new String(buf, StandardCharsets.UTF_8);
+
+            // Hide password if exists
+            body = body.replaceAll(
+                    "\"password\":\".*?\"",
+                    "\"password\":\"******\""
+            );
+
             log.info("Request Body: {}", body);
         }
     }
