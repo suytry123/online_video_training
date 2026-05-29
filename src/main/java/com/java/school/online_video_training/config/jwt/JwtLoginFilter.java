@@ -33,7 +33,7 @@ public class JwtLoginFilter extends UsernamePasswordAuthenticationFilter{
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			LoginRequest loginRequest = mapper.readValue(request.getInputStream(), LoginRequest.class);
-			Authentication authentication = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
+			Authentication authentication = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword());
 			Authentication authenticate = authenticationManager.authenticate(authentication);
 			return authenticate;
 		} catch (Exception e) {

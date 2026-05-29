@@ -85,7 +85,7 @@ public class AuthServiceImpl implements AuthService{
 	@Override
 	public LoginResponse authenticateUser(LoginRequest loginRequest) {
 		Authentication authentication = authenticationManager.authenticate(
-		        new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+		        new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
 		    SecurityContextHolder.getContext().setAuthentication(authentication);
 		    AuthUser userPrincipal = (AuthUser) authentication.getPrincipal();
@@ -96,8 +96,21 @@ public class AuthServiceImpl implements AuthService{
 
 		    	// Pass username and authorities to JWT generator
 //		    	return jwtUtils.generateJwtToken(userPrincipal.getUsername(), authorities);
-		    String token = jwtUtils.generateJwtToken(userPrincipal.getUsername(), authorities);
-	    	return new LoginResponse(token, userPrincipal.getUsername());
+		    String token = jwtUtils.generateJwtToken(
+		            userPrincipal.getEmail(),
+		            authorities
+		    );
+
+		    List<String> roles = userPrincipal.getRoles().stream()
+		            .map(Role::getName)
+		            .collect(Collectors.toList());
+
+		    return new LoginResponse(
+		            token,
+		            userPrincipal.getUsername(),
+		            userPrincipal.getEmail(),
+		            roles
+		    );
 
 //		    return jwtUtils.generateJwtToken(userPrincipal.getUsername());
 	}

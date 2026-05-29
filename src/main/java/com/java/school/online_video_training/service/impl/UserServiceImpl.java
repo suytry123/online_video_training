@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -68,6 +70,36 @@ public class UserServiceImpl implements UserService {
 				.accountNonLocked(user.isAccountNonLocked()).credentialsNonExpired(user.isCredentialsNonExpired())
 				.enabled(user.isEnabled()).build();
 		return Optional.ofNullable(authUser);
+	}
+	
+	@Override
+	public AuthUser findUserByEmail(String email) {
+
+	    User user = userRepository.findByEmail(email)
+	            .orElseThrow(() ->
+	                    new ResourceNotFoundException(
+	                            "User with email = " + email + " not found"));
+
+	    Set<GrantedAuthority> authorities = user.getRoles().stream()
+	            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+	            .collect(Collectors.toSet());
+	    
+	    AuthUser authUser = new AuthUser();
+
+	    authUser.setId(user.getId());
+	    authUser.setUsername(user.getUsername());
+	    authUser.setEmail(user.getEmail());
+	    authUser.setPassword(user.getPassword());
+	    authUser.setRoles(user.getRoles());
+
+	    authUser.setAuthorities(authorities);
+
+	    authUser.setAccountNonExpired(true);
+	    authUser.setAccountNonLocked(true);
+	    authUser.setCredentialsNonExpired(true);
+	    authUser.setEnabled(user.isEnabled());
+
+	    return authUser;
 	}
 
 	public Set<SimpleGrantedAuthority> getAuthorities(Set<Role> roles) {

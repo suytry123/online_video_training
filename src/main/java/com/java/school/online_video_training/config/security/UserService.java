@@ -13,6 +13,7 @@ import com.java.school.online_video_training.entity.User;
 
 public interface UserService {
 	Optional<AuthUser> findUserByUsername(String username);
+	AuthUser findUserByEmail(String email);
 	User applyForAuthor(UserRegistrationDTO userDTO);
 	String verifyEmail(String token);
 	void sendVerificationEmail(User user, String token);
