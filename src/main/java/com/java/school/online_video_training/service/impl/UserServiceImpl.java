@@ -74,32 +74,23 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	public AuthUser findUserByEmail(String email) {
-
 	    User user = userRepository.findByEmail(email)
 	            .orElseThrow(() ->
 	                    new ResourceNotFoundException(
 	                            "User with email = " + email + " not found"));
 
-	    Set<GrantedAuthority> authorities = user.getRoles().stream()
-	            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
-	            .collect(Collectors.toSet());
-	    
-	    AuthUser authUser = new AuthUser();
-
-	    authUser.setId(user.getId());
-	    authUser.setUsername(user.getUsername());
-	    authUser.setEmail(user.getEmail());
-	    authUser.setPassword(user.getPassword());
-	    authUser.setRoles(user.getRoles());
-
-	    authUser.setAuthorities(authorities);
-
-	    authUser.setAccountNonExpired(true);
-	    authUser.setAccountNonLocked(true);
-	    authUser.setCredentialsNonExpired(true);
-	    authUser.setEnabled(user.isEnabled());
-
-	    return authUser;
+	    return AuthUser.builder()
+	            .id(user.getId())
+	            .username(user.getUsername())
+	            .email(user.getEmail())
+	            .password(user.getPassword())
+	            .roles(user.getRoles())
+	            .authorities(getAuthorities(user.getRoles()))
+	            .accountNonExpired(user.isAccountNonExpired())
+	            .accountNonLocked(user.isAccountNonLocked())
+	            .credentialsNonExpired(user.isCredentialsNonExpired())
+	            .enabled(user.isEnabled())
+	            .build();
 	}
 
 	public Set<SimpleGrantedAuthority> getAuthorities(Set<Role> roles) {

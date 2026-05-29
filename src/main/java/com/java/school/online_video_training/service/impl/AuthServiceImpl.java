@@ -2,6 +2,7 @@ package com.java.school.online_video_training.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -74,12 +75,24 @@ public class AuthServiceImpl implements AuthService{
 
 		user.setRoles(roles);
 		userRepository.save(user);
-		Set<String> authorities = roles.stream()
+		return jwtUtils.generateJwtToken(signUpRequest.getEmail(), buildAuthorityNames(roles));
+		/*Set<String> authorities = roles.stream()
 			    .map(Role::getName)
 			    .collect(Collectors.toSet());
 
-			return jwtUtils.generateJwtToken(signUpRequest.getEmail(), new ArrayList<>(authorities));
+			return jwtUtils.generateJwtToken(signUpRequest.getEmail(), new ArrayList<>(authorities));*/
 //		return jwtUtils.generateJwtToken(signUpRequest.getUsername());
+	}
+	
+	private List<String> buildAuthorityNames(Set<Role> roles) {
+		Set<String> names = new LinkedHashSet<>();
+		roles.stream()
+				.flatMap(role -> role.getPermissions().stream().map(p -> p.getName()))
+				.forEach(names::add);
+		roles.stream()
+				.map(role -> "ROLE_" + role.getName())
+				.forEach(names::add);
+		return new ArrayList<>(names);
 	}
 
 	@Override
@@ -101,9 +114,9 @@ public class AuthServiceImpl implements AuthService{
 		            authorities
 		    );
 
-		    List<String> roles = userPrincipal.getRoles().stream()
+		    Set<String> roles = userPrincipal.getRoles().stream()
 		            .map(Role::getName)
-		            .collect(Collectors.toList());
+		            .collect(Collectors.toCollection(LinkedHashSet::new));
 
 		    return new LoginResponse(
 		            token,

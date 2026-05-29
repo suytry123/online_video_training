@@ -1,6 +1,6 @@
 package com.java.school.online_video_training.config.jwt;
 
-import java.util.List;
+import java.util.Set;
 
 import lombok.Data;
 
@@ -10,6 +10,6 @@ public class LoginResponse {
 	private final String token;
 	private final String username;	
 	private final String email;
-	private final List<String> roles;
+	private final Set<String> roles;
 
 }
