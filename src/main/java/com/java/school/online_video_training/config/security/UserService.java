@@ -1,5 +1,6 @@
 package com.java.school.online_video_training.config.security;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -8,6 +9,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserPhotoDTO;
+import com.java.school.online_video_training.dto.UserProfileDTO;
+import com.java.school.online_video_training.dto.UserProfileUpdateDTO;
 import com.java.school.online_video_training.dto.UserRegistrationDTO;
 import com.java.school.online_video_training.entity.User;
 
@@ -23,6 +26,7 @@ public interface UserService {
 	UserPhotoDTO uploadPhoto(Long userId, MultipartFile photo);
 	UserPhotoDTO updatePhoto(Long userId, MultipartFile photo);
 	UserPhotoDTO getPhotoById(Long userId);
+	byte[] getPhotoContent(Long userId) throws IOException;
 	//Page<String> getPhoto(Map<String, String> photos);
 	Page<Map<String, String>> getPhotoMetadata(Map<String, String> photos);
 	void deletePhoto(Long userId);
@@ -30,4 +34,6 @@ public interface UserService {
 	//String rejectAuthor(String token);
 	//for user signup
 	String signupUser(SignupUser signupUser);
+	UserProfileDTO getProfile(Long userId);
+    UserProfileDTO updateProfile(Long userId, UserProfileUpdateDTO dto);
 }

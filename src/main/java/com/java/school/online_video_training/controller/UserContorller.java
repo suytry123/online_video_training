@@ -1,5 +1,6 @@
 package com.java.school.online_video_training.controller;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,10 +32,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.java.school.online_video_training.config.security.AuthUser;
 import com.java.school.online_video_training.config.security.UserService;
+import com.java.school.online_video_training.dto.ApiResponse;
 import com.java.school.online_video_training.dto.PageDTO;
 import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserPhotoDTO;
+import com.java.school.online_video_training.dto.UserProfileDTO;
+import com.java.school.online_video_training.dto.UserProfileUpdateDTO;
 import com.java.school.online_video_training.dto.UserRegistrationDTO;
 import com.java.school.online_video_training.entity.User;
 
@@ -163,12 +169,11 @@ public class UserContorller {
 		}
 	}
 
-	@GetMapping("/photo/{userId}")
-	@PreAuthorize("hasAuthority('user:read')")
+	/*@GetMapping("/photo/{userId}")
 	public ResponseEntity<?> getPhoto(@PathVariable Long userId) {
 		try {
 			UserPhotoDTO user = userService.getPhotoById(userId);
-			String photo = user.getUserPhoto();
+			String photo = user.getPhotoUrl();
 			if (photo == null) {
 				return ResponseEntity.notFound().build();
 			}
@@ -182,10 +187,22 @@ public class UserContorller {
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Photo retrieval failed");
 		}
+	}*/
+	
+	@GetMapping("/photo/{userId}")
+	public ResponseEntity<byte[]> getPhoto(@PathVariable Long userId) throws IOException {
+
+	    byte[] image = userService.getPhotoContent(userId);
+	    if (image == null) {
+	        return ResponseEntity.notFound().build();
+	    }
+
+	    return ResponseEntity.ok()
+	            .contentType(MediaType.IMAGE_JPEG)
+	            .body(image);
 	}
 
 	@GetMapping("/photos")
-	@PreAuthorize("hasAuthority('user:read')")
 	public ResponseEntity<?> getPhotos(@RequestParam Map<String, String> photos) {
 		try {
 			Page<Map<String, String>> photoMetadata = userService.getPhotoMetadata(photos);
@@ -224,5 +241,26 @@ public class UserContorller {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Authorization", "Bearer " + jwt);
 		return ResponseEntity.ok().headers(responseHeaders).build();
+	}
+	
+	@GetMapping("/profile")
+	public ResponseEntity<ApiResponse<UserProfileDTO>> getProfile(Authentication authentication) {
+
+		AuthUser authUser = (AuthUser) authentication.getPrincipal();
+
+		UserProfileDTO profile = userService.getProfile(authUser.getId());
+
+		return ResponseEntity.ok(new ApiResponse<>(true, "Profile retrieved successfully", profile));
+	}
+
+	@PutMapping("/profile")
+	public ResponseEntity<ApiResponse<UserProfileDTO>> updateProfile(Authentication authentication,
+			@RequestBody UserProfileUpdateDTO dto) {
+
+		AuthUser authUser = (AuthUser) authentication.getPrincipal();
+
+		UserProfileDTO profile = userService.updateProfile(authUser.getId(), dto);
+
+		return ResponseEntity.ok(new ApiResponse<>(true, "Profile updated successfully", profile));
 	}
 }

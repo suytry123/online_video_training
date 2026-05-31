@@ -1,6 +1,7 @@
 package com.java.school.online_video_training.config.security;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -48,6 +49,10 @@ public class WebSecurityConfig {
             .authorizeHttpRequests(auth -> 
                 auth.antMatchers("/api/auth/**", "/api/user/signup_user", "/api/courses/image/**", 
                 		"/api/courses/summary", "/api/public/statistics").permitAll()
+                	.antMatchers(HttpMethod.GET, "/api/user/photo/**").permitAll()
+                	.antMatchers(HttpMethod.POST, "/api/user/photo/**").authenticated()
+                	.antMatchers(HttpMethod.PUT, "/api/user/photo/**").authenticated()
+                	.antMatchers(HttpMethod.DELETE, "/api/user/photo/**").authenticated()
                     .antMatchers("/").permitAll()
                     .antMatchers("/swagger-ui/**","/swagger-ui.html","/webjars/**","/v2/**","/swagger-resources/**").permitAll()
                     .anyRequest().authenticated()

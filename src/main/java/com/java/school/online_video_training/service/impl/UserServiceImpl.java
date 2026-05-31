@@ -1,11 +1,11 @@
 package com.java.school.online_video_training.service.impl;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -19,7 +19,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -30,6 +29,8 @@ import com.java.school.online_video_training.config.security.JwtUtils;
 import com.java.school.online_video_training.config.security.UserService;
 import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserPhotoDTO;
+import com.java.school.online_video_training.dto.UserProfileDTO;
+import com.java.school.online_video_training.dto.UserProfileUpdateDTO;
 import com.java.school.online_video_training.dto.UserRegistrationDTO;
 import com.java.school.online_video_training.entity.Role;
 import com.java.school.online_video_training.entity.User;
@@ -633,6 +634,26 @@ public class UserServiceImpl implements UserService {
 
 		return mapper.toPhotoDTO(user);
 	}
+	
+	@Override
+	public byte[] getPhotoContent(Long userId) throws IOException {
+
+	    User user = userRepository.findById(userId)
+	            .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+	    if (user.getPhoto() == null || user.getPhoto().isBlank()) {
+	        throw new RuntimeException("User has no photo");
+	    }
+	    
+	    Path filePath = Paths.get("uploads/users/", user.getPhoto());
+	    
+
+	    if (!Files.exists(filePath)) {
+	        return null;
+	    }
+
+	    return Files.readAllBytes(filePath);
+	}
 
 	@Override
 	public Page<Map<String, String>> getPhotoMetadata(Map<String, String> photos) {
@@ -757,5 +778,36 @@ public class UserServiceImpl implements UserService {
 	    user.setRoles(Collections.singleton(userRole));
 		userRepository.save(user);
 		return jwtUtils.generateJwtToken(signupUser.getUsername());
+	}
+	
+	@Override
+	public UserProfileDTO getProfile(Long userId) {
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+		UserProfileDTO dto = new UserProfileDTO();
+
+		dto.setId(user.getId());
+		dto.setUsername(user.getUsername());
+		dto.setEmail(user.getEmail());
+		dto.setPhoneNumber(user.getPhoneNumber());
+		dto.setGender(user.getGender());
+		dto.setPhoto(user.getPhoto());
+		dto.setJoinDate(user.getJoinDate());
+
+		return dto;
+	}
+
+	@Override
+	public UserProfileDTO updateProfile(Long userId, UserProfileUpdateDTO dto) {
+
+		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+		user.setPhoneNumber(dto.getPhoneNumber());
+		user.setGender(dto.getGender());
+
+		userRepository.save(user);
+
+		return getProfile(userId);
 	}
 }

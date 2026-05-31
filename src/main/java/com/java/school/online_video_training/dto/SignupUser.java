@@ -7,5 +7,6 @@ public class SignupUser {
 	private Long id;
 	private String username;
 	private String password;
+    private String confirmPassword;
 	private String email;
 }
