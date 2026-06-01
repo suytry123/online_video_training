@@ -112,6 +112,8 @@ public class VideoServiceImpl implements VideoService {
 		Video video = getEntityById(id);
 //	    Video updateEntity = videoMapper.toVideo(videoDTO);
 	    video.setTitle(videoDTO.getTitle());
+	    video.setDescription(videoDTO.getDescription());
+	    video.setVideoLink(videoDTO.getVideoLink());
 	  
 	    Video updated = videoRepository.save(video);
 	    return videoMapper.toVideoResponseDTO(updated);
