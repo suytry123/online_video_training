@@ -1,5 +1,6 @@
 package com.java.school.online_video_training.exception;
 
+import java.util.Map;
 import java.util.UUID;
 
 import javax.security.sasl.AuthenticationException;
@@ -8,6 +9,7 @@ import javax.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,6 +40,15 @@ public class GlobleExceptionHandler {
 		log.error("Unexpected error occurred", ex);
 		ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An unexpected error occurred");
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+	}
+	
+	@ExceptionHandler(LockedException.class)
+	public ResponseEntity<?> handleLockedException(LockedException ex) {
+
+	    return ResponseEntity.status(HttpStatus.LOCKED)
+	            .body(Map.of(
+	                    "message", ex.getMessage()
+	            ));
 	}
 	
 

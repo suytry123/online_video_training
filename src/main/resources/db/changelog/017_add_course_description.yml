@@ -1,6 +1,6 @@
 databaseChangeLog:
 - changeSet:
-    id: 011_add_views_likes_to_courses
+    id: 017_add_course_description
     author: soksoytry200@gmail.com
     changes:
     - addColumn:

@@ -33,3 +33,5 @@ databaseChangeLog:
       file: db/changelog/016_add_soft_delete.yml
   - include:
       file: db/changelog/017_add_course_description.yml
+  - include:
+      file: db/changelog/018_add_user_lock_fields.yml

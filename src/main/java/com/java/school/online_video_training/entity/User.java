@@ -68,6 +68,13 @@ public class User {
 	private boolean credentialsNonExpired;
 	private boolean enabled;
 	
+	//for lock user
+	@Column(name = "failed_attempts", nullable = false)
+	private int failedAttempts;
+
+	@Column(name = "lock_time")
+	private LocalDateTime lockTime;
+	
 	// for author field
     private String education;
     private String address;

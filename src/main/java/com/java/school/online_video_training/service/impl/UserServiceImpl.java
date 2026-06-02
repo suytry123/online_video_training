@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.java.school.online_video_training.config.security.AuthUser;
 import com.java.school.online_video_training.config.security.JwtUtils;
+import com.java.school.online_video_training.config.security.SecurityConstants;
 import com.java.school.online_video_training.config.security.UserService;
 import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserPhotoDTO;
@@ -106,6 +108,7 @@ public class UserServiceImpl implements UserService {
 	private Stream<SimpleGrantedAuthority> toStream(Role role) {
 		return role.getPermissions().stream().map(permiision -> new SimpleGrantedAuthority(permiision.getName()));
 	}
+	
 
 	/*
 	@Override
