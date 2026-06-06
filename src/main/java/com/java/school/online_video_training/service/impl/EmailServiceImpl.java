@@ -1,27 +1,32 @@
 package com.java.school.online_video_training.service.impl;
 
+import java.time.LocalDateTime;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.java.school.online_video_training.entity.User;
+import com.java.school.online_video_training.repository.UserRepository;
 import com.java.school.online_video_training.service.EmailService;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class EmailServiceImpl implements EmailService {
 
-	@Autowired
-	private JavaMailSender mailSender;
+	private final JavaMailSender mailSender;
+	private final UserRepository userRepository;
 
 	@Value("${spring.mail.username}")
 	private String fromEmail;
@@ -37,6 +42,55 @@ public class EmailServiceImpl implements EmailService {
 		sendVerificationEmail(to, subject, text, false);
 	}
 
+	@Override
+    public void sendVerifyEmail(User user) {
+
+        String verifyUrl =
+                "http://localhost:4200/verify-email?token="
+                        + user.getVerificationToken();
+
+        SimpleMailMessage message = new SimpleMailMessage();
+
+        message.setTo(user.getEmail());
+
+        message.setSubject("Verify your account");
+
+        message.setText(
+                "Please click the link below to verify your account:\n\n"
+                        + verifyUrl);
+
+        mailSender.send(message);
+    }
+	
+	@Override
+	@Transactional
+	public boolean verifyEmail(String token) {
+
+	    User user = userRepository
+	            .findByVerificationToken(token)
+	            .orElse(null);
+
+	    if (user == null) {
+	        return false;
+	    }
+
+	    if (user.getVerificationTokenExpiry()
+	            .isBefore(LocalDateTime.now())) {
+
+	        return false;
+	    }
+
+	    user.setEnabled(true);
+
+	    user.setVerificationToken(null);
+
+	    user.setVerificationTokenExpiry(null);
+
+	    userRepository.save(user);
+
+	    return true;
+	}
+	
 	@Async
 	@Override
 	public void sendVerificationEmail(String to, String subject, String text, boolean isHtml) {

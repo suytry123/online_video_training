@@ -35,3 +35,5 @@ databaseChangeLog:
       file: db/changelog/017_add_course_description.yml
   - include:
       file: db/changelog/018_add_user_lock_fields.yml
+  - include:
+      file: db/changelog/019_add_verification_token_user.yml

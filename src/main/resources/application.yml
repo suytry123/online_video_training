@@ -12,7 +12,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   jackson:
-    property-naming-strategy: SNAKE_CASE
     default-property-inclusion: non-null
     deserialization:
       fail-on-unknown-properties: false

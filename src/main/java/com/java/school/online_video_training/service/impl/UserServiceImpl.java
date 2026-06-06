@@ -27,8 +27,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.java.school.online_video_training.config.security.AuthUser;
 import com.java.school.online_video_training.config.security.JwtUtils;
-import com.java.school.online_video_training.config.security.SecurityConstants;
 import com.java.school.online_video_training.config.security.UserService;
+import com.java.school.online_video_training.dto.MessageResponse;
 import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserPhotoDTO;
 import com.java.school.online_video_training.dto.UserProfileDTO;
@@ -759,7 +759,7 @@ public class UserServiceImpl implements UserService {
 	}*/
 	
 	@Override
-	public String signupUser(SignupUser signupUser) {
+	public MessageResponse signupUser(SignupUser signupUser) {
 		if (userRepository.existsByUsername(signupUser.getUsername())) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Username is already taken!");
 		}
@@ -776,11 +776,25 @@ public class UserServiceImpl implements UserService {
 		// Fetch existing role "USER" from DB
 	    Role userRole = roleRepository.findByName("USER")
 	        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "USER role not found"));
+	    
+	    String token = UUID.randomUUID().toString();
+
+	    user.setEnabled(false);
+
+	    user.setVerificationToken(token);
+
+	    user.setVerificationTokenExpiry(
+	            LocalDateTime.now().plusHours(24));
 
 	    // Assign role to user
 	    user.setRoles(Collections.singleton(userRole));
 		userRepository.save(user);
-		return jwtUtils.generateJwtToken(signupUser.getUsername());
+		emailService.sendVerificationEmail(user);
+
+		return new MessageResponse(
+			    "Registration successful. Please verify your email."
+			);
+		//		return jwtUtils.generateJwtToken(signupUser.getUsername());
 	}
 	
 	@Override

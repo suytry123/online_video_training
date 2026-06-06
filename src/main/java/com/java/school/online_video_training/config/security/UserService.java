@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.java.school.online_video_training.dto.MessageResponse;
 import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserPhotoDTO;
 import com.java.school.online_video_training.dto.UserProfileDTO;
@@ -33,7 +34,7 @@ public interface UserService {
 	//String approveAuthor(String token);
 	//String rejectAuthor(String token);
 	//for user signup
-	String signupUser(SignupUser signupUser);
+	MessageResponse signupUser(SignupUser signupUser);
 	UserProfileDTO getProfile(Long userId);
     UserProfileDTO updateProfile(Long userId, UserProfileUpdateDTO dto);
 }

@@ -9,10 +9,8 @@ import lombok.Data;
 @Data
 public class VideoDTO {
 	private Long id;
-    @JsonAlias({ "courseId", "course_id" })
     private Long courseId;
     private String title;
     private String description;
-    @JsonAlias({ "videoLink", "video_link" })
     private List<String> videoLink; 
 }

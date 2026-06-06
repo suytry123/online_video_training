@@ -1,0 +1,17 @@
+databaseChangeLog:
+- changeSet:
+    id: 018_add_user_lock_fields
+    author: soksoytry200@gmail.com
+    changes:
+      - addColumn:
+          tableName: users
+          columns:
+          - column:
+              name: failed_attempts
+              type: INT
+              defaultValueNumeric: 0
+              constraints:
+                nullable: false
+          - column:
+              name: lock_time
+              type: TIMESTAMP

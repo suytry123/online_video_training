@@ -1,9 +1,6 @@
 package com.java.school.online_video_training.controller;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.java.school.online_video_training.config.security.AuthUser;
 import com.java.school.online_video_training.config.security.UserService;
 import com.java.school.online_video_training.dto.ApiResponse;
+import com.java.school.online_video_training.dto.MessageResponse;
 import com.java.school.online_video_training.dto.PageDTO;
 import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserPhotoDTO;
@@ -55,6 +53,7 @@ public class UserContorller {
 	private final UserService userService;
 	private final LocalValidatorFactoryBean validator;
 	private final ObjectMapper objectMapper;
+	
 
 	@PostMapping("/applyForAuthor")
 	@PreAuthorize("hasAuthority('user:write')")
@@ -236,7 +235,7 @@ public class UserContorller {
 
 	@PostMapping("/signup_user")
 	public ResponseEntity<?> createUserAcc(@Valid @RequestBody SignupUser signupUser) {
-		String jwt = userService.signupUser(signupUser);
+		MessageResponse jwt = userService.signupUser(signupUser);
 
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Authorization", "Bearer " + jwt);

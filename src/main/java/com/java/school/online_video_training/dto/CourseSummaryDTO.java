@@ -14,7 +14,6 @@ public class CourseSummaryDTO {
     private String authorName;
     private int views;
     private int likes;
-    @JsonAlias({ "imageCover", "image_cover" })
     private String imageCover;
 	private BigDecimal price;
 	private String courseDescription;

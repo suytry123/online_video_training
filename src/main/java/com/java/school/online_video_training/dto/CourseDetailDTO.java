@@ -15,6 +15,5 @@ public class CourseDetailDTO {
     private int views;
     private int likes;
     private List<VideoDTO> videos;
-//    @JsonAlias({ "imageCover", "image_cover" })
 //    private String imageCover;
 }

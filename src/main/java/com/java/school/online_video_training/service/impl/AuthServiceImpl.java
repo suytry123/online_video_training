@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -104,20 +105,24 @@ public class AuthServiceImpl implements AuthService {
 	}
 
 	@Override
-	@Transactional
 	public LoginResponse authenticateUser(LoginRequest loginRequest) {
 
 		User user = userRepository.findByEmail(loginRequest.getEmail())
 				.orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+
+		// Check email verification
+		if (!user.isEnabled()) {
+			throw new DisabledException("Please verify your email first.");
+		}
+
 		// Check if account is locked
 		if (!user.isAccountNonLocked()) {
 
 			if (!securityService.unlockWhenTimeExpired(user)) {
 
-				long minutesLeft = Math.max(1,
-						Duration.between(LocalDateTime.now(),
-								user.getLockTime().plusMinutes(SecurityConstants.LOCK_TIME_DURATION_MINUTES))
-								.toMinutes());
+				LocalDateTime unlockTime = user.getLockTime().plusMinutes(SecurityConstants.LOCK_TIME_DURATION_MINUTES);
+
+				long minutesLeft = Math.max(1, Duration.between(LocalDateTime.now(), unlockTime).toMinutes());
 
 				throw new LockedException("Account locked. Try again in " + minutesLeft + " minute(s).");
 			}

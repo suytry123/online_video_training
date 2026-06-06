@@ -78,8 +78,12 @@ public class User {
 	// for author field
     private String education;
     private String address;
-    private String verificationToken;
     
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+    @Column(name = "verification_token_expiry")
+    private LocalDateTime verificationTokenExpiry;    
     @Column(name = "is_author")
     private Boolean  isAuthor = false;
     
