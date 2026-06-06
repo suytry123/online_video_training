@@ -758,6 +758,8 @@ public class UserServiceImpl implements UserService {
 		return imagePaths;
 	}*/
 	
+	
+	@Transactional
 	@Override
 	public MessageResponse signupUser(SignupUser signupUser) {
 		if (userRepository.existsByUsername(signupUser.getUsername())) {
@@ -777,7 +779,8 @@ public class UserServiceImpl implements UserService {
 	    Role userRole = roleRepository.findByName("USER")
 	        .orElseThrow(() -> new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "USER role not found"));
 	    
-	    String token = UUID.randomUUID().toString();
+//	    String token = UUID.randomUUID().toString();
+	    String token = generateVerificationToken();
 
 	    user.setEnabled(false);
 
@@ -789,12 +792,16 @@ public class UserServiceImpl implements UserService {
 	    // Assign role to user
 	    user.setRoles(Collections.singleton(userRole));
 		userRepository.save(user);
-		emailService.sendVerificationEmail(user);
+		emailService.sendUserVerificationEmail(user);
 
 		return new MessageResponse(
 			    "Registration successful. Please verify your email."
 			);
 		//		return jwtUtils.generateJwtToken(signupUser.getUsername());
+	}
+	
+	private String generateVerificationToken() {
+	    return UUID.randomUUID().toString();
 	}
 	
 	@Override

@@ -3,7 +3,7 @@ package com.java.school.online_video_training.service;
 import com.java.school.online_video_training.entity.User;
 
 public interface EmailService {
-	void sendVerifyEmail(User user);
+	void sendUserVerificationEmail(User user);
 	boolean verifyEmail(String token);
 	void sendVerificationEmail(String to, String subject, String text);
 	void sendVerificationEmail(String to, String subject, String text, boolean isHtml);

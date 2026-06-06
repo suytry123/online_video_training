@@ -112,7 +112,10 @@ public class AuthServiceImpl implements AuthService {
 
 		// Check email verification
 		if (!user.isEnabled()) {
-			throw new DisabledException("Please verify your email first.");
+		    throw new ApiException(
+		        HttpStatus.UNAUTHORIZED,
+		        "Please verify your email before logging in."
+		    );
 		}
 
 		// Check if account is locked

@@ -6,6 +6,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.java.school.online_video_training.entity.User;
+import com.java.school.online_video_training.exception.ApiException;
 import com.java.school.online_video_training.repository.UserRepository;
 import com.java.school.online_video_training.service.EmailService;
 
@@ -33,7 +35,7 @@ public class EmailServiceImpl implements EmailService {
 
 	@Value("${app.base-url}")
 	private String baseUrl;
-	
+
 	@Value("${app.admin-email}")
 	private String adminEmail;
 
@@ -42,55 +44,55 @@ public class EmailServiceImpl implements EmailService {
 		sendVerificationEmail(to, subject, text, false);
 	}
 
+	@Async
 	@Override
-    public void sendVerifyEmail(User user) {
+	public void sendUserVerificationEmail(User user) {
 
-        String verifyUrl =
-                "http://localhost:4200/verify-email?token="
-                        + user.getVerificationToken();
+		String verifyUrl = baseUrl + "/verify-email?token=" + user.getVerificationToken();
 
-        SimpleMailMessage message = new SimpleMailMessage();
+		SimpleMailMessage message = new SimpleMailMessage();
 
-        message.setTo(user.getEmail());
+		message.setTo(user.getEmail());
 
-        message.setSubject("Verify your account");
+		message.setSubject("Verify your account");
 
-        message.setText(
-                "Please click the link below to verify your account:\n\n"
-                        + verifyUrl);
+		message.setText("Please click the link below to verify your account:\n\n" + verifyUrl);
 
-        mailSender.send(message);
-    }
-	
+		try {
+			mailSender.send(message);
+		} catch (Exception e) {
+			log.error("Failed to send verification email", e);
+			throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to send verification email");
+		}
+	}
+
 	@Override
 	@Transactional
 	public boolean verifyEmail(String token) {
 
-	    User user = userRepository
-	            .findByVerificationToken(token)
-	            .orElse(null);
+		User user = userRepository.findByVerificationToken(token)
+				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Invalid verification token"));
 
-	    if (user == null) {
-	        return false;
-	    }
+		if (user.getVerificationTokenExpiry().isBefore(LocalDateTime.now())) {
 
-	    if (user.getVerificationTokenExpiry()
-	            .isBefore(LocalDateTime.now())) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Verification link has expired");
+		}
 
-	        return false;
-	    }
+		if (user.isEnabled()) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Account already verified");
+		}
 
-	    user.setEnabled(true);
+		user.setEnabled(true);
 
-	    user.setVerificationToken(null);
+		user.setVerificationToken(null);
 
-	    user.setVerificationTokenExpiry(null);
+		user.setVerificationTokenExpiry(null);
 
-	    userRepository.save(user);
+		userRepository.save(user);
 
-	    return true;
+		return true;
 	}
-	
+
 	@Async
 	@Override
 	public void sendVerificationEmail(String to, String subject, String text, boolean isHtml) {
@@ -206,31 +208,25 @@ public class EmailServiceImpl implements EmailService {
 	@Async
 	@Override
 	public void sendAuthorApprovalRequestEmail(User user) {
-	    String approveUrl = baseUrl + "/api/user/author/approve?token=" + user.getApproveToken();
-	    String rejectUrl = baseUrl + "/api/user/author/reject?token=" + user.getRejectToken();
-	    
-	    String emailBody = "<h2>New Author Application</h2>"
-	        + "<p>Dear Admin,</p>"
-	        + "<p>A user has applied to become an author. Please review the details below:</p>"
-	        + "<div style='background:#f9f9f9;padding:10px;border-radius:5px;'>"
-	        + "<b>Username:</b> " + user.getUsername() + "<br>"
-	        + "<b>Email:</b> " + user.getEmail() + "<br>"
-	        + "<b>Gender:</b> " + user.getGender() + "<br>"
-	        + "<b>Phone:</b> " + user.getPhoneNumber() + "<br>"
-	        + "<b>Education:</b> " + user.getEducation() + "<br>"
-	        + "<b>Address:</b> " + user.getAddress() + "<br>"
-	        + "<b>Current Role:</b> " + user.getRoles() + "<br>"
-	        + "<b>Bio:</b> " + user.getBio() + "<br>"
-	        + "<b>Expertise:</b> " + user.getExpertise() + "<br>"
-	        + "</div><br>"
-	        + "<a href=\"" + approveUrl + "\" style=\"background-color:#4CAF50;color:white;padding:10px 24px;text-decoration:none;border-radius:5px;\">APPROVE</a>"
-	        + "&nbsp;"
-	        + "<a href=\"" + rejectUrl + "\" style=\"background-color:#f44336;color:white;padding:10px 24px;text-decoration:none;border-radius:5px;\">REJECT</a>"
-	        + "<br><br><small>Note: This is an automated message. Please do not reply.</small>"
-	        + "<br><br>Best regards,<br>Your Application Team";
+		String approveUrl = baseUrl + "/api/user/author/approve?token=" + user.getApproveToken();
+		String rejectUrl = baseUrl + "/api/user/author/reject?token=" + user.getRejectToken();
 
-	    // Now send this emailBody as HTML using your sendHtmlEmail method
-	    sendHtmlEmail(adminEmail, "New Author Application", emailBody);
+		String emailBody = "<h2>New Author Application</h2>" + "<p>Dear Admin,</p>"
+				+ "<p>A user has applied to become an author. Please review the details below:</p>"
+				+ "<div style='background:#f9f9f9;padding:10px;border-radius:5px;'>" + "<b>Username:</b> "
+				+ user.getUsername() + "<br>" + "<b>Email:</b> " + user.getEmail() + "<br>" + "<b>Gender:</b> "
+				+ user.getGender() + "<br>" + "<b>Phone:</b> " + user.getPhoneNumber() + "<br>" + "<b>Education:</b> "
+				+ user.getEducation() + "<br>" + "<b>Address:</b> " + user.getAddress() + "<br>"
+				+ "<b>Current Role:</b> " + user.getRoles() + "<br>" + "<b>Bio:</b> " + user.getBio() + "<br>"
+				+ "<b>Expertise:</b> " + user.getExpertise() + "<br>" + "</div><br>" + "<a href=\"" + approveUrl
+				+ "\" style=\"background-color:#4CAF50;color:white;padding:10px 24px;text-decoration:none;border-radius:5px;\">APPROVE</a>"
+				+ "&nbsp;" + "<a href=\"" + rejectUrl
+				+ "\" style=\"background-color:#f44336;color:white;padding:10px 24px;text-decoration:none;border-radius:5px;\">REJECT</a>"
+				+ "<br><br><small>Note: This is an automated message. Please do not reply.</small>"
+				+ "<br><br>Best regards,<br>Your Application Team";
+
+		// Now send this emailBody as HTML using your sendHtmlEmail method
+		sendHtmlEmail(adminEmail, "New Author Application", emailBody);
 	}
 
 	private void sendHtmlEmail(String to, String subject, String htmlBody) {
@@ -255,6 +251,56 @@ public class EmailServiceImpl implements EmailService {
 			String status = approved ? "approved" : "rejected";
 			String subject = "Author Application Status Update";
 			String details = String.format("""
+					<div style="background-color: #f8f9fa; border-radius: 5px; padding: 20px; margin: 20px 0;">
+						<p><strong>Username:</strong> %s</p>
+						<p><strong>Email:</strong> %s</p>
+						<p><strong>Gender:</strong> %s</p>
+						<p><strong>Phone:</strong> %s</p>
+						<p><strong>Education:</strong> %s</p>
+						<p><strong>Address:</strong> %s</p>
+						<p><strong>Bio:</strong> %s</p>
+						<p><strong>Expertise:</strong> %s</p>
+					</div>""", user.getUsername(), user.getEmail(), user.getGender(), user.getPhoneNumber(),
+					user.getEducation(), user.getAddress(), user.getBio(), user.getExpertise());
+			String text = String.format("""
+					<!DOCTYPE html>
+					<html>
+					<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+						<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+							<h2 style="color: #2c3e50; text-align: center;">Author Application Update</h2>
+							<p>Dear %s,</p>
+							<p>Your author application has been <strong>%s</strong>.</p>
+							%s
+							<p>%s</p>
+							<p style="color: #666; font-size: 12px; margin-top: 30px;">
+								Note: This is an automated message. Please do not reply.
+							</p>
+						</div>
+					</body>
+					</html>
+					""", user.getUsername(), status, details,
+					approved ? "Congratulations! You can now start creating content."
+							: "Thank you for your interest. You can reapply in the future.");
+			log.info("[EMAIL][USER ALERT] Preparing to send author approval status email to user: {} (approved: {})",
+					user.getEmail(), approved);
+			log.debug("[EMAIL][USER ALERT] Email subject: {}", subject);
+			log.debug("[EMAIL][USER ALERT] Email body: {}", text);
+			sendVerificationEmail(user.getEmail(), subject, text, true);
+			log.info("[EMAIL][USER ALERT] Author approval status email sent to user: {} (approved: {})",
+					user.getEmail(), approved);
+		} catch (Exception e) {
+			log.error("[EMAIL][USER ALERT] Failed to send author approval status email to user: {} (approved: {}) - {}",
+					user.getEmail(), approved, e.getMessage(), e);
+			throw new RuntimeException("Failed to send author approval status email", e);
+		}
+	}
+
+	@Async
+	@Override
+	public void sendAdminActionConfirmation(User user, boolean approved) {
+		String status = approved ? "APPROVED" : "REJECTED";
+		String subject = "Admin Action Confirmation: Author Application " + status;
+		String details = String.format("""
 				<div style="background-color: #f8f9fa; border-radius: 5px; padding: 20px; margin: 20px 0;">
 					<p><strong>Username:</strong> %s</p>
 					<p><strong>Email:</strong> %s</p>
@@ -264,98 +310,27 @@ public class EmailServiceImpl implements EmailService {
 					<p><strong>Address:</strong> %s</p>
 					<p><strong>Bio:</strong> %s</p>
 					<p><strong>Expertise:</strong> %s</p>
-				</div>""",
-				user.getUsername(),
-				user.getEmail(),
-				user.getGender(),
-				user.getPhoneNumber(),
-				user.getEducation(),
-				user.getAddress(),
-				user.getBio(),
-				user.getExpertise()
-			);
-			String text = String.format("""
+				</div>""", user.getUsername(), user.getEmail(), user.getGender(), user.getPhoneNumber(),
+				user.getEducation(), user.getAddress(), user.getBio(), user.getExpertise());
+		String text = String.format("""
 				<!DOCTYPE html>
 				<html>
 				<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
 					<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-						<h2 style="color: #2c3e50; text-align: center;">Author Application Update</h2>
-						<p>Dear %s,</p>
-						<p>Your author application has been <strong>%s</strong>.</p>
+						<h2 style="color: #2c3e50; text-align: center;">Admin Action Confirmation</h2>
+						<p>You have <strong>%s</strong> the following author application:</p>
 						%s
-						<p>%s</p>
 						<p style="color: #666; font-size: 12px; margin-top: 30px;">
 							Note: This is an automated message. Please do not reply.
 						</p>
 					</div>
 				</body>
 				</html>
-				""",
-				user.getUsername(),
-				status,
-				details,
-				approved ? "Congratulations! You can now start creating content." : "Thank you for your interest. You can reapply in the future."
-			);
-			   log.info("[EMAIL][USER ALERT] Preparing to send author approval status email to user: {} (approved: {})", user.getEmail(), approved);
-		        log.debug("[EMAIL][USER ALERT] Email subject: {}", subject);
-		        log.debug("[EMAIL][USER ALERT] Email body: {}", text);
-		        sendVerificationEmail(user.getEmail(), subject, text, true);
-		        log.info("[EMAIL][USER ALERT] Author approval status email sent to user: {} (approved: {})", user.getEmail(), approved);
-		    } catch (Exception e) {
-		        log.error("[EMAIL][USER ALERT] Failed to send author approval status email to user: {} (approved: {}) - {}", user.getEmail(), approved, e.getMessage(), e);
-		        throw new RuntimeException("Failed to send author approval status email", e);
-		    }
-	}
-	
-	@Async
-	@Override
-	public void sendAdminActionConfirmation(User user, boolean approved) {
-		String status = approved ? "APPROVED" : "REJECTED";
-		String subject = "Admin Action Confirmation: Author Application " + status;
-		String details = String.format(
-			"""
-			<div style="background-color: #f8f9fa; border-radius: 5px; padding: 20px; margin: 20px 0;">
-				<p><strong>Username:</strong> %s</p>
-				<p><strong>Email:</strong> %s</p>
-				<p><strong>Gender:</strong> %s</p>
-				<p><strong>Phone:</strong> %s</p>
-				<p><strong>Education:</strong> %s</p>
-				<p><strong>Address:</strong> %s</p>
-				<p><strong>Bio:</strong> %s</p>
-				<p><strong>Expertise:</strong> %s</p>
-			</div>""",
-			user.getUsername(),
-			user.getEmail(),
-			user.getGender(),
-			user.getPhoneNumber(),
-			user.getEducation(),
-			user.getAddress(),
-			user.getBio(),
-			user.getExpertise()
-		);
-		String text = String.format(
-			"""
-			<!DOCTYPE html>
-			<html>
-			<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-				<div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-					<h2 style="color: #2c3e50; text-align: center;">Admin Action Confirmation</h2>
-					<p>You have <strong>%s</strong> the following author application:</p>
-					%s
-					<p style="color: #666; font-size: 12px; margin-top: 30px;">
-						Note: This is an automated message. Please do not reply.
-					</p>
-				</div>
-			</body>
-			</html>
-			""",
-			status,
-			details
-		);
+				""", status, details);
 		sendVerificationEmail(adminEmail, subject, text, true);
 		log.info("Admin action confirmation email sent to admin: {} for user: {}", adminEmail, user.getEmail());
 	}
-	
+
 	@Async
 	@Override
 	public void sendOtp(String to, String otp) {
@@ -364,5 +339,8 @@ public class EmailServiceImpl implements EmailService {
 		sendVerificationEmail(to, subject, message, false);
 	}
 
-	// NOTE: Bounce/error messages like 'Mail Delivery Subsystem' are generated by the recipient's mail server (e.g., Gmail) and cannot be produced or controlled by this application. This application can only log send failures or notify the admin if sending fails at the SMTP level.
+	// NOTE: Bounce/error messages like 'Mail Delivery Subsystem' are generated by
+	// the recipient's mail server (e.g., Gmail) and cannot be produced or
+	// controlled by this application. This application can only log send failures
+	// or notify the admin if sending fails at the SMTP level.
 }
