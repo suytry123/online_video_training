@@ -1,16 +1,5 @@
 package com.java.school.online_video_training.config.security;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import com.java.school.online_video_training.dto.UserRegistrationDTO;
-import com.java.school.online_video_training.entity.User;
-
-import lombok.RequiredArgsConstructor;
-
 //@Service
 //@RequiredArgsConstructor
 //public class UserServiceFakeImpl implements UserService{

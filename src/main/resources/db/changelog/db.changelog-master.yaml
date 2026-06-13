@@ -26,7 +26,7 @@ databaseChangeLog:
   - include:
       file: db/changelog/013_add_unique_constraints_to_images.yml
   - include:
-      file: db/changelog/014_add_missing_user_fields.yml
+      file: db/changelog/014_create_author_applications.yml
   - include:
       file: db/changelog/015_course_interaction.yml
   - include:
@@ -37,3 +37,5 @@ databaseChangeLog:
       file: db/changelog/018_add_user_lock_fields.yml
   - include:
       file: db/changelog/019_add_verification_token_user.yml
+  - include:
+      file: db/changelog/020_add_reset_password_columns.yml

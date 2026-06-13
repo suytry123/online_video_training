@@ -1,9 +1,19 @@
 package com.java.school.online_video_training.dto;
 
-import lombok.Data;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
-@Data
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class ResetPasswordRequest {
-	 private String phone;
-	 private String newPassword;
+
+	@NotBlank
+	private String token;
+
+	@NotBlank
+	@Size(min = 8, max = 100)
+	private String password;
 }

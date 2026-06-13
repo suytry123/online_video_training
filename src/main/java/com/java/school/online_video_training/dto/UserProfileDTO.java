@@ -2,6 +2,8 @@ package com.java.school.online_video_training.dto;
 
 import java.time.LocalDateTime;
 
+import com.java.school.online_video_training.enitity_enum.Gender;
+
 import lombok.Data;
 
 @Data
@@ -15,7 +17,7 @@ public class UserProfileDTO {
 
     private String phoneNumber;
 
-    private String gender;
+    private Gender gender;
 
     private String photo;
 

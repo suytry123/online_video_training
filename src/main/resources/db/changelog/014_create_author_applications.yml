@@ -1,0 +1,92 @@
+databaseChangeLog:
+  - changeSet:
+      id: 014_create_author_applications
+      author: soksoytry200@gmail.com
+      changes:
+        - createTable:
+             tableName: author_applications
+             columns:
+               - column:
+                   name: id
+                   type: BIGINT
+                   autoIncrement: true
+                   constraints:
+                     primaryKey: true
+                     nullable: false
+               - column:
+                   name: user_id
+                   type: BIGINT
+                   constraints:
+                     nullable: false
+               - column:
+                   name: education
+                   type: VARCHAR(255)
+                   constraints:
+                     nullable: false
+               - column:
+                   name: address
+                   type: VARCHAR(500)
+                   constraints:
+                     nullable: false
+               - column:
+                   name: bio
+                   type: VARCHAR(2000)
+                   constraints:
+                     nullable: false
+               - column:
+                   name: expertise
+                   type: VARCHAR(1000)
+                   constraints:
+                     nullable: false
+               - column:
+                   name: requested_at
+                   type: TIMESTAMP
+                   constraints:
+                     nullable: false
+               - column:
+                   name: approved_at
+                   type: TIMESTAMP
+               - column:
+                   name: rejected_at
+                   type: TIMESTAMP
+               - column:
+                   name: approved_by
+                   type: BIGINT
+               - column:
+                   name: rejected_by
+                   type: BIGINT
+               - column:
+                   name: status
+                   type: VARCHAR(30)
+                   constraints:
+                     nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: author_applications
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: user_id
+            constraintName: fk_author_application_user
+        - addForeignKeyConstraint:
+            baseTableName: author_applications
+            baseColumnNames: approved_by
+            referencedTableName: users
+            referencedColumnNames: user_id
+            constraintName: fk_author_application_approved_by
+        - addForeignKeyConstraint:
+            baseTableName: author_applications
+            baseColumnNames: rejected_by
+            referencedTableName: users
+            referencedColumnNames: user_id
+            constraintName: fk_author_application_rejected_by
+        - createIndex:
+            tableName: author_applications
+            indexName: idx_author_application_user
+            columns:
+              - column:
+                  name: user_id
+        - createIndex:
+            tableName: author_applications
+            indexName: idx_author_application_status
+            columns:
+              - column:
+                  name: status

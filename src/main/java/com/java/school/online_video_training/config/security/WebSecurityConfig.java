@@ -47,12 +47,14 @@ public class WebSecurityConfig {
             .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> 
-                auth.antMatchers("/api/auth/**", "/api/user/signup_user", "/api/courses/image/**", 
-                		"/api/courses/summary", "/api/public/statistics").permitAll()
-                	.antMatchers(HttpMethod.GET, "/api/user/photo/**").permitAll()
-                	.antMatchers(HttpMethod.POST, "/api/user/photo/**").authenticated()
-                	.antMatchers(HttpMethod.PUT, "/api/user/photo/**").authenticated()
-                	.antMatchers(HttpMethod.DELETE, "/api/user/photo/**").authenticated()
+                auth.antMatchers("/api/auth/**", "/api/users/signup_user", "/api/courses/image/**", 
+                		"/api/courses/summary", "/api/public/statistics", "/api/users/author-applications",
+                		"/api/users/verify-email").permitAll()
+						.antMatchers("/api/email/verify-email", "/api/email/resend-verification").permitAll()
+                	.antMatchers(HttpMethod.GET, "/api/users/photo/**").permitAll()
+                	.antMatchers(HttpMethod.POST, "/api/users/photo/**").authenticated()
+                	.antMatchers(HttpMethod.PUT, "/api/users/photo/**").authenticated()
+                	.antMatchers(HttpMethod.DELETE, "/api/users/photo/**").authenticated()
                     .antMatchers("/").permitAll()
                     .antMatchers("/swagger-ui/**","/swagger-ui.html","/webjars/**","/v2/**","/swagger-resources/**").permitAll()
                     .anyRequest().authenticated()

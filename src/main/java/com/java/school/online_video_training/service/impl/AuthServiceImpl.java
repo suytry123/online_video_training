@@ -1,8 +1,10 @@
 package com.java.school.online_video_training.service.impl;
 
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -12,7 +14,6 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,10 +36,13 @@ import com.java.school.online_video_training.exception.ApiException;
 import com.java.school.online_video_training.repository.RoleRepository;
 import com.java.school.online_video_training.repository.UserRepository;
 import com.java.school.online_video_training.service.AuthService;
+import com.java.school.online_video_training.service.EmailService;
 import com.java.school.online_video_training.service.UserSecurityService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -50,12 +54,15 @@ public class AuthServiceImpl implements AuthService {
 	private final UserSecurityService securityService;
 
 	private final PasswordEncoder passwordEncoder;
+	
+	private final EmailService emailService;
 
 	private final AuthenticationManager authenticationManager;
 
 	private final JwtUtils jwtUtils;
 
 	@Override
+	@Transactional
 	public String createUser(SignupRequest signUpRequest) {
 		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Username is already taken!");
@@ -78,9 +85,9 @@ public class AuthServiceImpl implements AuthService {
 			roles.add(userRole);
 		} else {
 			strRoles.forEach(role -> {
-				Role adminRole = roleRepository.findByName(role)
+				Role roleEntity = roleRepository.findByName(role)
 						.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, role + " Role is not found!"));
-				roles.add(adminRole);
+				roles.add(roleEntity);
 			});
 		}
 
@@ -160,6 +167,72 @@ public class AuthServiceImpl implements AuthService {
 
 			throw ex;
 		}
+	}
+
+	@Override
+	@Transactional
+	public void forgotPassword(String email) {
+
+		User user = userRepository.findByEmail(email).orElse(null);
+
+		if (user == null) {
+			return;
+		}
+
+		String token = generateResetToken();
+
+		user.setResetPasswordToken(token);
+
+		user.setResetPasswordExpiry(LocalDateTime.now().plusMinutes(15));
+
+		userRepository.save(user);
+
+		emailService.sendResetPasswordEmail(user);
+	}
+
+	@Override
+	@Transactional
+	public void resetPassword(String token, String password) {
+		  log.info("Reset token received: {}", token);
+
+
+		User user = userRepository.findByResetPasswordToken(token)
+				.orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "Invalid token"));
+		
+		  log.info("User found: {}", user.getEmail());
+		    log.info("Expiry time: {}", user.getResetPasswordExpiry());
+		    log.info("Current time: {}", LocalDateTime.now());
+
+		if (user.getResetPasswordExpiry().isBefore(LocalDateTime.now())) {
+			log.error("Token expired");
+
+			user.setResetPasswordToken(null);
+			user.setResetPasswordExpiry(null);
+
+			userRepository.save(user);
+
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Reset link expired");
+		}
+
+		user.setPassword(passwordEncoder.encode(password));
+
+		user.setResetPasswordToken(null);
+
+		user.setResetPasswordExpiry(null);
+
+		userRepository.save(user);
+		log.info("Password reset successful");
+	}
+
+	private String generateResetToken() {
+
+		SecureRandom random = new SecureRandom();
+
+		byte[] bytes = new byte[32];
+
+		random.nextBytes(bytes);
+
+		return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
 	}
 
 	/*

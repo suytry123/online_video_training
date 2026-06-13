@@ -7,5 +7,8 @@ databaseChangeLog:
           tableName: users
           columns:
           - column:
+              name: verification_token
+              type: VARCHAR(255)
+          - column:
               name: verification_token_expiry
               type: TIMESTAMP

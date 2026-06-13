@@ -1,9 +1,8 @@
 package com.java.school.online_video_training.service;
 
-import javax.validation.ValidationException;
-
-import com.java.school.online_video_training.dto.UserRegistrationDTO;
+import com.java.school.online_video_training.dto.AuthorApplicationDTO;
+import com.java.school.online_video_training.exception.ValidationException;
 
 public interface UserValidationService {
-    void validateUserRegistration(UserRegistrationDTO registrationDTO) throws ValidationException;
+    void validateUserRegistration(AuthorApplicationDTO authorApplicationDTO) throws ValidationException;
 }

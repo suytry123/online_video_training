@@ -1,10 +1,13 @@
 package com.java.school.online_video_training.entity;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,10 +15,14 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import org.springframework.format.annotation.DateTimeFormat;
+
+import com.java.school.online_video_training.enitity_enum.Gender;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -36,14 +43,15 @@ public class User {
 	@Column(name = "user_password")
 	private String password;
 	
-	@Column(name = "user_email")
+	@Column(name = "user_email", unique = true)
 	private String email;
 	
 	@Column(name = "phone_number")
 	private String phoneNumber;
 	
 	@Column(name = "gender")
-	private String gender;
+    @Enumerated(EnumType.STRING) 
+	private Gender gender;
 	
 	@Column(name = "photo")
 	private String photo;
@@ -75,59 +83,23 @@ public class User {
 	@Column(name = "lock_time")
 	private LocalDateTime lockTime;
 	
-	// for author field
-    private String education;
-    private String address;
-    
-    @Column(name = "verification_token")
-    private String verificationToken;
+	//fogot password
+	@Column(name = "reset_password_token")
+	private String resetPasswordToken;
 
-    @Column(name = "verification_token_expiry")
-    private LocalDateTime verificationTokenExpiry;    
-    @Column(name = "is_author")
-    private Boolean  isAuthor = false;
-    
-    @Column(name = "bio")
-    private String bio;
-    
-    @Column(name = "expertise")
-    private String expertise;
-    
-    @Column(name = "temp_author_bio")
-    private String tempAuthorBio;
-    
-    @Column(name = "temp_expertise")
-    private String tempExpertise;
-    
-    @Column(name = "temp_gender")
-    private String tempGender;
-    
-    @Column(name = "temp_phone_number")
-    private String tempPhoneNumber;
-    
-    @Column(name = "temp_education")
-    private String tempEducation;
-    
-    @Column(name = "temp_address")
-    private String tempAddress;
-    
-    @Column(name = "author_approval_requested")
-    private Boolean  authorApprovalRequested;
-    
-    @Column(name = "author_approval_status")
-    private String authorApprovalStatus; // PENDING, APPROVED, REJECTED
-    
-    @Column(name = "author_approved")
-    private Boolean  authorApproved = false;
-    
-    @Column(name = "approve_token")
-    private String approveToken;
-    
-    @Column(name = "reject_token")
-    private String rejectToken;
-    
-    @Column(name = "email_verified")
-    private Boolean  emailVerified = false;
+	@Column(name = "reset_password_expiry")
+	private LocalDateTime resetPasswordExpiry;
+
+	//email verification
+	@Column(name = "verification_token")
+	private String verificationToken;
+
+	@Column(name = "verification_token_expiry")
+	private LocalDateTime verificationTokenExpiry;
+	
+	// for author field
+	@OneToMany(mappedBy = "applicant")
+	private Set<AuthorApplication> authorApplications = new HashSet<>();
 	
 	// Constructor for creating new users
 	public User(Long id, String username, String email, String password) {

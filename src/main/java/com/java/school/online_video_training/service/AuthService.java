@@ -9,4 +9,6 @@ public interface AuthService {
 	String createUser(SignupRequest signupRequest);
 //	String authenticateUser(LoginRequest loginRequest);
 	LoginResponse authenticateUser(LoginRequest loginRequest);
+	void forgotPassword(String email);
+	void resetPassword(String token, String password);
 }

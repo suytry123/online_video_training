@@ -1,11 +1,9 @@
 package com.java.school.online_video_training.controller;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 
 import org.springframework.data.domain.Page;
@@ -15,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,18 +25,17 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.java.school.online_video_training.config.security.AuthUser;
 import com.java.school.online_video_training.config.security.UserService;
 import com.java.school.online_video_training.dto.ApiResponse;
+import com.java.school.online_video_training.dto.AuthorApplicationDTO;
+import com.java.school.online_video_training.dto.AuthorApplicationResponseDTO;
 import com.java.school.online_video_training.dto.MessageResponse;
 import com.java.school.online_video_training.dto.PageDTO;
 import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserPhotoDTO;
 import com.java.school.online_video_training.dto.UserProfileDTO;
 import com.java.school.online_video_training.dto.UserProfileUpdateDTO;
-import com.java.school.online_video_training.dto.UserRegistrationDTO;
-import com.java.school.online_video_training.entity.User;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,116 +43,50 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 @RestController
-@RequestMapping("/api/user")
-public class UserContorller {
+@RequestMapping("/api/users")
+public class UserController {
 
 	private final UserService userService;
-	private final LocalValidatorFactoryBean validator;
-	private final ObjectMapper objectMapper;
 	
-
-	@PostMapping("/applyForAuthor")
+	@PostMapping("/author-applications")
 	@PreAuthorize("hasAuthority('user:write')")
-	public ResponseEntity<?> applyForAuthor(@RequestBody String rawBody) {
-		try {
-			log.info("Raw request body for author application: {}", rawBody);
+	public ResponseEntity<AuthorApplicationResponseDTO> applyForAuthor(@Valid @RequestBody AuthorApplicationDTO dto) {
 
-			// Parse JSON to DTO
-			UserRegistrationDTO registrationDTO = objectMapper.readValue(rawBody, UserRegistrationDTO.class);
-			log.info("Parsed DTO for author application: {}", registrationDTO);
-
-			// Validate the DTO
-			Set<ConstraintViolation<UserRegistrationDTO>> violations = validator.validate(registrationDTO);
-			if (!violations.isEmpty()) {
-				log.error("Validation errors: {}", violations);
-				Map<String, String> errors = new HashMap<>();
-				violations.forEach(
-						violation -> errors.put(violation.getPropertyPath().toString(), violation.getMessage()));
-				return ResponseEntity.badRequest().body(errors);
-			}
-
-			// Process author application
-			User user = userService.applyForAuthor(registrationDTO);
-			return ResponseEntity.ok(user);
-		} catch (Exception e) {
-			log.error("Author application error: ", e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body("Error processing request: " + e.getMessage());
-		}
+		return ResponseEntity.ok(userService.submitAuthorApplication(dto));
 	}
 
 	@GetMapping("/verify-email")
-	public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+	public ResponseEntity<String> verifyEmail(@RequestParam String token) {
 		String message = userService.verifyEmail(token);
 		return ResponseEntity.ok(message);
 	}
 
-	/*@GetMapping("/test")
-	public ResponseEntity<String> test() {
-		String html = """
-					<html><body><h2>Test endpoint works!</h2></body></html>
-				""";
-		return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(html);
-	}*/
+	@PostMapping("/author-applications/{id}/approve")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> approveAuthor(@PathVariable Long id) {
 
-	@GetMapping("/author/approve")
-	public ResponseEntity<String> approveAuthor(@RequestParam String token) {
-		try {
-			String result = userService.handleAuthorApproval(token);
-			String htmlResponse = String.format("""
-					<html>
-					  <head><title>Author Approval</title></head>
-					  <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
-					    <h2 style='color:green;'>✅ %s</h2>
-					    <p>You may now close this window.</p>
-					  </body>
-					</html>
-					""", result);
-			return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(htmlResponse);
-		} catch (Exception e) {
-			log.error("Error in approveAuthor for token {}: ", token, e); // Add this line
-			String errorMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
-			String errorHtml = String.format("""
-					<html>
-					  <head><title>Approval Error</title></head>
-					  <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
-					    <h2 style='color:red;'>❌ Error: %s</h2>
-					    <p>Please try again later.</p>
-					  </body>
-					</html>
-					""", errorMsg);
-			return ResponseEntity.badRequest().contentType(MediaType.TEXT_HTML).body(errorHtml);
-		}
+	    String result = userService.approveAuthorApplication(id);
+
+	    return ResponseEntity.ok(result);
 	}
 
-	@GetMapping("/author/reject")
-	public ResponseEntity<?> rejectAuthor(@RequestParam String token) {
-		try {
-			String result = userService.handleAuthorRejection(token);
-			String htmlResponse = String.format("""
-					<html>
-					  <head><title>Author Rejection</title></head>
-					  <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
-						<h2 style='color:orange;'>⚠️ %s</h2>
-						<p>You may now close this window.</p>
-					  </body>
-					</html>
-					""", result);
-			return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body(htmlResponse);
-		} catch (Exception e) {
-			String errorHtml = String.format("""
-					<html>
-					  <head><title>Rejection Error</title></head>
-					  <body style='font-family:sans-serif;text-align:center;margin-top:50px'>
-						<h2 style='color:red;'>❌ Error: %s</h2>
-						<p>Please try again later.</p>
-					  </body>
-					</html>
-					""", e.getMessage());
-			return ResponseEntity.badRequest().contentType(MediaType.TEXT_HTML).body(errorHtml);
-		}
-	}
+	@PostMapping("/author-applications/{id}/reject")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<String> rejectAuthor(@PathVariable Long id) {
 
+	    String result = userService.rejectAuthorApplication(id);
+
+	    return ResponseEntity.ok(result);
+	}
+	
+	@GetMapping("/author-applications")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<Page<AuthorApplicationResponseDTO>> getApplications(
+			@RequestParam Map<String, String> params) {
+
+		return ResponseEntity.ok(userService.getAuthorApplications(params));
+	}
+	
 	@PostMapping("/photo/{userId}")
 	@PreAuthorize("hasAuthority('user:write')")
 	public ResponseEntity<?> uploadPhoto(@PathVariable Long userId, @RequestPart("photo") MultipartFile photo) {

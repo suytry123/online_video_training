@@ -45,7 +45,8 @@ spring:
       max-request-size: 10MB
 
 app:
-  base-url: https://e97b-111-118-131-115.ngrok-free.app 
+  base-url: https://ef9d-175-100-48-40.ngrok-free.app
+  frontend-url: https://0f16-175-100-48-40.ngrok-free.app
   logo-upload-dir: file-repository
   jwtSecret: ============================Suy===============================
   jwtExpirationMs: 86400000
