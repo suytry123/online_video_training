@@ -434,7 +434,7 @@ public class UserServiceImpl implements UserService {
 			throw new ApiException(HttpStatus.UNAUTHORIZED, "Authentication required");
 		}
 
-		return userRepository.findByEmail(authentication.getName())
+		return userRepository.findByUsername(authentication.getName())
 				.orElseThrow(() -> new ResourceNotFoundException("User not found"));
 	}
 
