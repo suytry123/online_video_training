@@ -47,6 +47,8 @@ spring:
 app:
   base-url: https://555e-203-144-76-179.ngrok-free.app
   frontend-url: https://e9b0-203-144-76-179.ngrok-free.app
+  upload:
+    cv-path: uploads/cv
   logo-upload-dir: file-repository
   jwtSecret: ============================Suy===============================
   jwtExpirationMs: 86400000

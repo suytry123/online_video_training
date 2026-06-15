@@ -17,9 +17,13 @@ import javax.persistence.Table;
 
 import com.java.school.online_video_training.config.security.AuthorApprovalStatus;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(
     name = "author_applications",
@@ -49,6 +53,13 @@ public class AuthorApplication {
 
     @Column(nullable = false, length = 1000)
     private String expertise;
+    
+
+    @Column(name = "cv_file_name", nullable = false, length = 255)
+    private String cvFileName;
+
+    @Column(name = "cv_file_path", nullable = false, length = 500)
+    private String cvFilePath;
 
 //    @Column(name = "action_token", unique = true, nullable = false, length = 512)
 //    private String actionToken;

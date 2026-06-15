@@ -1,11 +1,11 @@
 package com.java.school.online_video_training.controller;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -48,11 +48,20 @@ public class UserController {
 
 	private final UserService userService;
 	
-	@PostMapping("/author-applications")
+	@PostMapping(value = "/author-applications", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@PreAuthorize("hasAuthority('user:write')")
-	public ResponseEntity<AuthorApplicationResponseDTO> applyForAuthor(@Valid @RequestBody AuthorApplicationDTO dto) {
+	public ResponseEntity<AuthorApplicationResponseDTO> applyForAuthor(
+			@Valid @RequestPart("application") AuthorApplicationDTO dto, @RequestPart("cvFile") MultipartFile cvFile) {
 
-		return ResponseEntity.ok(userService.submitAuthorApplication(dto));
+		return ResponseEntity.ok(userService.submitAuthorApplication(dto, cvFile));
+	}
+
+	@GetMapping("/author-applications/{id}/cv")
+	public ResponseEntity<Resource> downloadCv(@PathVariable Long id) {
+
+		Resource resource = userService.getAuthorApplicationCv(id);
+
+		return ResponseEntity.ok().contentType(MediaType.APPLICATION_PDF).body(resource);
 	}
 
 	@GetMapping("/verify-email")

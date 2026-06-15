@@ -34,6 +34,6 @@ public class AuthorApplicationResponseDTO {
 	private String authorBio;
 
 	private String authorExpertise;
-
+	
 	private String message;
 }

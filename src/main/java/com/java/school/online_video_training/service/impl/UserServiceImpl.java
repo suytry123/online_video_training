@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -19,6 +19,8 @@ import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -29,6 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.java.school.online_video_training.config.security.AuthUser;
@@ -37,14 +40,12 @@ import com.java.school.online_video_training.config.security.JwtUtils;
 import com.java.school.online_video_training.config.security.UserService;
 import com.java.school.online_video_training.dto.AuthorApplicationDTO;
 import com.java.school.online_video_training.dto.AuthorApplicationResponseDTO;
-import com.java.school.online_video_training.dto.CategoryDTO;
 import com.java.school.online_video_training.dto.MessageResponse;
 import com.java.school.online_video_training.dto.SignupUser;
 import com.java.school.online_video_training.dto.UserPhotoDTO;
 import com.java.school.online_video_training.dto.UserProfileDTO;
 import com.java.school.online_video_training.dto.UserProfileUpdateDTO;
 import com.java.school.online_video_training.entity.AuthorApplication;
-import com.java.school.online_video_training.entity.Category;
 import com.java.school.online_video_training.entity.Role;
 import com.java.school.online_video_training.entity.User;
 import com.java.school.online_video_training.exception.ApiException;
@@ -57,8 +58,6 @@ import com.java.school.online_video_training.service.EmailService;
 import com.java.school.online_video_training.service.util.PageUtil;
 import com.java.school.online_video_training.spec.AuthorApplicationFilter;
 import com.java.school.online_video_training.spec.AuthorApplicationSpec;
-import com.java.school.online_video_training.spec.CategoryFilter;
-import com.java.school.online_video_training.spec.CategorySpec;
 import com.java.school.online_video_training.spec.UserFilter;
 import com.java.school.online_video_training.spec.UserSpec;
 
@@ -83,6 +82,9 @@ public class UserServiceImpl implements UserService {
 	
 	@Value("${app.base-url}")
 	private String baseUrl;
+	
+	@Value("${app.upload.cv-path}")
+	private String cvUploadPath;
 	
 	public static final String AUTHOR = "AUTHOR";
 
@@ -216,9 +218,10 @@ public class UserServiceImpl implements UserService {
 	
 	@Override
 	@Transactional
-	public AuthorApplicationResponseDTO submitAuthorApplication(AuthorApplicationDTO dto) {
+	public AuthorApplicationResponseDTO submitAuthorApplication(AuthorApplicationDTO dto, MultipartFile cvFile) {
 
 		User user = getCurrentUser();
+		validateCv(cvFile);
 
 		if (hasRole(user, AUTHOR)) {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "User is already an author");
@@ -243,6 +246,7 @@ public class UserServiceImpl implements UserService {
 
 		}
 
+		String fileName = saveCvFile(cvFile);
 		AuthorApplication application = new AuthorApplication();
 
 		application.setApplicant(user);
@@ -251,6 +255,10 @@ public class UserServiceImpl implements UserService {
 		application.setAddress(dto.getAddress());
 		application.setBio(dto.getAuthorBio());
 		application.setExpertise(dto.getAuthorExpertise());
+
+		application.setCvFileName(fileName);
+
+		application.setCvFilePath(Paths.get(cvUploadPath, fileName).toString());
 
 //		application.setActionToken(UUID.randomUUID().toString());
 
@@ -276,6 +284,78 @@ public class UserServiceImpl implements UserService {
 			throw new ApiException(HttpStatus.BAD_REQUEST, "Application already processed");
 		}
 
+	}
+
+	private void validateCv(MultipartFile cvFile) {
+
+		if (cvFile == null || cvFile.isEmpty()) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "CV file is required");
+		}
+
+		String originalFileName = cvFile.getOriginalFilename();
+
+		if (originalFileName == null || !originalFileName.toLowerCase().endsWith(".pdf")) {
+
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Only PDF files are allowed");
+		}
+
+		String contentType = cvFile.getContentType();
+
+		if (contentType != null && !"application/pdf".equals(contentType)) {
+
+			throw new ApiException(HttpStatus.BAD_REQUEST, "Only PDF files are allowed");
+		}
+
+		long maxSize = 5 * 1024 * 1024;
+
+		if (cvFile.getSize() > maxSize) {
+			throw new ApiException(HttpStatus.BAD_REQUEST, "CV must not exceed 5MB");
+		}
+	}
+
+	private String saveCvFile(MultipartFile file) {
+
+		try {
+
+			Path uploadDir = Paths.get(cvUploadPath);
+
+			Files.createDirectories(uploadDir);
+
+			String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
+
+			if (originalFileName.contains("..")) {
+				throw new ApiException(HttpStatus.BAD_REQUEST, "Invalid file name");
+			}
+
+			String fileName = UUID.randomUUID() + ".pdf";
+
+			Path filePath = uploadDir.resolve(fileName);
+
+			Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+			return fileName;
+
+		} catch (IOException e) {
+
+			throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to save CV");
+		}
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public Resource getAuthorApplicationCv(Long applicationId) {
+
+		AuthorApplication application = authorApplicationRepository.findById(applicationId)
+				.orElseThrow(() -> new ResourceNotFoundException("Author Application", applicationId));
+
+		FileSystemResource resource = new FileSystemResource(application.getCvFilePath());
+
+		if (!resource.exists()) {
+
+			throw new ApiException(HttpStatus.NOT_FOUND, "CV file not found");
+		}
+
+		return resource;
 	}
 
 	@Override

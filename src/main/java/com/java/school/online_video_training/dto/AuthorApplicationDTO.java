@@ -33,4 +33,5 @@ public class AuthorApplicationDTO {
     @NotBlank(message = "Author expertise is required")
     @Size(max = 200, message = "Author expertise cannot exceed 200 characters")
     private String authorExpertise;
+    
 }

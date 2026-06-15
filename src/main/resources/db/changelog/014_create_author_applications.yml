@@ -60,6 +60,16 @@ databaseChangeLog:
                    type: VARCHAR(30)
                    constraints:
                      nullable: false
+               - column:
+                   name: cv_file_name
+                   type: varchar(255)
+                   constraints:
+                     nullable: false
+               - column:
+                   name: cv_file_path
+                   type: varchar(500)
+                   constraints:
+                     nullable: false
         - addForeignKeyConstraint:
             baseTableName: author_applications
             baseColumnNames: user_id
