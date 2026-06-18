@@ -1,15 +1,20 @@
 package com.java.school.online_video_training.service.impl;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.java.school.online_video_training.dto.VideoDTO;
 import com.java.school.online_video_training.dto.VideoResponseDTO;
+import com.java.school.online_video_training.enitity_enum.EnrollmentStatus;
+import com.java.school.online_video_training.enitity_enum.PaymentStatus;
 import com.java.school.online_video_training.entity.Course;
 import com.java.school.online_video_training.entity.Enrollment;
 import com.java.school.online_video_training.entity.Video;
@@ -398,36 +403,59 @@ public class VideoServiceImpl implements VideoService {
 	}*/
 	
 	@Override
-	public Page<VideoResponseDTO> getVideosForUser(Long courseId, Long userId, Map<String, String> params) {
-        // Find enrollment for user and course
-        Enrollment enrollment = enrollmentRepository.findAll().stream()
-            .filter(e -> e.getCourse().getId().equals(courseId) && e.getUser().getId().equals(userId))
-            .findFirst().orElse(null);
-        if (enrollment == null || "REJECTED".equalsIgnoreCase(enrollment.getStatus())) {
-            return Page.empty();
-        }
-        // Check payment status if needed
-        boolean isPaid = "PAID".equalsIgnoreCase(String.valueOf(enrollment.getPaymentStatus()));
+	@Transactional(readOnly = true)
+	public Page<VideoResponseDTO> getVideosForUser(
+	        Long courseId,
+	        Long userId,
+	        Map<String, String> params) {
 
-        // Parse pagination params
-        int pageLimit = PageUtil.DEFAULT_PAGE_LIMIT;
-        if (params.containsKey(PageUtil.PAGE_LIMIT)) {
-            pageLimit = Integer.parseInt(params.get(PageUtil.PAGE_LIMIT));
-        }
-        int pageNumber = PageUtil.DEFAULT_PAGE_NUMBER;
-        if (params.containsKey(PageUtil.PAGE_NUMBER)) {
-            pageNumber = Integer.parseInt(params.get(PageUtil.PAGE_NUMBER));
-        }
-        Pageable pageable = PageUtil.getPageable(pageNumber, pageLimit);
+	    Enrollment enrollment =
+	            enrollmentRepository
+	                    .findByCourseIdAndUserId(courseId, userId)
+	                    .orElseThrow(() ->
+	                            new AccessDeniedException(
+	                                    "You are not enrolled in this course"));
 
-        // Only show videos for this course
-        Page<Video> videos = videoRepository.findAll(
-            (root, query, cb) -> cb.equal(root.get("course").get("id"), courseId), pageable);
+	    if (enrollment.getStatus() != EnrollmentStatus.APPROVED) {
+	        throw new AccessDeniedException(
+	                "Enrollment has not been approved");
+	    }
 
-        // If not paid, you can filter for free videos here if you have such a flag
-        // For now, just return the page as is
-        return videos.map(videoMapper::toVideoResponseDTO);
-    }
+	    Course course = enrollment.getCourse();
+
+	    boolean paidCourse =
+	            course.getPrice() != null
+	                    && course.getPrice().compareTo(BigDecimal.ZERO) > 0;
+
+	    if (paidCourse
+	            && enrollment.getPaymentStatus() != PaymentStatus.PAID) {
+
+	        throw new AccessDeniedException(
+	                "Course payment required");
+	    }
+
+	    int pageLimit =
+	            Integer.parseInt(
+	                    params.getOrDefault(
+	                            PageUtil.PAGE_LIMIT,
+	                            String.valueOf(PageUtil.DEFAULT_PAGE_LIMIT)));
+
+	    int pageNumber =
+	            Integer.parseInt(
+	                    params.getOrDefault(
+	                            PageUtil.PAGE_NUMBER,
+	                            String.valueOf(PageUtil.DEFAULT_PAGE_NUMBER)));
+
+	    Pageable pageable =
+	            PageUtil.getPageable(pageNumber, pageLimit);
+
+	    Page<Video> videos =
+	            videoRepository.findByCourseId(
+	                    courseId,
+	                    pageable);
+
+	    return videos.map(videoMapper::toVideoResponseDTO);
+	}
 	
 	/*
 	@Override

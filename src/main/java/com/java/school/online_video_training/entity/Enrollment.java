@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,6 +15,9 @@ import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.java.school.online_video_training.enitity_enum.EnrollmentStatus;
+import com.java.school.online_video_training.enitity_enum.PaymentStatus;
 
 import lombok.Data;
 
@@ -31,16 +36,17 @@ public class Enrollment {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status; // e.g., "PENDING", "APPROVED", "REJECTED"
+    private EnrollmentStatus status;
     
     @Column(nullable = false, precision = 19, scale = 2)
-    private BigDecimal price; // Amount paid for this enrollment (null or 0 if unpaid)
+    private BigDecimal price;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String paymentStatus; // e.g., "UNPAID", "PAID"
+    private PaymentStatus paymentStatus;
 
-    // (Optional) Add timestamps for auditing
      @CreationTimestamp
      private LocalDateTime createdAt;
      

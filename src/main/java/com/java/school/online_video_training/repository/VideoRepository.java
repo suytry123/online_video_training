@@ -2,6 +2,8 @@ package com.java.school.online_video_training.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +19,7 @@ public interface VideoRepository extends JpaRepository<Video, Long>, JpaSpecific
 	List<Video> findByCourseId(Long courseId);
 	List<Video> findByCourseIdAndIsDeletedFalse(Long courseId);
 	List<Video> findByIsDeletedTrue();
+	Page<Video> findByCourseId(Long courseId, Pageable pageable);
 
 
 //	@Query("SELECT v.title AS title, c.name AS courseName, v.userCreated AS userCreated, " +

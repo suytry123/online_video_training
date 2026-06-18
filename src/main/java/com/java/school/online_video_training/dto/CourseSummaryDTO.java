@@ -2,7 +2,7 @@ package com.java.school.online_video_training.dto;
 
 import java.math.BigDecimal;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
+import com.java.school.online_video_training.enitity_enum.CourseType;
 
 import lombok.Data;
 
@@ -17,4 +17,5 @@ public class CourseSummaryDTO {
     private String imageCover;
 	private BigDecimal price;
 	private String courseDescription;
+    private CourseType courseType;
 }

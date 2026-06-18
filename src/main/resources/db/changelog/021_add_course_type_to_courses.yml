@@ -1,0 +1,14 @@
+databaseChangeLog:
+- changeSet:
+    id: 021_add_course_type_to_courses
+    author: soksoytry200@gmail.com
+    changes:
+      - addColumn:
+          tableName: courses
+          columns:
+            - column:
+                name: course_type
+                type: varchar(20)
+                defaultValue: FREE
+                constraints:
+                  nullable: false

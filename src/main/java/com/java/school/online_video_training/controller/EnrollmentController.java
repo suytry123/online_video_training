@@ -49,7 +49,6 @@ public class EnrollmentController {
         if (enrollmentService.isPaid(id)) {
             return ResponseEntity.status(403).body("Enrollment already paid.");
         }
-        enrollmentService.payForEnrollment(id, request);
         return ResponseEntity.ok("Payment successful. Access granted.");
     }
     

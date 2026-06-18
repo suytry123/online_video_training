@@ -1,8 +1,9 @@
 package com.java.school.online_video_training.dto;
 
+import java.math.BigDecimal;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
+import com.java.school.online_video_training.enitity_enum.CourseType;
 
 import lombok.Data;
 
@@ -14,6 +15,8 @@ public class CourseDetailDTO {
     private String categoryName;
     private int views;
     private int likes;
+	private BigDecimal price;
+    private CourseType courseType;
     private List<VideoDTO> videos;
 //    private String imageCover;
 }

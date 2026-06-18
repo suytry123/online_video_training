@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -13,6 +15,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+
+import com.java.school.online_video_training.enitity_enum.CourseType;
 
 import lombok.Data;
 
@@ -49,7 +53,11 @@ public class Course {
 	private String courseDescription;
 	
 	@Column(nullable = false, precision = 19, scale = 2)
-	private BigDecimal price;
+	private BigDecimal price = BigDecimal.ZERO;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private CourseType courseType = CourseType.FREE;
 	
 	@Column(nullable = false)
 	private boolean isDeleted = false;

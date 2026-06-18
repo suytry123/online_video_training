@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -46,59 +48,34 @@ import lombok.extern.slf4j.Slf4j;
 public class CourseController {
 	private final CourseService courseService;
 	private final CourseRepository courseRepository;
-//	private final CourseMapper courseMapper;
-
-	/*@PreAuthorize("hasAuthority('course:write')")
-    @PostMapping
-    public ResponseEntity<?> create(@RequestBody CourseDTO courseDTO) {
-        CourseResponseDTO created = courseService.create(courseDTO);
-        return ResponseEntity.ok(created);
-    }*/
-	
-//	@PreAuthorize("hasAuthority('course:read')")
-//	@GetMapping("{id}")
-//	public ResponseEntity<?> getById(@PathVariable("id") Long id){
-//		Course course = courseService.getById(id);
-//		return ResponseEntity.ok(courseMapper.toCourseDTO(course));
-//	}
-//
-//	@PreAuthorize("hasAuthority('course:read')")
-//	@GetMapping
-//	public ResponseEntity<?> getCourses(@RequestParam Map<String, String> course) {
-//		Page<Course> courses = courseService.getCourses(course);
-//
-//		PageDTO dto = new PageDTO(courses);
-//
-//		return ResponseEntity.ok(dto);
-//	}
 	
 	@PreAuthorize("hasAuthority('course:write')")
 	@PostMapping
-	public ResponseEntity<?> create(@RequestBody CourseDTO courseDTO, Authentication authentication) {
+	public ResponseEntity<CourseResponseDTO> create(@Valid @RequestBody CourseDTO courseDTO, Authentication authentication) {
 
 		String username = authentication.getName();
 
 		CourseResponseDTO created = courseService.create(courseDTO, username);
 
-		return ResponseEntity.ok(created);
+		return ResponseEntity.status(HttpStatus.CREATED).body(created);
 	}
 
 	@PreAuthorize("hasAuthority('course:read')")
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable("id") Long id) {
 		CourseResponseDTO course = courseService.getCourseById(id);
         return ResponseEntity.ok(course);
     }
 
     @PreAuthorize("hasAuthority('course:write')")
-    @PutMapping("{id}")
-    public ResponseEntity<?> update(@PathVariable("id") Long courseId, @RequestBody CourseDTO courseUpdate) {
+    @PutMapping("/{id}")
+    public ResponseEntity<CourseResponseDTO> update(@PathVariable("id") Long courseId, @RequestBody CourseDTO courseUpdate) {
     	CourseResponseDTO updated = courseService.update(courseId, courseUpdate);
         return ResponseEntity.ok(updated);
     }
 
     @PreAuthorize("hasAuthority('course:write')")
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable("id") Long courseId) {
         courseService.delete(courseId);
         return ResponseEntity.ok().build();
@@ -114,7 +91,7 @@ public class CourseController {
 
 //    @PreAuthorize("hasAuthority('course:read')")
     @GetMapping("/{id}/detail")
-    public ResponseEntity<?> getCourseDetail(@PathVariable Long id){
+    public ResponseEntity<CourseDetailDTO> getCourseDetail(@PathVariable Long id){
         CourseDetailDTO courseDetail = courseService.getCourseDetail(id);
         return ResponseEntity.ok(courseDetail);
     }

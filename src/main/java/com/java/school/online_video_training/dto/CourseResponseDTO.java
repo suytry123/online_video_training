@@ -2,6 +2,8 @@ package com.java.school.online_video_training.dto;
 
 import java.math.BigDecimal;
 
+import com.java.school.online_video_training.enitity_enum.CourseType;
+
 import lombok.Data;
 
 @Data
@@ -17,4 +19,5 @@ public class CourseResponseDTO {
 	private Long authorId;
 	private String authorName;
 	private String imageCover;
+    private CourseType courseType;
 }
