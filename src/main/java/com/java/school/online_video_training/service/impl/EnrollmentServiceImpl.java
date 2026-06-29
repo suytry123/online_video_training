@@ -5,9 +5,9 @@ import java.math.BigDecimal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.java.school.online_video_training.enitity_enum.EnrollmentStatus;
-import com.java.school.online_video_training.enitity_enum.PaymentStatus;
 import com.java.school.online_video_training.entity.Enrollment;
+import com.java.school.online_video_training.enums.EnrollmentStatus;
+import com.java.school.online_video_training.enums.PaymentStatus;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
 import com.java.school.online_video_training.repository.EnrollmentRepository;
 import com.java.school.online_video_training.service.EnrollmentService;

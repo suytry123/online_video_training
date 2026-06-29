@@ -2,7 +2,7 @@ package com.java.school.online_video_training.dto;
 
 import java.math.BigDecimal;
 
-import com.java.school.online_video_training.enitity_enum.CourseType;
+import com.java.school.online_video_training.enums.CourseType;
 
 import lombok.Data;
 

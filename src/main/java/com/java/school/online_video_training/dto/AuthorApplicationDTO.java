@@ -6,7 +6,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.java.school.online_video_training.enitity_enum.Gender;
+import com.java.school.online_video_training.enums.Gender;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

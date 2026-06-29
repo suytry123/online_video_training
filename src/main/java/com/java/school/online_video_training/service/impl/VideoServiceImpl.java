@@ -13,11 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.java.school.online_video_training.dto.VideoDTO;
 import com.java.school.online_video_training.dto.VideoResponseDTO;
-import com.java.school.online_video_training.enitity_enum.EnrollmentStatus;
-import com.java.school.online_video_training.enitity_enum.PaymentStatus;
 import com.java.school.online_video_training.entity.Course;
 import com.java.school.online_video_training.entity.Enrollment;
 import com.java.school.online_video_training.entity.Video;
+import com.java.school.online_video_training.enums.EnrollmentStatus;
+import com.java.school.online_video_training.enums.PaymentStatus;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
 import com.java.school.online_video_training.mapper.VideoMapper;
 import com.java.school.online_video_training.repository.CourseRepository;

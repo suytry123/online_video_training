@@ -2,7 +2,7 @@ package com.java.school.online_video_training.dto;
 
 import javax.validation.constraints.Size;
 
-import com.java.school.online_video_training.enitity_enum.Gender;
+import com.java.school.online_video_training.enums.Gender;
 
 import lombok.Data;
 

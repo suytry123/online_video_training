@@ -16,8 +16,8 @@ import javax.persistence.ManyToOne;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.java.school.online_video_training.enitity_enum.EnrollmentStatus;
-import com.java.school.online_video_training.enitity_enum.PaymentStatus;
+import com.java.school.online_video_training.enums.EnrollmentStatus;
+import com.java.school.online_video_training.enums.PaymentStatus;
 
 import lombok.Data;
 

@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import javax.validation.constraints.NotNull;
 
-import com.java.school.online_video_training.enitity_enum.CourseType;
+import com.java.school.online_video_training.enums.CourseType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

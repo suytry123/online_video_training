@@ -24,15 +24,15 @@ import com.java.school.online_video_training.dto.CourseDetailDTO;
 import com.java.school.online_video_training.dto.CourseResponseDTO;
 import com.java.school.online_video_training.dto.CourseSummaryDTO;
 import com.java.school.online_video_training.dto.VideoDTO;
-import com.java.school.online_video_training.enitity_enum.CourseType;
-import com.java.school.online_video_training.enitity_enum.EnrollmentStatus;
-import com.java.school.online_video_training.enitity_enum.PaymentStatus;
 import com.java.school.online_video_training.entity.Category;
 import com.java.school.online_video_training.entity.Course;
 import com.java.school.online_video_training.entity.CourseLike;
 import com.java.school.online_video_training.entity.CourseView;
 import com.java.school.online_video_training.entity.Enrollment;
 import com.java.school.online_video_training.entity.User;
+import com.java.school.online_video_training.enums.CourseType;
+import com.java.school.online_video_training.enums.EnrollmentStatus;
+import com.java.school.online_video_training.enums.PaymentStatus;
 import com.java.school.online_video_training.exception.ApiException;
 import com.java.school.online_video_training.exception.FileDeletionException;
 import com.java.school.online_video_training.exception.ResourceNotFoundException;
@@ -561,7 +561,8 @@ public class CourseServiceImpl implements CourseService {
 
 		String folder = Paths.get("uploads", "courses").toString();
 
-		Course course = courseRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Course", id));
+		Course course = courseRepository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Course", id));
 
 		String imageCover = course.getImageCover();
 

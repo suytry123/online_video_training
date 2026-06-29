@@ -16,7 +16,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import com.java.school.online_video_training.enitity_enum.CourseType;
+import com.java.school.online_video_training.enums.CourseType;
 
 import lombok.Data;
 
